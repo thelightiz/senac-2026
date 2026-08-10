@@ -17,9 +17,11 @@ Lembrem-se da nossa regra de ouro: **Desenvolvimento de software é 50% código 
 
 Cada grupo deverá escolher **apenas um** dos desafios abaixo. Navegue até a pasta de cada projeto para ler as especificações completas e os requisitos técnicos:
 
-1. [**SimulaCoop (Nível Fácil):**](./SimulaCoop/README.md) Um simulador de crédito focado em transparência, evolução de dívida e UI/UX.
-2. [**CoopVision (Nível Médio):**](./CoopVision/README.md) Um assistente de onboarding inteligente utilizando IA Multimodal para extração de dados de documentos.
-3. [**CoopShield (Nível Difícil):**](./CoopShield/README.md) Um motor anti-fraudes que monitora, analisa e bloqueia transações suspeitas em tempo real.
+1. **SimulaCoop (Nível Fácil):** Um simulador de crédito focado em transparência, evolução de dívida e UI/UX.
+2. **CoopVision (Nível Médio):** Um assistente de onboarding inteligente utilizando IA Multimodal para extração de dados de documentos.
+3. **CoopShield (Nível Difícil):** Um motor anti-fraudes que monitora, analisa e bloqueia transações suspeitas em tempo real.
+4. **Atualização Cadastral Inteligente** modernizando o processo de **atualização cadastral**, reduzindo a necessidade de digitação manual das informações presentes nos documentos enviados pelos clientes.
+5. **Atualização Cadastral Inteligente** a evolução com OCR.
 
 ---
 

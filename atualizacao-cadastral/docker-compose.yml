@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: ./backend # Pasta onde está o Dockerfile
+      dockerfile: Dockerfile
+    container_name: api_django
+    volumes:
+      - ./backend:/backend/
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - psql
+    # Se quiser editar o código em tempo real, precisará ajustar o Dockerfile ou usar volumes com permissões.
+    command: python manage.py runserver 0.0.0.0:8000
+    restart: unless-stopped
+  psql:
+    container_name: psql
+    image: postgres:18.6-alpine3.24
+    volumes:
+      - .pg_data:/var/lib/postgresql # Volume gerenciado pelo Docker
+    env_file:
+      - .env
+  frontend:
+    build:
+      context: ./frontend # Pasta onde está o Dockerfile
+      dockerfile: Dockerfile
+    container_name: react
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules 
+    working_dir: /frontend
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env
+    command: npm run dev -- --host 0.0.0.0
+    restart: unless-stopped

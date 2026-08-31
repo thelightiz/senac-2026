@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+
+# Python / Ambientes
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Configurações sensíveis
+.env
+
+# Documentação
+*.md
+docs/
+
+# IDEs
+.vscode/
+.idea/

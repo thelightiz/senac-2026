@@ -1,0 +1,10 @@
+# IDEs
+.vscode/
+.idea/
+
+# Configurações sensíveis
+.env
+
+# Postgree / Docker
+data/
+.pg_data/

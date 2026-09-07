@@ -1,9 +1,7 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-class Usuarios(models.Model):
-    id = models.AutoField(primary_key=True)
-    nome = models.CharField(max_length=100)
-    senha = models.CharField(max_length=50)
+class Usuarios(AbstractUser):
     ROLES = [
         ('GN', 'Gerente de Negócios'),
         ('GA', 'Gerente de Agência'),

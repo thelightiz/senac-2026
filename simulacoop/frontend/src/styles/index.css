@@ -1,0 +1,386 @@
+/* ==========================================================
+   VARIÁVEIS / RESET
+   ========================================================== */
+:root {
+  --branco: #ffffff;
+  --cards: #3FA110;
+  --parede-4: #3FA110;
+  --texto: #3FA110;
+  --preto: #000000;
+  --texto-card: #ffffff;
+  --fonte: 'Segoe UI', Arial, Helvetica, sans-serif;
+  --radius: 14px;
+
+  /* top bar */
+  --dark-green: #1E3D1F;
+  --light-gray: #D9D9D9;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--fonte);
+  color: var(--cinza-texto);
+  line-height: 1.5;
+}
+
+img { max-width: 100%; display: block; }
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul { list-style: none; }
+
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+h1, h2 {
+  color: var(--preto);
+  line-height: 1.25;
+}
+
+h3, h4, h5 {
+  color: var(--texto-card);
+}
+
+.section {
+  padding: 80px 0;
+}
+
+.eyebrow {
+  color: var(--branco);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.center-btn {
+  text-align: center;
+  margin-top: 40px;
+}
+
+/* ==========================================================
+   BOTÕES
+   ========================================================== */
+.btn {
+  display: inline-block;
+  padding: 12px 26px;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn-outline {
+  background: transparent;
+  border-color: var(--preto);
+  color: var(--branco);
+}
+.btn-outline:hover { background: var(--branco); color: var(--texto); }
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+header.topbar {
+    background: var(--branco);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 60px;
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+ 
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+ 
+  .logo strong {
+    color: #297407;
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+ 
+  nav.tabs {
+    display: flex;
+    gap: 26px;
+  }
+ 
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+ 
+  .actions button.solid {
+    background: var(--light-gray);
+    color: var(--dark-green);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .actions button.solid:hover {
+    background: #ffffff;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  }
+ 
+  .actions .icon {
+    width: 20px; height: 20px;
+    color: var(--dark-green);
+    cursor: pointer;
+  }
+
+/* ==========================================================
+   HERO
+   ========================================================== */
+.hero {
+  background: linear-gradient(135deg, #297407, #a5ffada8);
+  padding: 90px 0;
+}
+.hero-inner {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+.hero-text { flex: 1; }
+.hero-image { flex: 1; }
+.hero-image img { border-radius: var(--radius); }
+
+.hero-tag {
+  background-color: #D9D9D9;
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 22px;
+  box-shadow: 0px 7px 8px rgba(0, 0, 0, 0.212);
+}
+
+.hero-text h1 {
+  font-size: 42px;
+  margin-bottom: 18px;
+}
+.hero-text {
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0px 20px 50px rgba(0, 0, 0, 0.521);
+}
+
+.hero-text p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  max-width: 480px;
+}
+
+/* ==========================================================
+   SOLUÇÕES / CARDS
+   ========================================================== */
+.solucoes h2 {
+  font-size: 32px;
+  max-width: 600px;
+  margin-bottom: 50px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.card {
+  background: var(--texto);
+  border: 1px solid #eee;
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+}
+
+.card-big {
+  grid-column: span 2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--cards);
+  border: none;
+  padding: 20px;
+}
+.card-big .card-content { flex: 1; }
+.card-big h3 { margin-bottom: 4px; font-size: 17px; }
+.card-big p { font-size: 14px; margin-bottom: 6px; }
+
+.card-small {
+  grid-column: span 2;
+  background: var(--cards);
+  border: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+}
+.card-small h4 { margin-bottom: 6px; font-size: 17px; }
+.card-small p { font-size: 14px; }
+
+@media (max-width: 900px) {
+  .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .card-big, .card-small { grid-column: span 2; }
+}
+
+/* ==========================================================
+   DIFERENCIAIS
+   ========================================================== */
+.diferenciais {
+  background: var(--parede-4);
+}
+.diferenciais h2 {
+  font-size: 32px;
+  max-width: 600px;
+  margin-bottom: 50px;
+}
+
+.diferenciais-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+
+.diferencial-item .icon {
+  font-size: 34px;
+  display: block;
+  margin-bottom: 16px;
+}
+.diferencial-item h4 { margin-bottom: 10px; font-size: 17px; }
+.diferencial-item p { font-size: 14px; }
+
+@media (max-width: 900px) {
+  .diferenciais-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ==========================================================
+   NÚMEROS
+   ========================================================== */
+.numeros {
+  background: var(--branco);
+  color: var(--texto);
+}
+.numeros-inner {
+  display: flex;
+  gap: 60px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.numero-destaque { flex: 1; min-width: 260px; }
+.numero-destaque h2 { color: var(--texto); font-size: 34px; margin-bottom: 12px; }
+.numero-destaque p { margin-bottom: 24px; opacity: .9; }
+
+.numeros-grid {
+  flex: 1.2;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  min-width: 300px;
+}
+.numero-item h4 { color: var(--texto); font-size: 17px; margin-bottom: 8px; }
+.numero-item p { font-size: 14px; opacity: .85; }
+
+/* ==========================================================
+   FOOTER
+   ========================================================== */
+.footer {
+  background: var(--preto);
+  color: #cfcfcf;
+  padding-top: 60px;
+  font-size: 14px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 30px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #333;
+}
+
+.footer-col h5 {
+  color: var(--texto);
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+.footer-col a {
+  display: block;
+  margin-bottom: 10px;
+  opacity: .8;
+}
+.footer-col a:hover { opacity: 1; color: var(--branco); }
+
+.footer-contact p { margin-bottom: 12px; opacity: .85; }
+
+.footer-social {
+  padding: 24px 0;
+  border-bottom: 1px solid #333;
+}
+.social-icons {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-bottom {
+  padding: 24px 0 40px;
+  font-size: 13px;
+  opacity: .7;
+}
+.footer-bottom p { margin-bottom: 6px; }
+.footer-note { font-style: italic; margin-top: 10px; }
+
+/* ==========================================================
+   RESPONSIVO
+   ========================================================== */
+@media (max-width: 900px) {
+  .hero-inner,
+  .numeros-inner {
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .hero-text h1 { font-size: 30px; }
+  .footer-grid { grid-template-columns: 1fr; }
+}

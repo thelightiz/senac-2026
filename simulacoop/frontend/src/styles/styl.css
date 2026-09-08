@@ -1,0 +1,263 @@
+:root {
+    --green: #4C9A2A;
+    --green-dark: #3B7A20;
+    --green-darker: #2E5F18;
+    --result-bg: #DCEFD1;
+    --border-gray: #E5E7EA;
+    --text-dark: #1F2A1A;
+    --text-muted: #6B7280;
+    --placeholder: #9AA0A6;
+    --page-bg: #F5F6F5;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--page-bg);
+    color: var(--text-dark);
+}
+
+/* Top bar */
+header.topbar {
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    height: 60px;
+    background: var(--green);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.brand strong {
+    color: #fff;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+/* Content / panels */
+main.content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+}
+
+.panels {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.panel {
+    flex: 1;
+    background: #fff;
+    border: 1px solid var(--border-gray);
+    border-radius: 14px;
+    padding: 28px 32px;
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green-dark);
+    margin: 0 0 24px;
+}
+
+.panel-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Form */
+.loan-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrap input,
+.input-wrap select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border-gray);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text-dark);
+    appearance: none;
+}
+
+.input-wrap input::placeholder {
+    color: var(--placeholder);
+}
+
+
+.input-suffix {
+    position: absolute;
+    right: 14px;
+    font-size: 14px;
+    color: var(--placeholder);
+    pointer-events: none;
+}
+
+.select-wrap select {
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.select-wrap select:invalid,
+.select-wrap select option[value=""] {
+    color: var(--placeholder);
+}
+
+.select-wrap .chevron {
+    position: absolute;
+    right: 12px;
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.submit-btn {
+    margin-top: 8px;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    padding: 13px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.submit-btn:hover {
+    background: var(--green-dark);
+}
+
+/* Result panel */
+.result-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    width: 100%;
+}
+
+.result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+}
+
+.result-box {
+    background: var(--result-bg);
+    border-radius: 8px;
+    padding: 18px 26px;
+    min-height: 92px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.result-label {
+    font-size: 14px;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.result-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green);
+}
+
+.form-message {
+    color: #B3261E;
+    font-size: 14px;
+    margin: 16px 0 0;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+    .panels {
+        flex-direction: column;
+    }
+    .panel {
+        width: 100%;
+    }
+}
+
+.grafico-panel {
+    margin-top: 30px;
+    padding: 25px;
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 14px;
+}
+
+#grafico {
+    margin-top: 30px;
+}
+
+.actions button.solid {
+    background: color(srgb rgb(255, 255, 255));
+    color: var(--green-darker);
+    border: none;
+    padding: 15px 15px;
+    border-radius: 100px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .actions button.solid:hover {
+    background: #ffffff;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  }
+ 
+  .actions .icon {
+    width: 20px; height: 20px;
+    color: var(--green-dark);
+    cursor: pointer;
+  }
+
+  .solid {
+    position: absolute;
+    left: 95%;
+    top: 0.8%;
+}

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/styl.css">
+    <title>Simulador de Empréstimo — Sicredi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <strong>Sicredi</strong>
+        </div>
+        <div class="actions">
+            <a href="index.html"><button class="solid">Inicial</button></a>
+        </div>
+    </header>
+
+
+    <main class="content">
+        <div class="panels">
+
+            <section class="panel">
+                <h2 class="panel-title">
+                    <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="8" y1="13" x2="16" y2="13"></line>
+                        <line x1="8" y1="17" x2="16" y2="17"></line>
+                    </svg>
+                    1. Configure o empréstimo
+                </h2>
+
+                <form class="loan-form" id="loan-form">
+                    <div class="field">
+                        <label for="loan-amount">Valor do empréstimo</label>
+                        <div class="input-wrap">
+                            <input type="number" inputmode="decimal" id="loan-amount" name="loan-amount" placeholder="Ex.: 10.000,00">
+                            <span class="input-suffix">R$</span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="interest-rate">Juros</label>
+                        <div class="input-wrap">
+                            <input type="text" inputmode="decimal" id="interest-rate" name="interest-rate" placeholder="Ex.: 1,5">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="installments">Quantidade de parcelas</label>
+                        <div class="input-wrap">
+                            <input type="number" inputmode="decimal" id="installments" name="installments" placeholder="Ex.: 12">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="amortization-type">Tipo de crédito</label>
+                        <div class="input-wrap select-wrap">
+                            <select id="amortization-type" name="amortization-type">
+                                <option value="" disabled selected>Selecione o tipo</option>
+                                <option value="price">Price</option>
+                                <option value="sac">SAC</option>
+                            </select>
+                            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Calcular simulação</button>
+                </form>
+            </section>
+
+            <section class="panel">
+                <h2 class="panel-title">
+                    <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    2. Resultado da Simulação
+                </h2>
+                <div class="result-area" id="result-area">
+                    <div class="result-grid">
+                        <div class="result-box">
+                            <span class="result-label">↗ valor da parcela</span>
+                            <span class="result-value" id="result-value">R$ 0,00</span>
+                        </div>
+                        <div class="result-box">
+                            <span class="result-label">Juros</span>
+                            <span class="result-value" id="result-loan">R$ 0,00</span>
+                        </div>
+                        <div class="result-box">
+                            <span class="result-label">CET (custo Efetivo total)</span>
+                            <span class="result-value" id="result-cet">0,00%</span>
+                        </div>
+                        <div class="result-box">
+                            <span class="result-label">Total a pagar</span>
+                            <span class="result-value" id="result-total">R$ 0,00</span>
+                        </div>
+                        
+                    </div>
+                </div>
+                <p class="form-message" id="form-message" hidden></p>
+            </section>
+        </div>
+    </main>
+
+    <section class="grafico-panel">
+        <h2>Composição das parcelas</h2>
+        <p>
+            Veja, em cada parcela, quanto é o valor que você deve (amortização) e quanto é juros — ou seja, o total que você vai pagar.
+        </p>
+        <canvas id="grafico"></canvas>
+    </section>
+
+    <script>
+        const form = document.getElementById('loan-form');
+        const resultValue = document.getElementById('result-value');
+        const resultLoan = document.getElementById('result-loan');
+        const resultCet = document.getElementById('result-cet');
+        const resultTotal = document.getElementById('result-total');
+        const formMessage = document.getElementById('form-message');
+        const grafico = document.getElementById('grafico');
+
+        function parseCurrency(value) {
+            const cleaned = value.replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '');
+            return parseFloat(cleaned);
+        }
+
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // versão curta sem centavos para caber em cima da barra
+        function formatCurrencyCurto(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+        }
+
+        // Gera a tabela de parcelas (Price ou SAC) com juros e saldo devedor de cada mes
+        function calcularParcelas(amount, monthlyRate, installments, type) {
+            let balance = amount;
+            const schedule = [];
+
+            if (type === 'price') {
+                const installmentValue = amount * (monthlyRate * Math.pow(1 + monthlyRate, installments)) / (Math.pow(1 + monthlyRate, installments) - 1);
+                for (let i = 1; i <= installments; i++) {
+                    const interestPortion = balance * monthlyRate;
+                    const amortizationPortion = installmentValue - interestPortion;
+                    balance = Math.max(balance - amortizationPortion, 0);
+                    schedule.push({ installment: installmentValue, interest: interestPortion, balance });
+                }
+            } else {
+                const amortizationPortion = amount / installments;
+                for (let i = 1; i <= installments; i++) {
+                    const interestPortion = balance * monthlyRate;
+                    const installmentValue = amortizationPortion + interestPortion;
+                    balance = Math.max(balance - amortizationPortion, 0);
+                    schedule.push({ installment: installmentValue, interest: interestPortion, balance });
+                }
+            }
+            return schedule;
+        }
+
+        let graficoChart = null;
+
+        // Desenha o grafico com chart.js cada parcela é uma barra empilhada
+        // com "valor devido" (amortizaçao) + "juros" mostrando o total que será pago
+        function desenharGrafico(schedule) {
+            // limita a quantidade de barras para manter os valores legiveis
+            const maxBarras = 12;
+            let dadosExibidos = schedule.map((p, i) => ({ ...p, numero: i + 1 }));
+            if (schedule.length > maxBarras) {
+                const passo = (schedule.length - 1) / (maxBarras - 1);
+                dadosExibidos = Array.from({ length: maxBarras }, (_, i) => {
+                    const idx = Math.round(i * passo);
+                    return { ...schedule[idx], numero: idx + 1 };
+                });
+            }
+
+            const labels = dadosExibidos.map(p => `Parcela ${p.numero}`);
+            const amortizacaoData = dadosExibidos.map(p => p.installment - p.interest);
+            const jurosData = dadosExibidos.map(p => p.interest);
+
+            if (typeof Chart === 'undefined') {
+                grafico.insertAdjacentHTML(
+                    'afterend',
+                    '<p style="color:#B3261E;font-size:14px;margin-top:12px;">Não foi possível carregar a biblioteca do gráfico (Chart.js). Verifique sua conexão com a internet e recarregue a página.</p>'
+                );
+                return;
+            }
+
+            if (graficoChart) {
+                graficoChart.data.labels = labels;
+                graficoChart.data.datasets[0].data = amortizacaoData;
+                graficoChart.data.datasets[1].data = jurosData;
+                graficoChart.update();
+                return;
+            }
+
+            graficoChart = new Chart(grafico, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Valor devido (amortização)',
+                            data: amortizacaoData,
+                            backgroundColor: '#3B7A20',
+                            stack: 'parcela'
+                        },
+                        {
+                            label: 'Juros',
+                            data: jurosData,
+                            backgroundColor: '#A6D785',
+                            stack: 'parcela'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            ticks: {
+                                callback: (value) => formatCurrencyCurto(value)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const amount = parseCurrency(document.getElementById('loan-amount').value || '');
+            const installments = parseInt(document.getElementById('installments').value, 10);
+            const type = document.getElementById('amortization-type').value;
+            const interestRate = parseFloat(document.getElementById('interest-rate').value.replace(',', '.'));
+
+            if (!amount || !installments || !interestRate || !type) {
+                formMessage.textContent = 'Preencha todos os campos para calcular a simulação.';
+                formMessage.hidden = false;
+                return;
+            }
+
+            formMessage.hidden = true;
+
+            const monthlyRate = interestRate / 100; // taxa ilustrativa para fins de simulação
+            const schedule = calcularParcelas(amount, monthlyRate, installments, type);
+
+            const primeiraParcela = schedule[0].installment;
+            const totalJuros = schedule.reduce((soma, p) => soma + p.interest, 0);
+            const totalPago = amount + totalJuros;
+            const cetAnual = (Math.pow(1 + monthlyRate, 12) - 1) * 100;
+
+            resultValue.textContent = formatCurrency(primeiraParcela);
+            resultLoan.textContent = formatCurrency(totalJuros);
+            resultCet.textContent = cetAnual.toFixed(2) + '%';
+            resultTotal.textContent = formatCurrency(totalPago);
+
+            desenharGrafico(schedule);
+        });
+    </script>
+</body>
+</html>

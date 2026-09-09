@@ -1,5 +1,5 @@
 import { useState, SyntheticEvent } from "react";
-import axios from 'axios';
+import { api } from "../../services/api";
 
 export const TelaLogin = () => {
   const [usuario, setUsuario] = useState('');
@@ -9,7 +9,7 @@ export const TelaLogin = () => {
     event.preventDefault();
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login', {usuario, senha});
+      const response = await api.post('login/', {usuario, senha});
       console.log('Sucesso', response.data);
     } catch (error: any) {
       if (error.response) {

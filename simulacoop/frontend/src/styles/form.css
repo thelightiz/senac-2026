@@ -232,6 +232,48 @@ main.content {
     margin-top: 30px;
 }
 
+.grafico-detalhe {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    margin-top: 12px;
+    padding: 0 8px;
+}
+
+.detalhe-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.detalhe-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--text-dark);
+    white-space: nowrap;
+}
+
+.detalhe-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.detalhe-dot.dot-amortizacao {
+    background: #3B7A20;
+}
+
+.detalhe-dot.dot-juros {
+    background: #A6D785;
+}
+
 .actions button.solid {
     background: color(srgb rgb(255, 255, 255));
     color: var(--green-darker);

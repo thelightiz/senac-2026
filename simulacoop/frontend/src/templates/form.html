@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../styles/styl.css">
+    <link rel="stylesheet" href="../styles/form.css">
     <title>Simulador de Empréstimo — Sicredi</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+    <script src="../static/js/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -114,6 +114,7 @@
             Veja, em cada parcela, quanto é o valor que você deve (amortização) e quanto é juros — ou seja, o total que você vai pagar.
         </p>
         <canvas id="grafico"></canvas>
+        <div id="grafico-detalhe" class="grafico-detalhe"></div>
     </section>
 
     <script>
@@ -124,6 +125,7 @@
         const resultTotal = document.getElementById('result-total');
         const formMessage = document.getElementById('form-message');
         const grafico = document.getElementById('grafico');
+        const graficoDetalhe = document.getElementById('grafico-detalhe');
 
         function parseCurrency(value) {
             const cleaned = value.replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '');
@@ -183,6 +185,28 @@
             const labels = dadosExibidos.map(p => `Parcela ${p.numero}`);
             const amortizacaoData = dadosExibidos.map(p => p.installment - p.interest);
             const jurosData = dadosExibidos.map(p => p.interest);
+
+            // monta a lista de valores (amortização + juros) abaixo do gráfico,
+            // uma coluna por parcela exibida, alinhada com as barras
+            graficoDetalhe.innerHTML = '';
+            dadosExibidos.forEach((parcela) => {
+                const amortizacao = parcela.installment - parcela.interest;
+
+                const coluna = document.createElement('div');
+                coluna.className = 'detalhe-col';
+
+                const itemAmortizacao = document.createElement('span');
+                itemAmortizacao.className = 'detalhe-item';
+                itemAmortizacao.innerHTML = `<span class="detalhe-dot dot-amortizacao"></span>${formatCurrencyCurto(amortizacao)}`;
+
+                const itemJuros = document.createElement('span');
+                itemJuros.className = 'detalhe-item';
+                itemJuros.innerHTML = `<span class="detalhe-dot dot-juros"></span>${formatCurrencyCurto(parcela.interest)}`;
+
+                coluna.appendChild(itemAmortizacao);
+                coluna.appendChild(itemJuros);
+                graficoDetalhe.appendChild(coluna);
+            });
 
             if (typeof Chart === 'undefined') {
                 grafico.insertAdjacentHTML(

@@ -10,9 +10,7 @@
 
 <body>
     <header class="topbar">
-        <div class="brand">
-            <strong>Sicredi</strong>
-        </div>
+        <img class="brand" src="../static/img/RGB/HORIZONTAL_PREFERENCIAL_COLORIDA_RGB.png" alt="Sicredi">
         <div class="actions">
             <a href="index.html"><button class="solid">Inicial</button></a>
         </div>
@@ -113,7 +111,9 @@
         <p>
             Veja, em cada parcela, quanto é o valor que você deve (amortização) e quanto é juros — ou seja, o total que você vai pagar.
         </p>
-        <canvas id="grafico"></canvas>
+        <div class="grafico-wrap">
+            <canvas id="grafico"></canvas>
+        </div>
         <div id="grafico-detalhe" class="grafico-detalhe"></div>
     </section>
 
@@ -172,7 +172,7 @@
         // com "valor devido" (amortizaçao) + "juros" mostrando o total que será pago
         function desenharGrafico(schedule) {
             // limita a quantidade de barras para manter os valores legiveis
-            const maxBarras = 12;
+            const maxBarras = 24;
             let dadosExibidos = schedule.map((p, i) => ({ ...p, numero: i + 1 }));
             if (schedule.length > maxBarras) {
                 const passo = (schedule.length - 1) / (maxBarras - 1);
@@ -245,6 +245,7 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top' },
                         tooltip: {

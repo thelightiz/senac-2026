@@ -1,11 +1,15 @@
+@font-face {
+  font-family: 'Exo 2';
+  src: url('../static/fonts/Exo2-Medium.ttf') format('truetype');
+}
+
 :root {
+    --fonte: 'Exo 2', 'Segoe UI', Arial, Helvetica, sans-serif;
     --green: #4C9A2A;
     --green-dark: #3B7A20;
     --green-darker: #2E5F18;
     --result-bg: #DCEFD1;
     --border-gray: #E5E7EA;
-    --text-dark: #1F2A1A;
-    --text-muted: #6B7280;
     --placeholder: #9AA0A6;
     --page-bg: #F5F6F5;
 }
@@ -14,7 +18,6 @@
 
 body {
     margin: 0;
-    font-family: 'Segoe UI', Arial, sans-serif;
     background: var(--page-bg);
     color: var(--text-dark);
 }
@@ -29,17 +32,9 @@ header.topbar {
 }
 
 .brand {
+    max-width: 150px;
     display: flex;
     align-items: center;
-    gap: 10px;
-}
-
-
-.brand strong {
-    color: #fff;
-    font-size: 19px;
-    font-weight: 700;
-    letter-spacing: 0.2px;
 }
 
 /* Content / panels */
@@ -111,7 +106,6 @@ main.content {
     border: 1px solid var(--border-gray);
     border-radius: 8px;
     font-size: 14px;
-    font-family: inherit;
     background: #fff;
     color: var(--text-dark);
     appearance: none;
@@ -222,7 +216,8 @@ main.content {
 }
 
 .grafico-panel {
-    margin-top: 30px;
+    max-width: 1777px;
+    margin: 10px auto 0;
     padding: 25px;
     border: 1px solid rgb(0, 0, 0);
     border-radius: 14px;
@@ -238,6 +233,11 @@ main.content {
     gap: 4px;
     margin-top: 12px;
     padding: 0 8px;
+}
+.grafico-wrap {
+    position: relative;
+    height: 400px;
+    margin-top: 30px;
 }
 
 .detalhe-col {

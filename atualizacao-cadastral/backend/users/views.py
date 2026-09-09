@@ -31,7 +31,7 @@ class LoginView(APIView):
 
         # Token de acesso
         response.set_cookie(
-            key='refresh_token',
+            key='access_token',
             value=access_token,
             httponly=True,
             secure=False,

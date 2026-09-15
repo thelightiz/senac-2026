@@ -4,23 +4,26 @@ import { api } from "./api";
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  requiredRole?: string;
 }
 
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
 
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        await api.get('/gn/minhas-solicitacoes');
-        setHasAccess(true);
-      } catch (error: any) {
-        const status = error.response?.status;
-        if (status === 401 || status === 403) {
-          setHasAccess(false);
+        const response = await api.get('/auth');
+        if (response.data.role == requiredRole) {
+          setHasAccess(true);
         } else {
           setHasAccess(false);
         }
+      } catch (error: any) {
+        const status = error.response?.status;
+        setErrorStatus(status || 500);
+        setHasAccess(false);
       }
     };
 
@@ -32,8 +35,12 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (!hasAccess) {
+    if (errorStatus === 401) {
+      return <Navigate to="/entrar" replace />
+    }
+
     return <Navigate to="/erro/403" replace />;
   }
 
   return <>{children}</>
-}
+};

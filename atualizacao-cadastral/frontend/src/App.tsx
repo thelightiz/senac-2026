@@ -2,7 +2,7 @@ import React from 'react';
 import { Rotas } from './routes/routes';
 
 export const App = () => {
-  return (<Rotas />)
-}
+  return (<Rotas />);
+};
 
-export default App
+export default App;

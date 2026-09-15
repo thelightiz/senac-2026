@@ -1,7 +1,7 @@
 import { useState, SyntheticEvent } from "react";
 import { api } from "../../services/api";
 
-export const TelaLogin = () => {
+export const Login = () => {
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
 

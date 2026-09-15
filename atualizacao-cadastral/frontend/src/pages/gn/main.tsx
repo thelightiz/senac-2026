@@ -18,9 +18,6 @@ export const GNMyRequests = () => {
   }, []);
 
   return (
-    <>
-      <h1 className="text-3xl text-center">Minhas solicitações</h1>
-      
-    </>
+    <h1 className="text-3xl text-center">Minhas solicitações</h1>
   );
 };

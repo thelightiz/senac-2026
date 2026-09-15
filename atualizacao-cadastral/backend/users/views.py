@@ -52,9 +52,16 @@ class LoginView(APIView):
 
         return response
 
+class AuthView(APIView):
+    def get(self, request):
+        user = request.user
+        if user.is_authenticated:
+            return Response({"role": user.role}, status=status.HTTP_200_OK)
+        return Response({"mensagem": "Usuário não autenticado"}, status=status.HTTP_401_UNAUTHORIZED)
+
 class GNMyRequestsView(APIView):
     permission_classes = [HasRole]
     allowed_roles = ['GN']
 
     def get(self, request):
-        return Response({"message": "ok"}, status=status.HTTP_200_OK)
+        return Response({"mensagem": "ok"}, status=status.HTTP_200_OK)

@@ -1,3 +1,4 @@
+from .permissions import HasRole
 from .serializers import LoginSerializer
 from rest_framework import status
 from rest_framework.response import Response
@@ -34,8 +35,8 @@ class LoginView(APIView):
             key='access_token',
             value=access_token,
             httponly=True,
-            secure=False,
-            samesite='Lax',
+            secure=True,
+            samesite='None',
             max_age=15 * 60
         )
 
@@ -44,9 +45,16 @@ class LoginView(APIView):
             key='refresh_token',
             value=refresh_token,
             httponly=True,
-            secure=False,
-            samesite='Lax',
+            secure=True,
+            samesite='None',
             max_age=7 * 24 * 60 * 60
         )
 
         return response
+
+class GNMyRequestsView(APIView):
+    permission_classes = [HasRole]
+    allowed_roles = ['GN']
+
+    def get(self, request):
+        return Response({"message": "ok"}, status=status.HTTP_200_OK)

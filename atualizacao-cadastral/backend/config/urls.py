@@ -20,5 +20,6 @@ from users import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/login/', views.LoginView.as_view())
+    path('api/login/', views.LoginView.as_view()),
+    path('api/gn/minhas-solicitacoes', views.GNMyRequestsView.as_view())
 ]

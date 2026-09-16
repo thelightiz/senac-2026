@@ -9,7 +9,7 @@ class LoginView(APIView):
     permission_classes = []
 
     def post(self, request):
-        serializer = LoginSerializer(data=request.data, context={"request": request})
+        serializer = LoginSerializer(data=request.data, context={'request': request})
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -21,12 +21,12 @@ class LoginView(APIView):
         refresh_token = str(refresh)
 
         response = Response(
-            {"status": "success",
-                "mensagem": "Login realizado com sucesso!",
-                "user": {
-                    "id": user.id,
-                    "nome": user.username,
-                    "role": user.role}
+            {'status': 'success',
+                'mensagem': 'Login realizado com sucesso!',
+                'user': {
+                    'id': user.id,
+                    'nome': user.username,
+                    'role': user.role}
             }, status=status.HTTP_200_OK
         )
 
@@ -56,12 +56,12 @@ class AuthView(APIView):
     def get(self, request):
         user = request.user
         if user.is_authenticated:
-            return Response({"role": user.role}, status=status.HTTP_200_OK)
-        return Response({"mensagem": "Usuário não autenticado"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'role': user.role}, status=status.HTTP_200_OK)
+        return Response({'mensagem': 'Usuário não autenticado'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class GNMyRequestsView(APIView):
     permission_classes = [HasRole]
     allowed_roles = ['GN']
 
     def get(self, request):
-        return Response({"mensagem": "ok"}, status=status.HTTP_200_OK)
+        return Response({'mensagem': 'ok'}, status=status.HTTP_200_OK)

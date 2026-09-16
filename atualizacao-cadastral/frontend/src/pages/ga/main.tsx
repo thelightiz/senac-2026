@@ -4,10 +4,10 @@ import { api } from "../../services/api"
 export const GARequestQueue = () => {
     const test = async () => {
         try {
-            await api.get ('/ga/fila-de-solicitacoes');
-            console.log('Tem permissão')
+            await api.get("/ga/fila-de-solicitacoes");
+            console.log("Tem permissão")
         } catch (error: any) {
-            console.log('Sem permissão')
+            console.log("Sem permissão")
         }
     };
 

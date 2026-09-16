@@ -5,7 +5,7 @@ import { api } from "./api";
 interface ProtectedRouteProps {
   children: ReactNode;
   requiredRole?: string;
-}
+};
 
 export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
@@ -14,7 +14,7 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        const response = await api.get('/auth');
+        const response = await api.get("/auth");
         if (response.data.role == requiredRole) {
           setHasAccess(true);
         } else {
@@ -36,11 +36,11 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
 
   if (!hasAccess) {
     if (errorStatus === 401) {
-      return <Navigate to="/entrar" replace />
+      return <Navigate to="/entrar" replace />;
     }
 
     return <Navigate to="/erro/403" replace />;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 };

@@ -2,20 +2,20 @@ import { useState, SyntheticEvent } from "react";
 import { api } from "../../services/api";
 
 export const Login = () => {
-  const [usuario, setUsuario] = useState('');
-  const [senha, setSenha] = useState('');
+  const [usuario, setUsuario] = useState("");
+  const [senha, setSenha] = useState("");
 
   const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
 
     try {
-      const response = await api.post('login/', {usuario, senha});
-      console.log('Sucesso', response.data);
+      const response = await api.post("login/", {usuario, senha});
+      console.log("Sucesso", response.data);
     } catch (error: any) {
       if (error.response) {
-        console.error('Erro retornado pelo backend:', error.response.data);
+        console.error("Erro retornado pelo backend:", error.response.data);
       } else {
-        console.error('Sem resposta do servidor:', error.message);
+        console.error("Sem resposta do servidor:", error.message);
       }
     }
 

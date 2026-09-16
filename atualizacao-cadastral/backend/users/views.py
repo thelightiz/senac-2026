@@ -14,16 +14,16 @@ class LoginView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        user = serializer.validated_data['user']
+        user = serializer.validated_data['username']
 
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
 
         response = Response(
-            {'status': 'success',
+            {'status': 'sucesso',
                 'mensagem': 'Login realizado com sucesso!',
-                'user': {
+                'usuario': {
                     'id': user.id,
                     'nome': user.username,
                     'role': user.role}
@@ -64,4 +64,10 @@ class GNMyRequestsView(APIView):
     allowed_roles = ['GN']
 
     def get(self, request):
-        return Response({'mensagem': 'ok'}, status=status.HTTP_200_OK)
+        user = request.user
+        return Response(
+            {'usuario': {
+                'nome': user.username,
+                'role': user.role,
+            }},
+            status=status.HTTP_200_OK)

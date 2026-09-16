@@ -2,24 +2,25 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 
 class LoginSerializer(serializers.Serializer):
-    usuario = serializers.CharField(max_length=150, write_only=True)
-    senha = serializers.CharField(write_only=True)
+    username = serializers.CharField(max_length=150, write_only=True)
+    password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        usuario = data.get('usuario')
-        senha = data.get('senha')
+        print(data)
+        username = data.get('username')
+        password = data.get('password')
 
-        if not usuario or not senha:
+        if not username or not password:
             raise serializers.ValidationError('Usuário e senha são obrigatórios.')
 
-        user = authenticate(
+        username = authenticate(
             request=self.context.get('request'),
-            username=usuario,
-            password=senha
+            username=username,
+            password=password
         )
 
-        if not user:
+        if not username:
             raise serializers.ValidationError('Credenciais inválidas.')
         
-        data['user'] = user
+        data['username'] = username
         return data

@@ -1,13 +1,10 @@
-from .permissions import HasRole
-from .serializers import LoginSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import LoginSerializer
 
 class LoginView(APIView):
-    permission_classes = []
-
     def post(self, request):
         serializer = LoginSerializer(data=request.data, context={'request': request})
 
@@ -58,16 +55,3 @@ class AuthView(APIView):
         if user.is_authenticated:
             return Response({'role': user.role}, status=status.HTTP_200_OK)
         return Response({'mensagem': 'Usuário não autenticado'}, status=status.HTTP_401_UNAUTHORIZED)
-
-class GNMyRequestsView(APIView):
-    permission_classes = [HasRole]
-    allowed_roles = ['GN']
-
-    def get(self, request):
-        user = request.user
-        return Response(
-            {'usuario': {
-                'nome': user.username,
-                'role': user.role,
-            }},
-            status=status.HTTP_200_OK)

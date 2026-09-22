@@ -1,10 +1,26 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, SyntheticEvent, useState } from "react";
+import { api } from "../../services/api";
 
 export const GNCreateRequest = () => {
   const [customerName, setCustomerName] = useState("");
   const [requestType, setRequestType] = useState("");
   const [newData, setNewData] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleSubmit = async (event: SyntheticEvent) => {
+    event.preventDefault();
+    
+    const dataDict = {
+      "cliente": customerName,
+      "tipo": requestType,
+      "dados_novos": newData,
+      "documento": selectedFile
+    };
+
+    const response = await api.post("gn/criar-solicitacao", {dataDict});
+    console.log(response);
+    console.log(dataDict);
+  }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -26,7 +42,7 @@ export const GNCreateRequest = () => {
         return;
       }
       setSelectedFile(file);
-      console.error(null);
+      console.log("GG pro max");
     }
   };
 
@@ -36,7 +52,7 @@ export const GNCreateRequest = () => {
         <h1 className="text-3xl text-center font-bold my-6">Criação de Solicitação para Atualização de Cadastro</h1>
       </div>
       <div>
-        <form>
+        <form onSubmit={handleSubmit}>
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label htmlFor="customerName" className="block text-sm/6 font-medium text-gray-900">Nome do Cliente</label>
@@ -53,8 +69,8 @@ export const GNCreateRequest = () => {
                 <label htmlFor="requestType" className="block text-sm/6 font-medium text-gray-900">Tipo de Atualização</label>
                 <div className="mt-2">
                   <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-                    <select id="requestType" name="requestType" value={requestType} className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" onChange={(e) => setRequestType(e.target.value)}>
-                      <option value="">Selecione uma opção</option>
+                    <select id="requestType" name="requestType" value={requestType} className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" onChange={(e) => setRequestType(e.target.value)} required>
+                      <option value="" disabled>Selecione uma opção</option>
                       <option value="Renda">Renda</option>
                       <option value="Endereço">Endereço</option>
                       <option value="Patrimônio">Patrimônio</option>

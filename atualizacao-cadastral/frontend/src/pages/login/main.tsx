@@ -1,4 +1,4 @@
-import { useState, SyntheticEvent, use } from "react";
+import { useState, SyntheticEvent } from "react";
 import { api } from "../../services/api";
 import { RoleRedirect } from "../../services/routeRedirector";
 import { Link } from "react-router-dom";
@@ -49,7 +49,7 @@ export const Login = () => {
 
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
               <div className="sm:col-span-4">
-                <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">password</label>
+                <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">Senha</label>
                 <div className="mt-2">
                   <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                     <input id="password" type="password" name="password" value={password} className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" onChange={(e) => setPassword(e.target.value)} required/>

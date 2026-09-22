@@ -16,11 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from users import views
+from users import views as users_views
+from update_requests import views as requests_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/login/', views.LoginView.as_view()),
-    path('api/gn/minhas-solicitacoes', views.GNMyRequestsView.as_view()),
-    path('api/auth', views.AuthView.as_view())
+    path('api/login/', users_views.LoginView.as_view()),
+    path('api/auth', users_views.AuthView.as_view()),
+    path('api/gn/minhas-solicitacoes', requests_views.GNMyRequestsView.as_view()),
+    path('api/gn/criar-solicitacao', requests_views.GNCreateRequestView.as_view())
 ]

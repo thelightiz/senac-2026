@@ -5,7 +5,7 @@ import { api } from "./api";
 interface ProtectedRouteProps {
   children: ReactNode;
   requiredRole?: string;
-};
+}
 
 export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);

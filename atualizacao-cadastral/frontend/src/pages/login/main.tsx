@@ -1,15 +1,19 @@
-import { useState, SyntheticEvent } from "react";
+import { useState, SyntheticEvent, use } from "react";
 import { api } from "../../services/api";
+import { RoleRedirect } from "../../services/routeRedirector";
+import { Link } from "react-router-dom";
 
 export const Login = () => {
-  const [usuario, setUsuario] = useState("");
-  const [senha, setSenha] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [userRole, setusernameRole] = useState<string | null>(null);
 
   const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
 
     try {
-      const response = await api.post("login/", {usuario, senha});
+      const response = await api.post("login/", {username, password});
+      setusernameRole(response.data.usuario.role)
       console.log("Sucesso", response.data);
     } catch (error: any) {
       if (error.response) {
@@ -18,8 +22,11 @@ export const Login = () => {
         console.error("Sem resposta do servidor:", error.message);
       }
     }
-
   };
+
+  if (userRole) {
+    return <RoleRedirect role={userRole} />;
+  }
 
   return (
      <>
@@ -31,10 +38,10 @@ export const Login = () => {
 
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label htmlFor="usuario" className="block text-sm/6 font-medium text-gray-900">Usuário</label>
+                <label htmlFor="username" className="block text-sm/6 font-medium text-gray-900">Usuário</label>
                 <div className="mt-2">
                   <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-                    <input id="usuario" type="text" name="usuario" value={usuario} className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" onChange={(e) => setUsuario(e.target.value)} required/>
+                    <input id="username" type="text" name="username" value={username} className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" onChange={(e) => setUsername(e.target.value)} required/>
                   </div>
                 </div>
               </div>
@@ -42,10 +49,10 @@ export const Login = () => {
 
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
               <div className="sm:col-span-4">
-                <label htmlFor="senha" className="block text-sm/6 font-medium text-gray-900">Senha</label>
+                <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">password</label>
                 <div className="mt-2">
                   <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-                    <input id="senha" type="password" name="senha" value={senha} className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" onChange={(e) => setSenha(e.target.value)} required/>
+                    <input id="password" type="password" name="password" value={password} className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" onChange={(e) => setPassword(e.target.value)} required/>
                   </div>
                 </div>
               </div>
@@ -55,8 +62,8 @@ export const Login = () => {
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-x-6">
-          <button type="button" className="text-sm/6 font-semibold text-gray-900">Voltar</button>
-          <button type="submit" id="botao" className="rounded-md bg-botao-entrar px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-botao-entrar focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar">Entrar</button>
+          <Link to="/" className="text-sm/6 font-semibold text-gray-900">Voltar</Link>
+          <button type="submit" id="botao" className="rounded-md bg-botao-1 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-botao-1-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar">Entrar</button>
         </div>
       </form>
     </>

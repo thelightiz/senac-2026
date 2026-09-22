@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface de Verificação - Sicredi</title>
+    <link rel="stylesheet" href="../static/styles/style.css">
+</head>
+<body>
+
+    <!-- Topo da Página -->
+    <header class="header-bar">
+        <span>Sicredi</span>
+        <span class="header-icon">⚙</span>
+    </header>
+
+    <!-- Bloco Centralizador -->
+    <main class="main-container">
+
+        <!-- quadrado 1 -->
+        <section class="card">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <h1 class="step-title">Upload do documento</h1>
+            </div>
+            <p class="step-description">Envie o seu RG ou CNH para que possamos realizar a análise.</p>
+            
+            <div class="drop-zone">
+
+                <!-- Ícone Simplificado do Documento -->
+                 <div class="processing-zone">
+                <!-- Gráfico Reduzido e Minificado da Lupa e IA -->
+                <img src="papel-pessoa.png" alt="lupa">
+
+                
+                    <div class="progress-bar"></div>
+                </div>
+                
+                <p>Arraste e solte o documento aqui ou selecione o arquivo</p>
+            </div>
+
+            <button class="btn-outline campo-papel-botao"> Selecione o documento</button>
+            <button class="btn-solid subir-arquivo"> Enviar para o processamento</button>
+        </section>
+
+        <!-- quadrado 2 -->
+        <section class="card">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <h1 class="step-title">Processamento</h1>
+
+            </div>
+            <p class="step-description">Estamos analisando o seu documento com a inteligência artificial.</p>
+            
+            <div class="processing-zone">
+                <!-- Gráfico Reduzido e Minificado da Lupa e IA -->
+                <img src="papel-lupa.png" alt="lupa">
+
+                <h3 class="analysis-title">Documento em análise...</h3>
+                <p class="analysis-subtitle">Isso pode levar alguns segundos.</p>
+                
+                
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+                <span class="status-text">analisando as informações</span>
+            </div>
+
+        </section>
+
+        <!-- quadrado 3 -->
+        <section class="card">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <h1 class="step-title">Dados pessoais</h1>
+            </div>
+            <p class="step-description">Confira os dados do seu documento e confirme para que possamos continuar.</p>
+            
+            <!-- Texto explicativo acima do botão -->
+            <p class="texto-superior-botao">NOME</p>
+            
+            <input type="text" class="nome-completo campo-com-imagem" placeholder="Nome: digite seu nome completo" placeholder="Nome: digite seu nome completo" class="nome-completo" type="text">
+
+                <p class="texto-superior-botao">CPF</p>
+                <input placeholder="096.584.365-81" class="nome-completo" type="text" class="btn-solid" style="margin-top: 0px;">
+
+                <p class="texto-superior-botao">Data de Nascimento</p>
+                <input type="text" class="nome-completo campo-imagem" placeholder="27/08/2000" class="nome-completo" type="text" class="btn-solid" style="margin-top: 0px;">
+
+                <button class="btn-solid trasso-correto" style="margin-top: 50px;"> Confirmar dados e continuar</button>
+                <button class="btn-link">Editar dados</button>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- LOGICA JAVASCRIPT DA BARRA DE CARREGAMENTO -->
+    <script>
+        // Aguarda a página carregar completamente
+        window.addEventListener('DOMContentLoaded', () => {
+            const barra = document.getElementById('barra-progresso');
+            const passo2 = document.getElementById('passo-2');
+            const passo3 = document.getElementById('passo-3');
+            
+            let progresso = 0;
+
+            // Inicia o cronômetro para encher a barra de 0 a 100%
+            const intervalo = setInterval(() => {
+                if (progresso >= 100) {
+                    clearInterval(intervalo); // Interrompe o carregamento
+                    
+                    // Transição automática: esconde a tela de análise e mostra os dados preenchidos
+                    passo2.style.display = 'none';
+                    passo3.style.display = 'block';
+                } else {
+                    progresso += 1; 
+                    barra.style.width = progresso + '%'; // Avança o preenchimento visualmente
+                }
+            }, 45); // Controla a velocidade (aproximadamente 4.5 segundos totais)
+        });
+    </script>
+
+</body>
+</html>

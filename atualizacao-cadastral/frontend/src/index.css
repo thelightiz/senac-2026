@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-botao-entrar: #33820d;
+  --color-botao-1: #33820d;
+  --color-botao-1-700: #33820db3; /* b3 = 70% de opacidade */
 }
 
 html, body {

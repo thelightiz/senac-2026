@@ -5,22 +5,34 @@ export const GNCreateRequest = () => {
   const [customerName, setCustomerName] = useState("");
   const [requestType, setRequestType] = useState("");
   const [newData, setNewData] = useState("");
+  const [oldData, setOldData] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
     
-    const dataDict = {
-      "cliente": customerName,
-      "tipo": requestType,
-      "dados_novos": newData,
-      "documento": selectedFile
-    };
+    if (!selectedFile) {
+      console.error("Por favor, selecione um arquivo antes de enviar.");
+      return;
+    }
 
-    const response = await api.post("gn/criar-solicitacao", {dataDict});
-    console.log(response);
-    console.log(dataDict);
-  }
+    const formData = new FormData();
+    formData.append("cliente", customerName);
+    formData.append("atualizacao", requestType);
+    formData.append("dados_antigos", oldData);
+    formData.append("dados_novos", newData);
+    formData.append("documento", selectedFile);
+
+    console.log("É FormData?", formData instanceof FormData);
+
+   try {
+    // 2. Envie a variável formData, sem definir headers
+      const response = await api.post("gn/criar-solicitacao", formData);
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -79,6 +91,18 @@ export const GNCreateRequest = () => {
                 </div>
               </div>
             </div>
+
+            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label htmlFor="oldData" className="block text-sm/6 font-medium text-gray-900">Dados Antigos</label>
+                <div className="mt-2">
+                  <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                    <input id="oldData" type="text" name="oldData" value={oldData} className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" onChange={(e) => setOldData(e.target.value)} required/>
+                  </div>
+                </div>
+              </div>
+            </div>
+
 
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
               <div className="sm:col-span-2">

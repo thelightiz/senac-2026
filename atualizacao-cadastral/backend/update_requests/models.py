@@ -1,12 +1,21 @@
 from django.db import models
+from django.conf import settings
 from customers.models import Cliente
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 class Solicitacao(models.Model):
     id = models.AutoField(primary_key=True)
-    id_gn = models.IntegerField()
+    criado_por = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='solicitacoes_criadas',
+        help_text="Usuário que criou a solicitação"
+    )
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='solicitacoes')
-    dados_antigos = models.ForeignKey('DadosAntigos', on_delete=models.SET_NULL, null=True, blank=True, related_name='solicitacoes_com_dados_antigos')
-    dados_novos = models.ForeignKey('DadosNovos', on_delete=models.SET_NULL, null=True, blank=True, related_name='solicitacoes_com_dados')
 
     TIPO_ATUALIZACAO = [
         ('Renda', 'Atualização de Renda'),
@@ -28,10 +37,10 @@ class Solicitacao(models.Model):
     ]
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='DRAFT')
 
-    documento = models.URLField(help_text='URL do documento anexado')
+    documento = models.FileField(upload_to='documentos_solicitacoes/', help_text='Arquivo do documento anexado')
 
     def __str__(self):
-        return f'Solicitação {self.id} - {self.cliente.nome} ({self.get_status_display()})'
+        return f'Solicitação {self.id} - {self.cliente.nome} - Criado por: {self.criado_por.username if self.criado_por else "N/A"}'
 
 
 class DadosAntigos(models.Model):
@@ -71,13 +80,13 @@ class SnapshotImovel(models.Model):
 class SnapshotVeiculo(models.Model):
     dados_antigos = models.ForeignKey(DadosAntigos, related_name='veiculos_snapshot', on_delete=models.CASCADE)
     
-    enavam = models.CharField(max_length=11, blank=True, null=True)
+    renavam = models.CharField(max_length=11, blank=True, null=True)
     placa = models.CharField(max_length=7, blank=True, null=True)
     marca_modelo = models.CharField(max_length=90, blank=True, null=True)
     ano = models.CharField(max_length=9, blank=True, null=True) # Mantido como Char para validação de formato se necessário
     
     def __str__(self):
-        return f'RENAVAM {self.veiculo_renavam} (Snapshot ID: {self.dados_antigos.id})'
+        return f'RENAVAM {self.renavam} (Snapshot ID: {self.dados_antigos.id})'
 
 class DadosNovos(models.Model):
     solicitacao = models.ForeignKey(Solicitacao, related_name='dados_solicitacoes_novos', on_delete=models.CASCADE)

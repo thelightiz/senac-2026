@@ -20,8 +20,11 @@ def cpf_verification(image_path):
     caminho_absoluto = os.path.join(diretorio_atual, image_path)
     
     try:
+        if isinstance(image_source, str):
+            diretorio_atual = os.path.dirname(os.path.abspath(__file__))
+            image_source = os.path.join(diretorio_atual, image_source)
         # Lê a imagem usando PIL com o caminho correto
-        imagem = Image.open(caminho_absoluto)
+        imagem = Image.open(imagem_source)
         
         # promt da analise da imagem 
         prompt = """
@@ -81,5 +84,6 @@ def cpf_verification(image_path):
         return {"erro": f"Falha ao processar: {str(e)}"}
 
 # Testando o bglh
-teste = cpf_verification("fotojapa.jpeg")
-print(json.dumps(teste, indent=2, ensure_ascii=False))
+if __name__ == "__main__":
+    teste = cpf_verification("fotojapa.jpeg")
+    print(json.dumps(teste, indent=2, ensure_ascii=False))

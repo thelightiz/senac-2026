@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface de Verificação - Sicredi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <header class="header-bar">
+        <span>Sicredi</span>
+        <span class="header-icon">⚙</span>
+    </header>
+
+    <main class="main-container">
+
+        <!-- quadrado 1 -->
+        <section class="card">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <h1 class="step-title">Upload do documento</h1>
+            </div>
+            <p class="step-description">Envie o seu RG ou CNH para que possamos realizar a análise.</p>
+
+            <div class="drop-zone" id="drop-zone">
+                <div class="processing-zone">
+                    <img src="{{ url_for('static', filename='img/papel-pessoa.png') }}" alt="documento" id="preview">
+                </div>
+                <p id="nome-arquivo">Arraste e solte o documento aqui ou selecione o arquivo</p>
+            </div>
+
+            <!-- input real de arquivo, escondido -->
+            <input type="file" id="input-arquivo" accept="image/*" hidden>
+
+            <button type="button" class="btn-outline campo-papel-botao" id="btn-selecionar">Selecione o documento</button>
+            <button type="button" class="btn-solid subir-arquivo" id="btn-enviar">Enviar para o processamento</button>
+        </section>
+
+        <!-- quadrado 2 -->
+        <section class="card">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <h1 class="step-title">Processamento</h1>
+            </div>
+            <p class="step-description">Estamos analisando o seu documento com a inteligência artificial.</p>
+
+            <div class="processing-zone">
+                <img src="{{ url_for('static', filename='img/papel-lupa.png') }}" alt="lupa">
+
+                <h3 class="analysis-title" id="titulo-analise">Aguardando documento...</h3>
+                <p class="analysis-subtitle">Isso pode levar alguns segundos.</p>
+
+                <div class="progress-container">
+                    <div class="progress-bar" id="barra-progresso"></div>
+                </div>
+                <span class="status-text" id="status-texto">aguardando envio</span>
+            </div>
+        </section>
+
+        <!-- quadrado 3 -->
+        <section class="card">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <h1 class="step-title">Dados pessoais</h1>
+            </div>
+            <p class="step-description">Confira os dados do seu documento e confirme para que possamos continuar.</p>
+
+            <p class="texto-superior-botao">NOME</p>
+            <input type="text" id="nome" class="nome-completo campo-com-imagem" placeholder="Nome: digite seu nome completo">
+
+            <p class="texto-superior-botao">CPF</p>
+            <input type="text" id="cpf" class="nome-completo" placeholder="000.000.000-00">
+
+            <p class="texto-superior-botao">Data de Nascimento</p>
+            <input type="text" id="data_nascimento" class="nome-completo campo-imagem" placeholder="DD/MM/AAAA">
+
+            <button type="button" class="btn-solid trasso-correto" id="btn-confirmar" style="margin-top: 50px;">Confirmar dados e continuar</button>
+            <button type="button" class="btn-link" id="btn-editar">Editar dados</button>
+        </section>
+
+    </main>
+
+    <script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const inputArquivo = document.getElementById('input-arquivo');
+        const btnSelecionar = document.getElementById('btn-selecionar');
+        const btnEnviar = document.getElementById('btn-enviar');
+        const dropZone = document.getElementById('drop-zone');
+        const nomeArquivo = document.getElementById('nome-arquivo');
+        const preview = document.getElementById('preview');
+
+        const barra = document.getElementById('barra-progresso');
+        const titulo = document.getElementById('titulo-analise');
+        const status = document.getElementById('status-texto');
+
+        const btnEditar = document.getElementById('btn-editar');
+
+        // chave do JSON -> id do input no HTML
+        const mapa = {
+            nome: 'nome',
+            numero_cpf: 'cpf',
+            data_nascimento: 'data_nascimento',
+        };
+
+        let arquivoSelecionado = null;
+        let intervaloBarra = null;
+
+        // ---------- seleção do arquivo ----------
+        btnSelecionar.addEventListener('click', () => inputArquivo.click());
+
+        inputArquivo.addEventListener('change', () => {
+            if (inputArquivo.files[0]) definirArquivo(inputArquivo.files[0]);
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#3f9c35';
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '';
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '';
+            const arquivo = e.dataTransfer.files[0];
+            if (arquivo && arquivo.type.startsWith('image/')) definirArquivo(arquivo);
+        });
+
+        function definirArquivo(arquivo) {
+            arquivoSelecionado = arquivo;
+            nomeArquivo.textContent = arquivo.name;
+            preview.src = URL.createObjectURL(arquivo); // mostra a imagem escolhida
+        }
+
+        // ---------- barra de progresso ----------
+        // Avança devagar até 90% enquanto espera a IA; completa ao receber a resposta.
+        function iniciarBarra() {
+            let progresso = 0;
+            barra.style.width = '0%';
+            clearInterval(intervaloBarra);
+            intervaloBarra = setInterval(() => {
+                if (progresso < 90) {
+                    progresso += 1;
+                    barra.style.width = progresso + '%';
+                }
+            }, 100);
+        }
+
+        function finalizarBarra() {
+            clearInterval(intervaloBarra);
+            barra.style.width = '100%';
+        }
+
+        function resetarBarra() {
+            clearInterval(intervaloBarra);
+            barra.style.width = '0%';
+        }
+
+        // ---------- envio para o backend ----------
+        btnEnviar.addEventListener('click', async () => {
+            if (!arquivoSelecionado) {
+                alert('Selecione um documento primeiro.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('imagem', arquivoSelecionado);
+
+            btnEnviar.disabled = true;
+            titulo.textContent = 'Documento em análise...';
+            status.textContent = 'analisando as informações';
+            iniciarBarra();
+
+            try {
+                const resposta = await fetch('/ler-imagem', {
+                 method: 'POST',
+                 body: formData
+                 });
+                const dados = await resposta.json();
+
+                if (!resposta.ok || dados.erro) {
+                    throw new Error(dados.erro || 'Erro ao processar a imagem');
+                }
+
+                finalizarBarra();
+
+                if (!dados.Is_there_cpf) {
+                    titulo.textContent = 'Nenhum CPF encontrado';
+                    status.textContent = 'tente outra imagem';
+                    return;
+                }
+
+                preencherCampos(dados.document_data);
+                titulo.textContent = 'Análise concluída!';
+                status.textContent = 'confira os dados ao lado';
+
+            } catch (erro) {
+                console.error(erro);
+                resetarBarra();
+                titulo.textContent = 'Não foi possível ler o documento';
+                status.textContent = 'tente novamente';
+            } finally {
+                btnEnviar.disabled = false;
+            }
+        });
+
+        function preencherCampos(dados) {
+            for (const [chave, valor] of Object.entries(dados)) {
+                const input = document.getElementById(mapa[chave]);
+                if (input && valor) {
+                    input.value = valor;
+                    input.readOnly = true; // travado até clicar em "Editar dados"
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        }
+
+        // ---------- editar dados ----------
+        btnEditar.addEventListener('click', () => {
+            Object.values(mapa).forEach((id) => {
+                document.getElementById(id).readOnly = false;
+            });
+            document.getElementById('nome').focus();
+        });
+    });
+    </script>
+
+</body>
+</html>

@@ -6,10 +6,19 @@ app = fl.Flask(__name__)
 
 
 @app.route('/')
-
-
 def index():
-    return fl.Render_template('index.html')
+    return fl.render_template('index.html')
+
+
+@app.route('/ler-imagem', methods=['POST'])
+def ler_imagem():
+    imagem = fl.request.files.get('imagem')
+
+    return fl.jsonify({
+        'mensagem': 'Imagem recebida!'
+    })
+
+
 
 
 

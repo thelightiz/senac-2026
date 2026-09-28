@@ -8,10 +8,10 @@ User = get_user_model()
 class Solicitacao(models.Model):
     id = models.AutoField(primary_key=True)
     criado_por = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='solicitacoes_criadas',
         help_text="Usuário que criou a solicitação"
     )
@@ -25,23 +25,19 @@ class Solicitacao(models.Model):
     atualizacao = models.CharField(max_length=20, choices=TIPO_ATUALIZACAO)
 
     STATUS_CHOICES = [
-        ('DRAFT', 'Rascunho'),
-        ('SUBMITTED', 'Enviado'),
-        ('PENDING_AGENCY_REVIEW', 'Pendente Análise'),
-        ('APPROVED', 'Aprovado'),
-        ('NEEDS_ADJUSTMENT', 'Necessita Ajuste'),
-        ('PENDING_CADASTRO', 'Pendente Cadastro'),
+        ('PENDING_AGENCY_REVIEW', 'Pendente Análise do GA'),
+        ('PENDING_CADASTRO', 'Pendente Análise do Time de Cadastro'),
+        ('NEEDS_ADJUSTMENT_GN', 'Necessita Ajuste do GN'),
+        ('NEEDS_ADJUSTMENT_GA', 'Necessita Ajuste do GA'),
         ('UPDATED', 'Atualizado'),
-        ('COMPLETED', 'Concluído'),
         ('REJECTED', 'Rejeitado'),
     ]
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='DRAFT')
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='PENDING_AGENCY_REVIEW')
 
     documento = models.FileField(upload_to='documentos_solicitacoes/', help_text='Arquivo do documento anexado')
 
     def __str__(self):
         return f'Solicitação {self.id} - {self.cliente.nome} - Criado por: {self.criado_por.username if self.criado_por else "N/A"}'
-
 
 class DadosAntigos(models.Model):
     solicitacao = models.ForeignKey(Solicitacao, related_name='dados_solicitacao_antigos', on_delete=models.CASCADE)
@@ -64,7 +60,6 @@ class DadosAntigos(models.Model):
 
     def tem_ativos(self):
         return self.tem_imoveis_snapshot or self.tem_veiculos_snapshot
-
 
 class SnapshotImovel(models.Model):
     dados_antigos = models.ForeignKey(DadosAntigos, related_name='imoveis_snapshot', on_delete=models.CASCADE)

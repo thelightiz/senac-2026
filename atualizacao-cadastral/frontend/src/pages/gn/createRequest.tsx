@@ -17,6 +17,7 @@ interface NewDataState {
 
 export const GNCreateRequest = () => {
   const [customerName, setCustomerName] = useState("");
+  const [customerCPF, setCustomerCPF] = useState("");
   const [requestType, setRequestType] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [newData, setNewData] = useState<NewDataState>({
@@ -48,7 +49,8 @@ export const GNCreateRequest = () => {
 
     const formData = new FormData();
     
-    formData.append("cliente", customerName);
+    formData.append("nome", customerName);
+    formData.append("cliente", customerCPF);
     formData.append("atualizacao", requestType);
     formData.append("documento", selectedFile);
 
@@ -118,12 +120,22 @@ export const GNCreateRequest = () => {
       </div>
       <div>
         <form onSubmit={handleSubmit}>
+
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label htmlFor="customerName" className="block text-sm/6 font-medium text-gray-900">Nome do Cliente</label>
                 <div className="mt-2">
                   <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                     <input id="customerName" type="text" name="customerName" value={customerName} className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" onChange={(e) => setCustomerName(e.target.value)} required/>
+                  </div>
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label htmlFor="customerCPF" className="block text-sm/6 font-medium text-gray-900">CPF do Cliente</label>
+                <div className="mt-2">
+                  <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
+                    <input id="customerCPF" type="text" name="customerCPF" value={customerCPF} className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" onChange={(e) => setCustomerCPF(e.target.value)} required/>
                   </div>
                 </div>
               </div>

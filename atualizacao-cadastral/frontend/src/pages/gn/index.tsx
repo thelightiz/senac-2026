@@ -11,7 +11,7 @@ interface Request {
   id: number;
   criado_por: string;
   cliente: string;
-  tipo: string;
+  atualizacao: string;
   status: string;
   documento: string | null;
 }
@@ -60,7 +60,7 @@ export const GNIndexPage = () => {
                 <th className="px-6 py-4">Cliente</th>
                 <th className="px-6 py-4">Tipo</th>
                 <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Documento</th>
+                <th className="px-6 py-4">Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -68,7 +68,7 @@ export const GNIndexPage = () => {
                 <tr key={r.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 font-medium text-gray-900">{r.id}</td>
                   <td className="px-6 py-4">{r.cliente}</td>
-                  <td className="px-6 py-4">{r.tipo}</td>
+                  <td className="px-6 py-4">{r.atualizacao}</td>
                   <td className="px-6 py-4">{r.status}</td>
                   <td className="px-6 py-4">
                     {r.documento

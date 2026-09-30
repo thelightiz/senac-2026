@@ -1,10 +1,11 @@
 from .models import Solicitacao
-from .serializers import PushRequestSerializer, GetRequestSerializer
+from .serializers import PushRequestSerializer, GetRequestsSerializer, GetRequestInfoSerializer
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from services.permissions import HasRole
+from django.shortcuts import get_object_or_404
 
 class GNMyRequestsView(APIView):
     permission_classes = [HasRole]
@@ -13,7 +14,7 @@ class GNMyRequestsView(APIView):
     def get(self, request):
         user = request.user
         requests = Solicitacao.objects.filter(criado_por=user)
-        serializer = GetRequestSerializer(requests, many=True)
+        serializer = GetRequestsSerializer(requests, many=True)
         
         return Response(
             {'usuario': {
@@ -39,3 +40,37 @@ class GNCreateRequestView(APIView):
             )
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class GARequestsQueueView(APIView):
+    permission_classes = [HasRole]
+    allowed_roles = ['GA']
+
+    def get(self, request):
+        user = request.user
+        requests = Solicitacao.objects.filter(status='PENDING_AGENCY_REVIEW')
+        serializer = GetRequestsSerializer(requests, many=True)
+        
+        return Response(
+            {'usuario': {
+                'nome': user.username,
+                'role': user.role,
+            },
+            'solicitacoes': serializer.data},
+            status=status.HTTP_200_OK)
+
+class SeeRequestView(APIView):
+    permission_classes = [HasRole]
+    allowed_roles = ['GA', 'CAD']
+
+    # Recebe o 'pk' (ou 'id') vindo da URL
+    def get(self, request, pk):
+        # Busca a solicitação ou retorna erro 404 automaticamente se não existir
+        solicitacao = get_object_or_404(Solicitacao, id=pk)
+        
+        # Serializa os dados do modelo para JSON
+        serializer = GetRequestInfoSerializer(solicitacao)
+
+        return Response(
+            {'solicitacao': serializer.data},
+            status=status.HTTP_200_OK
+        )

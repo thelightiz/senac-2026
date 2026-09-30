@@ -26,5 +26,7 @@ urlpatterns = [
     path('api/login/', users_views.LoginView.as_view()),
     path('api/auth', users_views.AuthView.as_view()),
     path('api/gn/minhas-solicitacoes', requests_views.GNMyRequestsView.as_view()),
-    path('api/gn/criar-solicitacao', requests_views.GNCreateRequestView.as_view())
+    path('api/gn/criar-solicitacao', requests_views.GNCreateRequestView.as_view()),
+    path('api/ga/fila-de-solicitacoes', requests_views.GARequestsQueueView.as_view()),
+    path('api/ver-solicitacao/<int:pk>', requests_views.SeeRequestView.as_view())
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

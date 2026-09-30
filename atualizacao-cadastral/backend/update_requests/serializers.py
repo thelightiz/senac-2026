@@ -79,11 +79,19 @@ class PushRequestSerializer(serializers.ModelSerializer):
 
         return solicitacao
 
-class GetRequestSerializer(serializers.ModelSerializer):
+class GetRequestsSerializer(serializers.ModelSerializer):
     cliente = serializers.StringRelatedField() 
     status = serializers.CharField(source='get_status_display', read_only=True)
     
     class Meta:
         model = Solicitacao
         fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documento']
-        
+
+class GetRequestInfoSerializer(serializers.ModelSerializer):
+    criado_por = serializers.StringRelatedField()
+    cliente = serializers.StringRelatedField()
+    status = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = Solicitacao
+        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documento']

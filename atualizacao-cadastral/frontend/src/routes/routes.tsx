@@ -4,7 +4,7 @@ import { Index } from "../pages/index/main";
 import { GNIndexPage} from "../pages/gn/index";
 import { GNCreateRequest } from "../pages/gn/createRequest";
 import { GARequestQueue } from "../pages/ga/index";
-import { Detalhes } from "../pages/ga/viewRequest";
+import { GAViewRequestInfo } from "../pages/ga/viewRequest";
 import { ProtectedRoute } from "../services/permissions";
 import { Error403Page } from "../pages/errors/403/main";
 
@@ -31,7 +31,7 @@ export const Rotas = () => {
             <ProtectedRoute requiredRole="GA">
               <Routes>
                 <Route path="fila-de-solicitacoes/" element={<GARequestQueue />} />
-                <Route path="fila-de-solicitacoes/solicitacao/:id" element={<Detalhes />} />
+                <Route path="fila-de-solicitacoes/solicitacao/:id" element={<GAViewRequestInfo />} />
               </Routes>
             </ProtectedRoute>
           }></Route>

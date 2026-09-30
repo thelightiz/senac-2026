@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../../services/api';
 
@@ -11,16 +11,25 @@ interface UpdateRequest {
   documento: string | null;
 }
 
-export const Detalhes = () => {
-  const { id } = useParams();
+export const GAViewRequestInfo = () => {
+  const { id } = useParams<{ id: string }>();
   const [requestUpdate, setRequestUpdate] = useState<UpdateRequest | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [pdfUrl, SetPdfUrl] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    let activeBlobUrl: string | undefined = undefined;
+
     const fetchSolicitacao = async () => {
       try {
-        const response = await api.get(`ver-solicitacao/${id}`);
-        setRequestUpdate(response.data.solicitacao);
+        const [dadosResponse, pdfRespose] = await Promise.all([
+          api.get(`ver-solicitacao/${id}`),
+          api.get(`ver-documento/${id}`, {responseType: 'blob'})
+        ])
+
+        setRequestUpdate(dadosResponse.data.solicitacao);
+        activeBlobUrl = URL.createObjectURL(pdfRespose.data);
+        SetPdfUrl(activeBlobUrl);
       } catch (error) {
         console.error("Erro ao carregar os detalhes:", error);
       } finally {
@@ -31,6 +40,13 @@ export const Detalhes = () => {
     if (id) {
       fetchSolicitacao();
     }
+
+    return () => {
+      if (activeBlobUrl) {
+        URL.revokeObjectURL(activeBlobUrl);
+      }
+    };
+
   }, [id]);
 
   if (loading) return <p>Carregando...</p>;
@@ -70,14 +86,7 @@ export const Detalhes = () => {
 
           <div className="space-y-3">
             <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Documento Anexado</span>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <div className="truncate">
-                  <p className="text-sm font-medium text-slate-800 truncate">{requestUpdate?.documento}</p>
-                </div>
-              </div>
-              <button className="px-4 py-2 text-xs font-medium text-botao-1 hover:bg-botao-1-700 hover:text-white border border-slate-300 rounded-lg transition-colors shrink-0">Visualizar</button>
-            </div>
+            <iframe src={pdfUrl} width="100%" height="600px" title="Visualizador de PDF" style={{ border: 'none' }} />
           </div>
 
         </div>

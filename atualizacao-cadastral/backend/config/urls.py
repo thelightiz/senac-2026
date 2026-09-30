@@ -28,5 +28,6 @@ urlpatterns = [
     path('api/gn/minhas-solicitacoes', requests_views.GNMyRequestsView.as_view()),
     path('api/gn/criar-solicitacao', requests_views.GNCreateRequestView.as_view()),
     path('api/ga/fila-de-solicitacoes', requests_views.GARequestsQueueView.as_view()),
-    path('api/ver-solicitacao/<int:pk>', requests_views.SeeRequestView.as_view())
+    path('api/ver-solicitacao/<int:pk>', requests_views.SeeRequestView.as_view()),
+    path('api/ver-documento/<int:pk>', requests_views.SeePDFView.as_view())
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

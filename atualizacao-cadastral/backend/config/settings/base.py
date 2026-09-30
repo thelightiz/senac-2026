@@ -85,6 +85,7 @@ CORS_ALLOW_HEADERS = [
     'dnt',
     'cache-control',
     'x-csrftoken',
+    'x-frame-options',
 ]
 
 REST_FRAMEWORK = {

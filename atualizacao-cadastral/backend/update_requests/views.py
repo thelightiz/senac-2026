@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from services.permissions import HasRole
 from django.shortcuts import get_object_or_404
+from documents.models import DocumentosSolicitacao
 
 class GNMyRequestsView(APIView):
     permission_classes = [HasRole]
@@ -60,7 +61,7 @@ class GARequestsQueueView(APIView):
 
 class SeeRequestView(APIView):
     permission_classes = [HasRole]
-    allowed_roles = ['GA', 'CAD']
+    allowed_roles = ['GN', 'GA', 'CAD']
 
     def get(self, request, pk):
         solicitacao = get_object_or_404(Solicitacao, id=pk)
@@ -80,7 +81,7 @@ class GAAcceptRequestView(APIView):
         solicitacao = get_object_or_404(Solicitacao, pk=pk)
 
         if solicitacao.status == 'PENDING_CADASTRO':
-            return Response({'detail': 'Solicitação já foi aprovada.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Solicitação já foi aprovada.'}, status=status.HTTP_409_CONFLICT)
         elif solicitacao.status != 'PENDING_AGENCY_REVIEW':
             return Response({'detail': 'Sem permissão para alterar o status da solicitação.'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -89,4 +90,27 @@ class GAAcceptRequestView(APIView):
 
         return Response({'mensagem': 'Solicitação aprovada'}, status=status.HTTP_200_OK)
 
-    
+class HandleRequestReturnsView(APIView):
+    permission_classes = [HasRole]
+    allowed_roles = ['GA', 'CAD']
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request, pk):
+        solicitacao = get_object_or_404(Solicitacao, pk=pk)
+        acao = request.data.get('action')
+        parecer = request.FILES.get('parecer')
+
+        if acao not in ['REPROVAR', 'SOLICITAR_AJUSTE']:
+            return Response({'detail': 'Ação inválida'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not parecer:
+            return Response({'detail': 'A inclusão do parecer é obrigatório'}, status=status.HTTP_400_BAD_REQUEST)
+
+        DocumentosSolicitacao.objects.create(solicitacao=solicitacao, arquivo=parecer)
+        solicitacao.status = 'REJECTED' if acao == 'REPROVAR' else 'NEEDS_ADJUSTMENT_GN'
+        solicitacao.save()
+
+        return Response(
+            {'mensagem': 'Documento anexado com sucesso.'},
+            status=status.HTTP_200_OK
+        )

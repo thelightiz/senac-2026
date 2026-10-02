@@ -35,5 +35,6 @@ urlpatterns = [
     path('api/ga/aprovar-solicitacao/<int:pk>', requests_views.GAAcceptRequestView.as_view()),
 
     path('api/ver-solicitacao/<int:pk>', requests_views.SeeRequestView.as_view()),
-    path('api/ver-documento/<int:pk>', documents_views.SeePDFView.as_view())
+    path('api/ver-documento/<int:pk>', documents_views.SeePDFView.as_view()),
+    path('api/retornar-solicitacao/<int:pk>', requests_views.HandleRequestReturnsView.as_view())
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

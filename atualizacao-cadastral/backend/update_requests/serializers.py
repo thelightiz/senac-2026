@@ -102,7 +102,7 @@ class GetRequestsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Solicitacao
-        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documentos']
+        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documentos',]
 
 class GetRequestDocumentsSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
@@ -120,12 +120,60 @@ class GetRequestDocumentsSerializer(serializers.ModelSerializer):
 
         return relative_url
 
+class GetImovelSnapshotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SnapshotImovel
+        fields = '__all__'
+
+class GetVeiculoSnapshotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SnapshotVeiculo
+        fields = '__all__'
+
+class GetRequestDadosAntigosSerializer(serializers.ModelSerializer):
+    imoveis_snapshot = GetImovelSnapshotSerializer(many=True, read_only=True)
+    veiculos_snapshot = GetVeiculoSnapshotSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = DadosAntigos
+        fields = '__all__'
+                  
+class GetRequestDadosNovosSerializer(serializers.ModelSerializer):
+    imovel = serializers.SerializerMethodField()
+    veiculo = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DadosNovos
+        fields = ['salario', 'residencia_endereco', 'residencia_cep', 'imovel', 'veiculo']
+
+    def get_imovel(self, obj):
+        if obj.imovel_endereco or obj.imovel_bairro or obj.imovel_cidade or obj.imovel_cep:
+            return [{
+                'endereco': obj.imovel_endereco,
+                'bairro': obj.imovel_bairro,
+                'cidade': obj.imovel_cidade,
+                'cep': obj.imovel_cep
+            }]
+        return list()
+
+    def get_veiculo(self, obj):
+        if obj.veiculo_renavam or obj.veiculo_placa or obj.veiculo_marca_modelo or obj.veiculo_ano:
+            return [{
+                'renavam': obj.veiculo_renavam,
+                'placa': obj.veiculo_placa,
+                'ano_modelo': obj.veiculo_marca_modelo,
+                'ano': obj.veiculo_ano
+            }]
+        return list()
+
 class GetRequestInfoSerializer(serializers.ModelSerializer):
     criado_por = serializers.StringRelatedField()
     cliente = serializers.StringRelatedField()
     status = serializers.CharField(source='get_status_display', read_only=True)
+    dados_solicitacao_antigos = GetRequestDadosAntigosSerializer(many=True, read_only=True)
+    dados_solicitacoes_novos = GetRequestDadosNovosSerializer(many=True, read_only=True)
     documentos = GetRequestDocumentsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Solicitacao
-        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documentos']
+        fields = '__all__'

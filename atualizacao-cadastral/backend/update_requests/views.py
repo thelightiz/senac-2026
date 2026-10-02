@@ -71,3 +71,22 @@ class SeeRequestView(APIView):
             {'solicitacao': serializer.data},
             status=status.HTTP_200_OK
         )
+
+class GAAcceptRequestView(APIView):
+    permission_classes = [HasRole]
+    allowed_roles = ['GA']
+
+    def post(self, request, pk):
+        solicitacao = get_object_or_404(Solicitacao, pk=pk)
+
+        if solicitacao.status == 'PENDING_CADASTRO':
+            return Response({'detail': 'Solicitação já foi aprovada.'}, status=status.HTTP_400_BAD_REQUEST)
+        elif solicitacao.status != 'PENDING_AGENCY_REVIEW':
+            return Response({'detail': 'Sem permissão para alterar o status da solicitação.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        solicitacao.status = 'PENDING_CADASTRO'
+        solicitacao.save()
+
+        return Response({'mensagem': 'Solicitação aprovada'}, status=status.HTTP_200_OK)
+
+    

@@ -24,11 +24,16 @@ from documents import views as documents_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
     path('api/login/', users_views.LoginView.as_view()),
     path('api/auth', users_views.AuthView.as_view()),
+
     path('api/gn/minhas-solicitacoes', requests_views.GNMyRequestsView.as_view()),
     path('api/gn/criar-solicitacao', requests_views.GNCreateRequestView.as_view()),
+
     path('api/ga/fila-de-solicitacoes', requests_views.GARequestsQueueView.as_view()),
+    path('api/ga/aprovar-solicitacao/<int:pk>', requests_views.GAAcceptRequestView.as_view()),
+
     path('api/ver-solicitacao/<int:pk>', requests_views.SeeRequestView.as_view()),
     path('api/ver-documento/<int:pk>', documents_views.SeePDFView.as_view())
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

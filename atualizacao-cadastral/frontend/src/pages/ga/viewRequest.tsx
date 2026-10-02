@@ -80,6 +80,15 @@ export const GAViewRequestInfo = () => {
       };
     }, [selectedDoc]);
 
+  const handleAccept = async () => {
+    try {
+      const response = await api.post(`ga/aprovar-solicitacao/${requestUpdate?.id}`)
+      console.log('Aceitado, resposta:', response.data)
+    } catch (error) {
+      console.error("Erro ao aceitar a solicitação:", error);
+    }
+  };
+
   if (loading) return <p>Carregando...</p>;
 
   return (
@@ -159,7 +168,7 @@ export const GAViewRequestInfo = () => {
         <div className="pt-6 mt-8 border-t border-slate-200 flex flex-col sm:flex-row justify-end items-center gap-4 max-w-7xl mx-auto w-full">
           <button className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-medium text-sm border border-slate-300 transition-colors">Rejeitar Solicitação</button>
           <button className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-medium text-sm border border-slate-300 transition-colors">Devolver para Ajuste</button>
-          <button className="w-full sm:w-auto px-6 py-3 rounded-xl bg-botao-1 hover:bg-botao-1-700 text-white font-medium text-sm shadow-md transition-colors">Aprovar Solicitação</button>
+          <button className="w-full sm:w-auto px-6 py-3 rounded-xl bg-botao-1 hover:bg-botao-1-700 text-white font-medium text-sm shadow-md transition-colors" onClick={() => handleAccept()}>Aprovar Solicitação</button>
         </div>
 
       </div>

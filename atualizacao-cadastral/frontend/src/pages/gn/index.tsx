@@ -71,9 +71,9 @@ export const GNIndexPage = () => {
                   <td className="px-6 py-4">{r.atualizacao}</td>
                   <td className="px-6 py-4">{r.status}</td>
                   <td className="px-6 py-4">
-                    {r.documento
-                      ? <a href={r.documento} className="hover:text-botao-1-700 hover:underline flex items-center gap-1" target="_blank" rel="noreferrer">Ver</a>
-                      : '—'}
+                    <Link to={`/gn/minhas-solicitacoes/ver-solicitacao/${r.id}`} className="inline-flex items-center justify-center gap-1 hover:text-botao-1-700 hover:underline">
+                      Ver
+                    </Link>
                   </td>
                 </tr>
               ))}

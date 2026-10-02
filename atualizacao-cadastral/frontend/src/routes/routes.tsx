@@ -7,6 +7,7 @@ import { GARequestQueue } from "../pages/ga/index";
 import { GAViewRequestInfo } from "../pages/ga/viewRequest";
 import { ProtectedRoute } from "../services/permissions";
 import { Error403Page } from "../pages/errors/403/main";
+import { GNViewRequest } from "../pages/gn/viewRequest";
 
 export const Rotas = () => {
     return (
@@ -20,6 +21,7 @@ export const Rotas = () => {
               <ProtectedRoute requiredRole="GN">
                 <Routes>
                   <Route path="minhas-solicitacoes/" element={<GNIndexPage/>} />
+                  <Route path="minhas-solicitacoes/ver-solicitacao/:id" element={<GNViewRequest />} />
                   <Route path="criar-solicitacao/" element={<GNCreateRequest/>} />
                 </Routes>
               </ProtectedRoute>

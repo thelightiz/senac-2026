@@ -52,7 +52,7 @@ export const GNCreateRequest = () => {
     formData.append("nome", customerName);
     formData.append("cliente", customerCPF);
     formData.append("atualizacao", requestType);
-    formData.append("documento", selectedFile);
+    formData.append("documentos", selectedFile);
 
     const cleanNewData = {
       ...newData,

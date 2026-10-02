@@ -34,8 +34,6 @@ class Solicitacao(models.Model):
     ]
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='PENDING_AGENCY_REVIEW')
 
-    documento = models.FileField(upload_to='documentos_solicitacoes/', help_text='Arquivo do documento anexado')
-
     def __str__(self):
         return f'Solicitação {self.id} - {self.cliente.nome} - Criado por: {self.criado_por.username if self.criado_por else "N/A"}'
 

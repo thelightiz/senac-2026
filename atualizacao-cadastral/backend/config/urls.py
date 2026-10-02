@@ -20,6 +20,7 @@ from django.contrib import admin
 from django.urls import path, include
 from users import views as users_views
 from update_requests import views as requests_views
+from documents import views as documents_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,5 +30,5 @@ urlpatterns = [
     path('api/gn/criar-solicitacao', requests_views.GNCreateRequestView.as_view()),
     path('api/ga/fila-de-solicitacoes', requests_views.GARequestsQueueView.as_view()),
     path('api/ver-solicitacao/<int:pk>', requests_views.SeeRequestView.as_view()),
-    path('api/ver-documento/<int:pk>', requests_views.SeePDFView.as_view())
+    path('api/ver-documento/<int:pk>', documents_views.SeePDFView.as_view())
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

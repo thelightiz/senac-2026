@@ -1,14 +1,11 @@
 from .models import Solicitacao
 from .serializers import PushRequestSerializer, GetRequestsSerializer, GetRequestInfoSerializer
-from django.views.decorators.clickjacking import xframe_options_exempt
-from django.utils.decorators import method_decorator
-from django.http import FileResponse
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from services.permissions import HasRole
+from django.shortcuts import get_object_or_404
 
 class GNMyRequestsView(APIView):
     permission_classes = [HasRole]
@@ -68,26 +65,9 @@ class SeeRequestView(APIView):
     def get(self, request, pk):
         solicitacao = get_object_or_404(Solicitacao, id=pk)
         
-        serializer = GetRequestInfoSerializer(solicitacao)
+        serializer = GetRequestInfoSerializer(solicitacao, context={'request': request})
 
         return Response(
             {'solicitacao': serializer.data},
             status=status.HTTP_200_OK
         )
-
-@method_decorator(xframe_options_exempt, name='dispatch')
-class SeePDFView(APIView):
-    permission_classes = [HasRole]
-    allowed_roles = ['GN', 'GA', 'CAD']
-
-    def get(self, request, pk):
-        solicitacao = get_object_or_404(Solicitacao, pk=pk)
-
-        if not solicitacao.documento:
-            return Response(
-                {"detail": "Nenhum arquivo anexado a este registro."}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        return FileResponse(solicitacao.documento.open('rb'), content_type='application/pdf')
-    

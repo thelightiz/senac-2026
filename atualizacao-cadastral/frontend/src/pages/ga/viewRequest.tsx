@@ -2,13 +2,19 @@ import { use, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../../services/api';
 
+interface Documento {
+  id: number;
+  nome?: string;
+  criado_em?: string;
+}
+
 interface UpdateRequest {
   id: number;
   criado_por: string;
   cliente: string;
   atualizacao: string;
   status: string;
-  documento: string | null;
+  documentos: Documento[] | null;
 }
 
 export const GAViewRequestInfo = () => {
@@ -16,20 +22,18 @@ export const GAViewRequestInfo = () => {
   const [requestUpdate, setRequestUpdate] = useState<UpdateRequest | null>(null);
   const [pdfUrl, SetPdfUrl] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
+  const [selectedDoc, setSelectedDoc] = useState<number | null>(null);
 
   useEffect(() => {
-    let activeBlobUrl: string | undefined = undefined;
-
     const fetchSolicitacao = async () => {
       try {
-        const [dadosResponse, pdfRespose] = await Promise.all([
-          api.get(`ver-solicitacao/${id}`),
-          api.get(`ver-documento/${id}`, {responseType: 'blob'})
-        ])
+        const response = await api.get(`ver-solicitacao/${id}`);
+        console.log("Resposta da API:", response.data);
+        setRequestUpdate(response.data.solicitacao);
 
-        setRequestUpdate(dadosResponse.data.solicitacao);
-        activeBlobUrl = URL.createObjectURL(pdfRespose.data);
-        SetPdfUrl(activeBlobUrl);
+        if (response.data.solicitacao.documentos?.length > 0) {
+          setSelectedDoc(response.data.solicitacao.documentos[0].id);
+        }
       } catch (error) {
         console.error("Erro ao carregar os detalhes:", error);
       } finally {
@@ -41,13 +45,40 @@ export const GAViewRequestInfo = () => {
       fetchSolicitacao();
     }
 
-    return () => {
-      if (activeBlobUrl) {
-        URL.revokeObjectURL(activeBlobUrl);
-      }
-    };
-
   }, [id]);
+
+  useEffect(() => {
+    if (!selectedDoc) {
+      return
+    }
+
+    let isCancelled = false;
+    let activeBlobUrl: string | undefined = undefined;
+
+    const fetchPdf = async () => {
+        try {
+          SetPdfUrl(undefined);
+          const response = await api.get(`ver-documento/${selectedDoc}`, { responseType: "blob" });
+
+          if (isCancelled) {
+            return;
+          }
+
+          activeBlobUrl = URL.createObjectURL(response.data);
+          SetPdfUrl(activeBlobUrl);
+        } catch (error) {
+        console.error("Erro ao carregar o PDF:", error);
+        }
+      };
+
+      fetchPdf();
+      
+      return () => {
+        if (activeBlobUrl) {
+          URL.revokeObjectURL(activeBlobUrl);
+        }
+      };
+    }, [selectedDoc]);
 
   if (loading) return <p>Carregando...</p>;
 
@@ -84,9 +115,43 @@ export const GAViewRequestInfo = () => {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Documento Anexado</span>
-            <iframe src={pdfUrl} width="100%" height="600px" title="Visualizador de PDF" style={{ border: 'none' }} />
+          <div className="space-y-4">
+            <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Documentos Anexados
+            </span>
+
+            <div className="flex flex-wrap gap-2">
+              {requestUpdate?.documentos?.map((doc, index) => {
+                const isSelected = selectedDoc === doc.id;
+                return (
+                  <button
+                    key={doc.id}
+                    onClick={() => setSelectedDoc(doc.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      isSelected
+                        ? 'bg-botao-1 text-white shadow-sm'
+                        : 'bg-botao-1-700 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {doc.nome || `Documento ${index + 1}`}
+                  </button>
+                );
+              })}
+            </div>
+
+            {pdfUrl ? (
+              <iframe
+                src={pdfUrl}
+                width="100%"
+                height="600px"
+                title="Visualizador de PDF"
+                className="rounded-xl border border-slate-200 shadow-sm w-full"
+              />
+            ) : (
+              <div className="w-full h-[600px] flex items-center justify-center bg-slate-50 rounded-xl border border-slate-200 text-slate-500 text-sm font-medium">
+                Carregando visualização do documento...
+              </div>
+            )}
           </div>
 
         </div>

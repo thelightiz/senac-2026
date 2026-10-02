@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 from .models import Solicitacao, DadosAntigos, DadosNovos, SnapshotImovel, SnapshotVeiculo
+from documents.models import DocumentosSolicitacao
 from customers.models import Cliente
 
 class PushRequestSerializer(serializers.ModelSerializer):
@@ -10,6 +11,12 @@ class PushRequestSerializer(serializers.ModelSerializer):
     )
     dados_novos = serializers.DictField(required=True)
 
+    documentos = serializers.ListField(
+        child=serializers.FileField(),
+        required=False,
+        write_only=True
+    )
+
     criado_por = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
@@ -18,7 +25,7 @@ class PushRequestSerializer(serializers.ModelSerializer):
         model = Solicitacao
         fields = [
             'id', 'criado_por', 'cliente', 'atualizacao', 'status',
-            'documento', 'dados_novos',
+            'documentos', 'dados_novos',
         ]
 
     def validate_dados_novos(self, value):
@@ -35,8 +42,18 @@ class PushRequestSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         cliente = validated_data.pop('cliente')
         dados_novos_data = validated_data.pop('dados_novos')
+        validated_data.pop('documentos', None)
 
         solicitacao = Solicitacao.objects.create(**validated_data, cliente=cliente)
+
+        request = self.context.get('request')
+        if request and request.FILES:
+            arquivos = request.FILES.getlist('documentos')
+            for arquivo in arquivos:
+                DocumentosSolicitacao.objects.create(
+                    solicitacao=solicitacao,
+                    arquivo=arquivo
+                )
 
         qtd_imoveis = cliente.imoveis.count()
         qtd_veiculos = cliente.veiculos.count()
@@ -50,7 +67,7 @@ class PushRequestSerializer(serializers.ModelSerializer):
             tem_imoveis_snapshot=qtd_imoveis > 0,
             tem_veiculos_snapshot=qtd_veiculos > 0,
             qtd_imoveis_snapshot=qtd_imoveis,
-            qtd_veiculos_snapshot=qtd_imoveis,
+            qtd_veiculos_snapshot=qtd_veiculos,
         )
 
         for imovel in cliente.imoveis.all():
@@ -85,13 +102,30 @@ class GetRequestsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Solicitacao
-        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documento']
+        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documentos']
+
+class GetRequestDocumentsSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DocumentosSolicitacao
+        fields = '__all__'
+
+    def get_url(self, obj):
+        request = self.context.get('request')
+        relative_url = f'/api/documentos/{obj.id}/visualizar'
+
+        if request:
+            return request.build_absolute_uri(relative_url)
+
+        return relative_url
 
 class GetRequestInfoSerializer(serializers.ModelSerializer):
     criado_por = serializers.StringRelatedField()
     cliente = serializers.StringRelatedField()
     status = serializers.CharField(source='get_status_display', read_only=True)
+    documentos = GetRequestDocumentsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Solicitacao
-        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documento']
+        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documentos']

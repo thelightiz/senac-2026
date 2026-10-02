@@ -1,5 +1,6 @@
 import { ChangeEvent, SyntheticEvent, useState } from "react";
 import { api } from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 interface NewDataState {
   salario: string;
@@ -33,6 +34,7 @@ export const GNCreateRequest = () => {
     veiculo_marca_modelo: "",
     veiculo_ano: "",
   });
+  const navigate = useNavigate();
 
   const handleNewDataChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -79,6 +81,8 @@ export const GNCreateRequest = () => {
       });
       setSelectedFile(null);
       
+      return navigate("/gn/minhas-solicitacoes");
+
     } catch (error: any) {
       console.error("Erro ao criar solicitação:", error);
       if (error.response?.data) {

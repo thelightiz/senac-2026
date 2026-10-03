@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { api } from "../../services/api";
-import { Link } from "react-router-dom";
 
 interface UserData {
   nome: string;
@@ -47,7 +46,12 @@ export const GNIndexPage = () => {
       <div className="mx-auto p-4">
         <div className="flex items-center justify-between mt-6">
           <p className="text-xl mt-3 text-gray-750">Bem-vindo, {user?.nome}!</p>
-          <Link to="/gn/criar-solicitacao" className="rounded-md bg-botao-1 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-botao-1-700 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar">Criar Solicitação</Link>
+          <a
+            href="/gn/criar-solicitacao"
+            className="rounded-md bg-botao-1 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-botao-1-700 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar"
+          >
+            Criar Solicitação
+          </a>
         </div>
 
         <h1 className="text-3xl text-center font-bold my-6">Minhas solicitações</h1>
@@ -71,9 +75,12 @@ export const GNIndexPage = () => {
                   <td className="px-6 py-4">{r.atualizacao}</td>
                   <td className="px-6 py-4">{r.status}</td>
                   <td className="px-6 py-4">
-                    <Link to={`/gn/minhas-solicitacoes/ver-solicitacao/${r.id}`} className="inline-flex items-center justify-center gap-1 hover:text-botao-1-700 hover:underline">
+                    <a
+                      href={`/gn/minhas-solicitacoes/ver-solicitacao/${r.id}`}
+                      className="inline-flex items-center justify-center gap-1 hover:text-botao-1-700 hover:underline"
+                    >
                       Ver
-                    </Link>
+                    </a>
                   </td>
                 </tr>
               ))}

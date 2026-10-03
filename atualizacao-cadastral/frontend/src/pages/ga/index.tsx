@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { api } from "../../services/api";
-import { Link } from "react-router-dom";
 
 interface UserData {
   nome: string;
@@ -70,9 +69,12 @@ export const GARequestQueue = () => {
                   <td className="px-6 py-4">{r.atualizacao}</td>
                   <td className="px-6 py-4">{r.status}</td>
                   <td className="px-6 py-4">
-                    <Link to={`/ga/fila-de-solicitacoes/solicitacao/${r.id}`} className="inline-flex items-center justify-center gap-1 hover:text-botao-1-700 hover:underline">
+                    <a
+                      href={`/ga/fila-de-solicitacoes/solicitacao/${r.id}`}
+                      className="inline-flex items-center justify-center gap-1 hover:text-botao-1-700 hover:underline"
+                    >
                       Ver
-                    </Link>
+                    </a>
                   </td>
                 </tr>
               ))}

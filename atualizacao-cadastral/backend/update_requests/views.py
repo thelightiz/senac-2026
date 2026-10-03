@@ -59,9 +59,26 @@ class GARequestsQueueView(APIView):
             'solicitacoes': serializer.data},
             status=status.HTTP_200_OK)
 
+class CADRequestsQueueView(APIView):
+    permission_classes = [HasRole]
+    allowed_roles = ['CADASTRO']
+
+    def get(self, request):
+        user = request.user
+        requests = Solicitacao.objects.filter(status='PENDING_CADASTRO')
+        serializer = GetRequestsSerializer(requests, many=True)
+        
+        return Response(
+            {'usuario': {
+                'nome': user.username,
+                'role': user.role,
+            },
+            'solicitacoes': serializer.data},
+            status=status.HTTP_200_OK)
+
 class SeeRequestView(APIView):
     permission_classes = [HasRole]
-    allowed_roles = ['GN', 'GA', 'CAD']
+    allowed_roles = ['GN', 'GA', 'CADASTRO']
 
     def get(self, request, pk):
         solicitacao = get_object_or_404(Solicitacao, id=pk)
@@ -92,7 +109,7 @@ class GAAcceptRequestView(APIView):
 
 class HandleRequestReturnsView(APIView):
     permission_classes = [HasRole]
-    allowed_roles = ['GA', 'CAD']
+    allowed_roles = ['GA', 'CADASTRO']
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, pk):

@@ -34,6 +34,8 @@ urlpatterns = [
     path('api/ga/fila-de-solicitacoes', requests_views.GARequestsQueueView.as_view()),
     path('api/ga/aprovar-solicitacao/<int:pk>', requests_views.GAAcceptRequestView.as_view()),
 
+    path('api/cad/fila-de-solicitacoes', requests_views.CADRequestsQueueView.as_view()),
+
     path('api/ver-solicitacao/<int:pk>', requests_views.SeeRequestView.as_view()),
     path('api/ver-documento/<int:pk>', documents_views.SeePDFView.as_view()),
     path('api/retornar-solicitacao/<int:pk>', requests_views.HandleRequestReturnsView.as_view())

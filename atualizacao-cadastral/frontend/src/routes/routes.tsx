@@ -8,6 +8,7 @@ import { GAViewRequestInfo } from "../pages/ga/viewRequest";
 import { ProtectedRoute } from "../services/permissions";
 import { Error403Page } from "../pages/errors/403/main";
 import { GNViewRequest } from "../pages/gn/viewRequest";
+import { CADRequestQueue } from "../pages/cad";
 
 export const Rotas = () => {
     return (
@@ -15,6 +16,7 @@ export const Rotas = () => {
         <Routes>
           <Route path="/" element={<Index/>} />
           <Route path="entrar/" element={<Login/>} />
+
           <Route 
             path="gn/*" 
             element={
@@ -27,16 +29,30 @@ export const Rotas = () => {
               </ProtectedRoute>
             } 
           />
+
           <Route
-          path="ga/*"
-          element={
-            <ProtectedRoute requiredRole="GA">
-              <Routes>
-                <Route path="fila-de-solicitacoes/" element={<GARequestQueue />} />
-                <Route path="fila-de-solicitacoes/solicitacao/:id" element={<GAViewRequestInfo />} />
-              </Routes>
-            </ProtectedRoute>
-          }></Route>
+            path="ga/*"
+            element={
+              <ProtectedRoute requiredRole="GA">
+                <Routes>
+                  <Route path="fila-de-solicitacoes/" element={<GARequestQueue />} />
+                  <Route path="fila-de-solicitacoes/solicitacao/:id" element={<GAViewRequestInfo />} />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="cad/*"
+            element={
+              <ProtectedRoute requiredRole="CADASTRO">
+                <Routes>
+                  <Route path="fila-de-solicitacoes/" element={<CADRequestQueue />} />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
+          
           <Route
             path="erro/*"
             element={

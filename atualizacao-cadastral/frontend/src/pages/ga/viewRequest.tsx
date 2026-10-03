@@ -198,24 +198,36 @@ export const GAViewRequestInfo = () => {
                 <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
                   Criado por
                 </span>
-                <p className="text-base font-semibold text-slate-900">{requestUpdate?.criado_por}</p>
+                <p className="text-base font-semibold text-slate-900">
+                  {requestUpdate?.criado_por}
+                </p>
               </div>
 
               <div>
                 <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
                   Cliente
                 </span>
-                <p className="text-base font-semibold text-slate-900">{requestUpdate?.cliente}</p>
+                <p className="text-base font-semibold text-slate-900">
+                  {requestUpdate?.cliente}
+                </p>
               </div>
 
               <div>
-                <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tipo de Atualização</span>
-                <p className="text-base font-semibold text-slate-900">{requestUpdate?.atualizacao || '-'}</p>
+                <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                  Tipo de Atualização
+                </span>
+                <p className="text-base font-semibold text-slate-900">
+                  {requestUpdate?.atualizacao || '-'}
+                </p>
               </div>
 
               <div>
-                <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Status</span>
-                <p className="text-base font-semibold text-slate-900">{requestUpdate?.status || 'Em Análise'}</p>
+                <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                  Status
+                </span>
+                <p className="text-base font-semibold text-slate-900">
+                  {requestUpdate?.status || 'Em Análise'}
+                </p>
               </div>
 
             </div>
@@ -235,16 +247,28 @@ export const GAViewRequestInfo = () => {
                   <>
                     <div className="space-y-2 bg-slate-50/80 p-4 rounded-xl border border-slate-100">
                       <div className="flex justify-between py-1 border-b border-slate-200/60">
-                        <span className="text-slate-500 font-medium">Salário</span>
-                        <span className="font-semibold text-slate-800">{formatCurrency(dadosAntigos.salario_snapshot)}</span>
+                        <span className="text-slate-500 font-medium">
+                          Salário
+                        </span>
+                        <span className="font-semibold text-slate-800">
+                          {formatCurrency(dadosAntigos.salario_snapshot)}
+                        </span>
                       </div>
                       <div className="flex justify-between py-1 border-b border-slate-200/60">
-                        <span className="text-slate-500 font-medium">Endereço</span>
-                        <span className="font-semibold text-slate-800 text-right">{dadosAntigos.endereco_snapshot || '-'}</span>
+                        <span className="text-slate-500 font-medium">
+                          Endereço
+                        </span>
+                        <span className="font-semibold text-slate-800 text-right">
+                          {dadosAntigos.endereco_snapshot || '-'}
+                        </span>
                       </div>
                       <div className="flex justify-between py-1">
-                        <span className="text-slate-500 font-medium">CEP</span>
-                        <span className="font-semibold text-slate-800">{dadosAntigos.cep_snapshot || '-'}</span>
+                        <span className="text-slate-500 font-medium">
+                          CEP
+                        </span>
+                        <span className="font-semibold text-slate-800">
+                          {dadosAntigos.cep_snapshot || '-'}
+                        </span>
                       </div>
                     </div>
 
@@ -255,15 +279,32 @@ export const GAViewRequestInfo = () => {
                       {dadosAntigos.imoveis_snapshot && dadosAntigos.imoveis_snapshot.length > 0 ? (
                         <div className="space-y-2">
                           {dadosAntigos.imoveis_snapshot.map((imovel: any, index: number) => (
-                            <div key={index} className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1">
-                              <p><span className="font-medium text-slate-500">Endereço:</span> {imovel.endereco || '-'}</p>
-                              <p><span className="font-medium text-slate-500">Bairro/Cidade:</span> {imovel.bairro || '-'} - {imovel.cidade || '-'}</p>
-                              <p><span className="font-medium text-slate-500">CEP:</span> {imovel.cep || '-'}</p>
+                            <div
+                              key={index}
+                              className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1"
+                            >
+                              <p>
+                                <span className="font-medium text-slate-500">
+                                  Endereço:
+                                </span> {imovel.endereco || '-'}
+                              </p>
+                              <p>
+                                <span className="font-medium text-slate-500">
+                                  Bairro/Cidade:
+                                </span> {imovel.bairro || '-'} - {imovel.cidade || '-'}
+                              </p>
+                              <p>
+                                <span className="font-medium text-slate-500">
+                                  CEP:
+                                </span> {imovel.cep || '-'}
+                              </p>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-slate-400 italic">Nenhum imóvel registrado.</p>
+                        <p className="text-xs text-slate-400 italic">
+                          Nenhum imóvel registrado.
+                        </p>
                       )}
                     </div>
 
@@ -274,19 +315,35 @@ export const GAViewRequestInfo = () => {
                       {dadosAntigos.veiculos_snapshot && dadosAntigos.veiculos_snapshot.length > 0 ? (
                         <div className="space-y-2">
                           {dadosAntigos.veiculos_snapshot.map((veiculo: any, index: number) => (
-                            <div key={index} className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1">
-                              <p className="font-semibold text-slate-800">{veiculo.marca_modelo || '-'} ({veiculo.ano || '-'})</p>
-                              <p><span className="font-medium text-slate-500">Placa:</span> {veiculo.placa || '-'} | <span className="font-medium text-slate-500">RENAVAM:</span> {veiculo.renavam || '-'}</p>
+                            <div
+                              key={index}
+                              className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1"
+                            >
+                              <p className="font-semibold text-slate-800">
+                                {veiculo.marca_modelo || '-'} ({veiculo.ano || '-'})
+                              </p>
+                              <p>
+                                <span className="font-medium text-slate-500">
+                                  Placa:
+                                </span> {veiculo.placa || '-'} | 
+                                <span className="font-medium text-slate-500">
+                                  RENAVAM:
+                                </span> {veiculo.renavam || '-'}
+                              </p>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-slate-400 italic">Nenhum veículo registrado.</p>
+                        <p className="text-xs text-slate-400 italic">
+                          Nenhum veículo registrado.
+                        </p>
                       )}
                     </div>
                   </>
                 ) : (
-                  <p className="text-xs text-slate-400 text-center py-6">Nenhum dado antigo encontrado.</p>
+                  <p className="text-xs text-slate-400 text-center py-6">
+                    Nenhum dado antigo encontrado.
+                  </p>
                 )}
               </div>
             </div>
@@ -303,16 +360,28 @@ export const GAViewRequestInfo = () => {
                   <>
                     <div className="space-y-2 bg-blue-50/40 p-4 rounded-xl border border-blue-100">
                       <div className="flex justify-between py-1 border-b border-blue-100">
-                        <span className="text-slate-500 font-medium">Salário</span>
-                        <span className="font-semibold text-slate-900">{formatCurrency(dadosNovos.salario)}</span>
+                        <span className="text-slate-500 font-medium">
+                          Salário
+                        </span>
+                        <span className="font-semibold text-slate-900">
+                          {formatCurrency(dadosNovos.salario)}
+                        </span>
                       </div>
                       <div className="flex justify-between py-1 border-b border-blue-100">
-                        <span className="text-slate-500 font-medium">Endereço</span>
-                        <span className="font-semibold text-slate-900 text-right">{dadosNovos.residencia_endereco || '-'}</span>
+                        <span className="text-slate-500 font-medium">
+                          Endereço
+                        </span>
+                        <span className="font-semibold text-slate-900 text-right">
+                          {dadosNovos.residencia_endereco || '-'}
+                        </span>
                       </div>
                       <div className="flex justify-between py-1">
-                        <span className="text-slate-500 font-medium">CEP</span>
-                        <span className="font-semibold text-slate-900">{dadosNovos.residencia_cep || '-'}</span>
+                        <span className="text-slate-500 font-medium">
+                          CEP
+                        </span>
+                        <span className="font-semibold text-slate-900">
+                          {dadosNovos.residencia_cep || '-'}
+                        </span>
                       </div>
                     </div>
 
@@ -323,15 +392,31 @@ export const GAViewRequestInfo = () => {
                       {dadosNovos.imovel && dadosNovos.imovel.length > 0 ? (
                         <div className="space-y-2">
                           {dadosNovos.imovel.map((imovel: any, index: number) => (
-                            <div key={index} className="bg-blue-50/30 p-3 rounded-lg border border-blue-100 text-xs space-y-1">
-                              <p><span className="font-medium text-slate-500">Endereço:</span> {imovel.endereco || '-'}</p>
-                              <p><span className="font-medium text-slate-500">Bairro/Cidade:</span> {imovel.bairro || '-'} - {imovel.cidade || '-'}</p>
-                              <p><span className="font-medium text-slate-500">CEP:</span> {imovel.cep || '-'}</p>
+                            <div
+                              key={index}
+                              className="bg-blue-50/30 p-3 rounded-lg border border-blue-100 text-xs space-y-1">
+                              <p>
+                                <span className="font-medium text-slate-500">
+                                  Endereço:
+                                </span> {imovel.endereco || '-'}
+                              </p>
+                              <p>
+                                <span className="font-medium text-slate-500">
+                                  Bairro/Cidade:
+                                </span> {imovel.bairro || '-'} - {imovel.cidade || '-'}
+                              </p>
+                              <p>
+                                <span className="font-medium text-slate-500">
+                                  CEP:
+                                </span> {imovel.cep || '-'}
+                              </p>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-slate-400 italic">Nenhum imóvel informado.</p>
+                        <p className="text-xs text-slate-400 italic">
+                          Nenhum imóvel informado.
+                        </p>
                       )}
                     </div>
 
@@ -342,19 +427,34 @@ export const GAViewRequestInfo = () => {
                       {dadosNovos.veiculo && dadosNovos.veiculo.length > 0 ? (
                         <div className="space-y-2">
                           {dadosNovos.veiculo.map((veiculo: any, index: number) => (
-                            <div key={index} className="bg-blue-50/30 p-3 rounded-lg border border-blue-100 text-xs space-y-1">
-                              <p className="font-semibold text-slate-800">{veiculo.marca_modelo || '-'} ({veiculo.ano || '-'})</p>
-                              <p><span className="font-medium text-slate-500">Placa:</span> {veiculo.placa || '-'} | <span className="font-medium text-slate-500">RENAVAM:</span> {veiculo.renavam || '-'}</p>
+                            <div
+                              key={index}
+                              className="bg-blue-50/30 p-3 rounded-lg border border-blue-100 text-xs space-y-1"
+                            >
+                              <p className="font-semibold text-slate-800">
+                                {veiculo.marca_modelo || '-'} ({veiculo.ano || '-'})
+                              </p>
+                              <p>
+                                <span className="font-medium text-slate-500">
+                                  Placa:
+                                </span> {veiculo.placa || '-'} | 
+                                <span className="font-medium text-slate-500">
+                                  RENAVAM:</span> {veiculo.renavam || '-'}
+                              </p>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-slate-400 italic">Nenhum veículo informado.</p>
+                        <p className="text-xs text-slate-400 italic">
+                          Nenhum veículo informado.
+                        </p>
                       )}
                     </div>
                   </>
                 ) : (
-                  <p className="text-xs text-slate-400 text-center py-6">Nenhum dado novo encontrado.</p>
+                  <p className="text-xs text-slate-400 text-center py-6">
+                    Nenhum dado novo encontrado.
+                  </p>
                 )}
               </div>
             </div>
@@ -398,7 +498,9 @@ export const GAViewRequestInfo = () => {
                 />
               ) : (
                 <div className="w-full h-[400px] flex flex-col items-center justify-center text-slate-400 text-sm gap-2">
-                  <p>Selecione um documento acima para visualizar o PDF</p>
+                  <p>
+                    Selecione um documento acima para visualizar o PDF
+                  </p>
                 </div>
               )}
             </div>

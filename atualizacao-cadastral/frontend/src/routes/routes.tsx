@@ -9,6 +9,7 @@ import { ProtectedRoute } from "../services/permissions";
 import { Error403Page } from "../pages/errors/403/main";
 import { GNViewRequest } from "../pages/gn/viewRequest";
 import { CADRequestQueue } from "../pages/cad";
+import { CADViewRequestInfo } from "../pages/cad/viewRequest";
 
 export const Rotas = () => {
     return (
@@ -48,6 +49,7 @@ export const Rotas = () => {
               <ProtectedRoute requiredRole="CADASTRO">
                 <Routes>
                   <Route path="fila-de-solicitacoes/" element={<CADRequestQueue />} />
+                  <Route path="fila-de-solicitacoes/solicitacao/:id" element={<CADViewRequestInfo />} />
                 </Routes>
               </ProtectedRoute>
             }

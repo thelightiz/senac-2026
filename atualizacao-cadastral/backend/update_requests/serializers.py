@@ -1,15 +1,46 @@
 from django.db import transaction
 from rest_framework import serializers
-from .models import Solicitacao, DadosAntigos, DadosNovos, SnapshotImovel, SnapshotVeiculo
+from .models import Solicitacao, DadosAntigos, DadosNovos, SnapshotImovel, SnapshotVeiculo, Imovel, Veiculo
 from documents.models import DocumentosSolicitacao
 from customers.models import Cliente
+import json
 
-class PushRequestSerializer(serializers.ModelSerializer):
+class PostRequestImovelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Imovel
+        fields = ['id', 'endereco', 'bairro', 'cidade', 'cep']
+        extra_kwargs = {
+            'endereco': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'bairro': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'cidade': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'cep': {'allow_null': True, 'allow_blank': True, 'required': False},
+        }
+
+class PostRequestVeiculoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Veiculo
+        fields = ['id', 'renavam', 'placa', 'marca_modelo', 'ano']
+        extra_kwargs = {
+            'renavam': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'placa': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'marca_modelo': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'ano': {'allow_null': True, 'allow_blank': True, 'required': False},
+        }
+
+class PostRequestDadosNovosSerializer(serializers.ModelSerializer):
+    imovel = PostRequestImovelSerializer(source='imoveis', many=True, required=False)
+    veiculo = PostRequestVeiculoSerializer(source='veiculos', many=True, required=False)
+
+    class Meta:
+        model = DadosNovos
+        fields = ['salario', 'residencia_endereco', 'residencia_cep', 'imovel', 'veiculo']
+
+class PostRequestSerializer(serializers.ModelSerializer):
     cliente = serializers.SlugRelatedField(
         slug_field='cpf',
         queryset=Cliente.objects.all()
     )
-    dados_novos = serializers.DictField(required=True)
+    dados_novos = PostRequestDadosNovosSerializer()
 
     documentos = serializers.ListField(
         child=serializers.FileField(),
@@ -27,6 +58,29 @@ class PushRequestSerializer(serializers.ModelSerializer):
             'id', 'criado_por', 'cliente', 'atualizacao', 'status',
             'documentos', 'dados_novos',
         ]
+
+    def to_internal_value(self, data):
+        if hasattr(data, 'getlist'):
+            data_dict = {}
+            for key in data.keys():
+                if key == 'documentos':
+                    data_dict[key] = data.getlist(key)
+                else:
+                    data_dict[key] = data.get(key)
+            data = data_dict
+        elif hasattr(data, 'copy'):
+            data = data.copy()
+
+        dados_novos_raw = data.get('dados_novos')
+        if isinstance(dados_novos_raw, str):
+            try:
+                data['dados_novos'] = json.loads(dados_novos_raw)
+            except (ValueError, TypeError, json.JSONDecodeError):
+                raise serializers.ValidationError({
+                    'dados_novos': 'A string enviada não é um JSON válido.'
+                })
+
+        return super().to_internal_value(data)
 
     def validate_dados_novos(self, value):
         if not value.get('salario'):
@@ -53,6 +107,29 @@ class PushRequestSerializer(serializers.ModelSerializer):
                 DocumentosSolicitacao.objects.create(
                     solicitacao=solicitacao,
                     arquivo=arquivo
+                )
+
+        imoveis_data = dados_novos_data.pop('imoveis', [])
+        veiculos_data = dados_novos_data.pop('veiculos', [])
+
+        dados_novos_instance = DadosNovos.objects.create(
+            solicitacao=solicitacao,
+            cliente=cliente,
+            **dados_novos_data
+        )
+
+        for imovel_dict in imoveis_data:
+            if any(imovel_dict.values()):
+                Imovel.objects.create(
+                    dados_novos=dados_novos_instance,
+                    **imovel_dict
+                )
+
+        for veiculo_dict in veiculos_data:
+            if any(veiculo_dict.values()):
+                Veiculo.objects.create(
+                    dados_novos=dados_novos_instance,
+                    **veiculo_dict
                 )
 
         qtd_imoveis = cliente.imoveis.count()
@@ -88,12 +165,6 @@ class PushRequestSerializer(serializers.ModelSerializer):
                 ano=veiculo.ano,
             )
 
-        DadosNovos.objects.create(
-            solicitacao=solicitacao,
-            cliente=cliente,
-            **dados_novos_data
-        )
-
         return solicitacao
 
 class GetRequestsSerializer(serializers.ModelSerializer):
@@ -102,7 +173,7 @@ class GetRequestsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Solicitacao
-        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documentos',]
+        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documentos']
 
 class GetRequestDocumentsSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
@@ -137,41 +208,21 @@ class GetRequestDadosAntigosSerializer(serializers.ModelSerializer):
     class Meta:
         model = DadosAntigos
         fields = '__all__'
-                  
+
 class GetRequestDadosNovosSerializer(serializers.ModelSerializer):
-    imovel = serializers.SerializerMethodField()
-    veiculo = serializers.SerializerMethodField()
+    imovel = PostRequestImovelSerializer(source='imoveis', many=True, read_only=True)
+    veiculo = PostRequestVeiculoSerializer(source='veiculos', many=True, read_only=True)
 
     class Meta:
         model = DadosNovos
         fields = ['salario', 'residencia_endereco', 'residencia_cep', 'imovel', 'veiculo']
 
-    def get_imovel(self, obj):
-        if obj.imovel_endereco or obj.imovel_bairro or obj.imovel_cidade or obj.imovel_cep:
-            return [{
-                'endereco': obj.imovel_endereco,
-                'bairro': obj.imovel_bairro,
-                'cidade': obj.imovel_cidade,
-                'cep': obj.imovel_cep
-            }]
-        return list()
-
-    def get_veiculo(self, obj):
-        if obj.veiculo_renavam or obj.veiculo_placa or obj.veiculo_marca_modelo or obj.veiculo_ano:
-            return [{
-                'renavam': obj.veiculo_renavam,
-                'placa': obj.veiculo_placa,
-                'ano_modelo': obj.veiculo_marca_modelo,
-                'ano': obj.veiculo_ano
-            }]
-        return list()
-
 class GetRequestInfoSerializer(serializers.ModelSerializer):
     criado_por = serializers.StringRelatedField()
     cliente = serializers.StringRelatedField()
     status = serializers.CharField(source='get_status_display', read_only=True)
-    dados_solicitacao_antigos = GetRequestDadosAntigosSerializer(many=True, read_only=True)
-    dados_solicitacoes_novos = GetRequestDadosNovosSerializer(many=True, read_only=True)
+    dados_antigos = GetRequestDadosAntigosSerializer(many=True, read_only=True)
+    dados_novos = GetRequestDadosNovosSerializer(many=True, read_only=True)
     documentos = GetRequestDocumentsSerializer(many=True, read_only=True)
 
     class Meta:

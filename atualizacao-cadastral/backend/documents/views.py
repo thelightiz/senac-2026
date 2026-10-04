@@ -12,7 +12,7 @@ from .models import DocumentosSolicitacao
 @method_decorator(xframe_options_exempt, name='dispatch')
 class SeePDFView(APIView):
     permission_classes = [HasRole]
-    allowed_roles = ['GN', 'GA', 'CAD']
+    allowed_roles = ['GN', 'GA', 'CADASTRO']
 
     def get(self, request, pk):
         documento = get_object_or_404(DocumentosSolicitacao, pk=pk)

@@ -47,12 +47,12 @@ interface UpdateRequest {
   cliente: string;
   atualizacao: string;
   status: string;
-  dados_solicitacao_antigos: DadosAntigos[] | null;
-  dados_solicitacoes_novos: DadosNovos[] | null;
+  dados_antigos: DadosAntigos[] | null;
+  dados_novos: DadosNovos[] | null;
   documentos: Documento[] | null;
 }
 
-type ActionType = "REPROVAR" | "SOLICITAR_AJUSTE";
+type ActionType = "REPROVAR" | "SOLICITAR_AJUSTE_GN";
 
 export const GAViewRequestInfo = () => {
   const { id } = useParams<{ id: string }>();
@@ -178,8 +178,8 @@ export const GAViewRequestInfo = () => {
 
   };
 
-  dadosAntigos = requestUpdate?.dados_solicitacao_antigos?.[0];
-  dadosNovos = requestUpdate?.dados_solicitacoes_novos?.[0];
+  dadosAntigos = requestUpdate?.dados_antigos?.[0];
+  dadosNovos = requestUpdate?.dados_novos?.[0];
 
   if (loading) return <p>Carregando...</p>;
 
@@ -518,7 +518,7 @@ export const GAViewRequestInfo = () => {
           </button>
           
           <button
-            onClick={() => handleOpenModal('SOLICITAR_AJUSTE')}
+            onClick={() => handleOpenModal('SOLICITAR_AJUSTE_GN')}
             className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-medium text-sm border border-slate-300 transition-colors"
           >
             Devolver para Ajuste

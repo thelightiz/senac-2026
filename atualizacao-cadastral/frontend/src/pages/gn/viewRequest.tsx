@@ -47,8 +47,8 @@ interface UpdateRequest {
   cliente: string;
   atualizacao: string;
   status: string;
-  dados_solicitacao_antigos: DadosAntigos[] | null;
-  dados_solicitacoes_novos: DadosNovos[] | null;
+  dados_antigos: DadosAntigos[] | null;
+  dados_novos: DadosNovos[] | null;
   documentos: Documento[] | null;
 }
 
@@ -127,8 +127,8 @@ export const GNViewRequest = () => {
     };
   }, [selectedDoc]);
   
-  dadosAntigos = requestUpdate?.dados_solicitacao_antigos?.[0];
-  dadosNovos = requestUpdate?.dados_solicitacoes_novos?.[0];
+  dadosAntigos = requestUpdate?.dados_antigos?.[0];
+  dadosNovos = requestUpdate?.dados_novos?.[0];
   
   if (loading) {
     return (

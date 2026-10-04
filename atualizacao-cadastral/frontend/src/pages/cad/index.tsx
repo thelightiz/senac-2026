@@ -70,7 +70,7 @@ export const CADRequestQueue = () => {
                   <td className="px-6 py-4">{r.status}</td>
                   <td className="px-6 py-4">
                     <a
-                      href={`/ga/fila-de-solicitacoes/solicitacao/${r.id}`}
+                      href={`/cad/fila-de-solicitacoes/solicitacao/${r.id}`}
                       className="inline-flex items-center justify-center gap-1 hover:text-botao-1-700 hover:underline">
                         Ver
                     </a>

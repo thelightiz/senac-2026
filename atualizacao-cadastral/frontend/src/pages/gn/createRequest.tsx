@@ -2,18 +2,26 @@ import { ChangeEvent, SyntheticEvent, useState } from "react";
 import { api } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
+interface Imovel {
+  endereco: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  cep: string | null;
+}
+
+interface Veiculo {
+  renavam: string | null;
+  placa: string | null;
+  marca_modelo: string | null;
+  ano: string | null;
+}
+
 interface NewDataState {
   salario: string;
   residencia_endereco: string;
   residencia_cep: string;
-  imovel_endereco: string;
-  imovel_bairro: string;
-  imovel_cidade: string;
-  imovel_cep: string;
-  veiculo_renavam: string;
-  veiculo_placa: string;
-  veiculo_marca_modelo: string;
-  veiculo_ano: string;
+  imovel: Imovel[];
+  veiculo: Veiculo[];
 }
 
 export const GNCreateRequest = () => {
@@ -21,24 +29,57 @@ export const GNCreateRequest = () => {
   const [customerCPF, setCustomerCPF] = useState("");
   const [requestType, setRequestType] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const navigate = useNavigate();
+
   const [newData, setNewData] = useState<NewDataState>({
     salario: "",
     residencia_endereco: "",
     residencia_cep: "",
-    imovel_endereco: "",
-    imovel_bairro: "",
-    imovel_cidade: "",
-    imovel_cep: "",
-    veiculo_renavam: "",
-    veiculo_placa: "",
-    veiculo_marca_modelo: "",
-    veiculo_ano: "",
+    imovel: [],
+    veiculo: []
   });
-  const navigate = useNavigate();
 
+  
+  // Estados para formulário
+  const [currentImovel, setCurrentImovel] = useState<Imovel>({
+    endereco: "",
+    bairro: "",
+    cidade: "",
+    cep: ""
+  });
+
+  const [currentVeiculo, setCurrentVeiculo] = useState<Veiculo>({
+    renavam: "",
+    placa: "",
+    marca_modelo: "",
+    ano: ""
+  });
+
+
+  // Handlers
   const handleNewDataChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNewData((prev) => ({ ...prev, [name]: value }));
+    setNewData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCurrentImovelChange = (e:ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCurrentImovel((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCurrentVeiculoChange = (e:ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCurrentVeiculo((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (event: SyntheticEvent) => {
@@ -51,15 +92,31 @@ export const GNCreateRequest = () => {
 
     const formData = new FormData();
     
+    const cleanCPF = customerCPF.replace(/\D/g, '');
+
     formData.append("nome", customerName);
-    formData.append("cliente", customerCPF);
+    formData.append("cliente", cleanCPF);
     formData.append("atualizacao", requestType);
     formData.append("documentos", selectedFile);
+
+    const temImovel = Boolean(
+      currentImovel.endereco || currentImovel.bairro || currentImovel.cidade || currentImovel.cep
+    );
+
+    const temVeiculo = Boolean(
+      currentVeiculo.renavam || currentVeiculo.placa || currentVeiculo.marca_modelo || currentVeiculo.ano
+    );
 
     const cleanNewData = {
       ...newData,
       residencia_cep: newData.residencia_cep.replace(/\D/g, ''),
-      imovel_cep: newData.imovel_cep.replace(/\D/g, ''),
+
+      imovel: temImovel ? [{
+        ...currentImovel,
+        cep: currentImovel.cep ? currentImovel.cep.replace(/\D/g, '') : null
+      }] : [],
+
+      veiculo: temVeiculo ? [currentVeiculo]: []
     };
 
     formData.append("dados_novos", JSON.stringify(cleanNewData));
@@ -75,9 +132,23 @@ export const GNCreateRequest = () => {
       setCustomerName("");
       setRequestType("");
       setNewData({
-        salario: "", residencia_endereco: "", residencia_cep: "", 
-        imovel_endereco: "", imovel_bairro: "", imovel_cidade: "", imovel_cep: "",
-        veiculo_renavam: "", veiculo_placa: "", veiculo_marca_modelo: "", veiculo_ano: "",
+        salario: "",
+        residencia_endereco: "",
+        residencia_cep: "",
+        imovel: [],
+        veiculo: []
+      });
+      setCurrentImovel({
+        endereco: "",
+        bairro: "",
+        cidade: "",
+        cep: ""
+      });
+      setCurrentVeiculo({
+        renavam: "",
+        placa: "",
+        marca_modelo: "",
+        ano: ""
       });
       setSelectedFile(null);
       
@@ -200,30 +271,30 @@ export const GNCreateRequest = () => {
             
             <div className="sm:col-span-2">
               <label htmlFor="imovel_endereco" className="block text-sm font-medium text-gray-900">Endereço do Imóvel</label>
-              <input id="imovel_endereco" name="imovel_endereco" type="text" value={newData.imovel_endereco} 
+              <input id="imovel_endereco" name="endereco" type="text" value={currentImovel.endereco ?? ""} 
                 className="mt-1 block w-full border rounded-md py-1.5 px-3 text-gray-400 focus:outline-none sm:text-sm" 
-                onChange={handleNewDataChange}
+                onChange={handleCurrentImovelChange}
               />
             </div>
             <div>
               <label htmlFor="imovel_bairro" className="block text-sm font-medium text-gray-900">Bairro</label>
-              <input id="imovel_bairro" name="imovel_bairro" type="text" value={newData.imovel_bairro} 
+              <input id="imovel_bairro" name="bairro" type="text" value={currentImovel.bairro ?? ""} 
                 className="mt-1 block w-full border rounded-md py-1.5 px-3 text-gray-400 focus:outline-none sm:text-sm" 
-                onChange={handleNewDataChange}
+                onChange={handleCurrentImovelChange}
               />
             </div>
             <div>
               <label htmlFor="imovel_cidade" className="block text-sm font-medium text-gray-900">Cidade</label>
-              <input id="imovel_cidade" name="imovel_cidade" type="text" value={newData.imovel_cidade} 
+              <input id="imovel_cidade" name="cidade" type="text" value={currentImovel.cidade ?? ""} 
                 className="mt-1 block w-full border rounded-md py-1.5 px-3 text-gray-400 focus:outline-none sm:text-sm" 
-                onChange={handleNewDataChange}
+                onChange={handleCurrentImovelChange}
               />
             </div>
             <div>
               <label htmlFor="imovel_cep" className="block text-sm font-medium text-gray-900">CEP Imóvel</label>
-              <input id="imovel_cep" name="imovel_cep" type="text" maxLength={8} value={newData.imovel_cep} 
+              <input id="imovel_cep" name="cep" type="text" maxLength={8} value={currentImovel.cep ?? ""} 
                 className="mt-1 block w-full border rounded-md py-1.5 px-3 text-gray-400 focus:outline-none sm:text-sm" 
-                onChange={handleNewDataChange} placeholder="00000000"
+                onChange={handleCurrentImovelChange} placeholder="00000000"
               />
             </div>
 
@@ -234,30 +305,30 @@ export const GNCreateRequest = () => {
 
             <div>
               <label htmlFor="veiculo_renavam" className="block text-sm font-medium text-gray-900">RENAVAM</label>
-              <input id="veiculo_renavam" name="veiculo_renavam" type="text" maxLength={11} value={newData.veiculo_renavam} 
+              <input id="veiculo_renavam" name="renavam" type="text" maxLength={11} value={currentVeiculo.renavam ?? ""} 
                 className="mt-1 block w-full border rounded-md py-1.5 px-3 text-gray-400 focus:outline-none sm:text-sm" 
-                onChange={handleNewDataChange}
+                onChange={handleCurrentVeiculoChange}
               />
             </div>
             <div>
               <label htmlFor="veiculo_placa" className="block text-sm font-medium text-gray-900">Placa</label>
-              <input id="veiculo_placa" name="veiculo_placa" type="text" maxLength={7} value={newData.veiculo_placa} 
+              <input id="veiculo_placa" name="placa" type="text" maxLength={7} value={currentVeiculo.placa ?? ""} 
                 className="mt-1 block w-full border rounded-md py-1.5 px-3 text-gray-400 focus:outline-none sm:text-sm" 
-                onChange={handleNewDataChange}
+                onChange={handleCurrentVeiculoChange}
               />
             </div>
             <div>
               <label htmlFor="veiculo_marca_modelo" className="block text-sm font-medium text-gray-900">Marca/Modelo</label>
-              <input id="veiculo_marca_modelo" name="veiculo_marca_modelo" type="text" value={newData.veiculo_marca_modelo} 
+              <input id="veiculo_marca_modelo" name="marca_modelo" type="text" value={currentVeiculo.marca_modelo ?? ""} 
                 className="mt-1 block w-full border rounded-md py-1.5 px-3 text-gray-400 focus:outline-none sm:text-sm" 
-                onChange={handleNewDataChange}
+                onChange={handleCurrentVeiculoChange}
               />
             </div>
             <div>
               <label htmlFor="veiculo_ano" className="block text-sm font-medium text-gray-900">Ano</label>
-              <input id="veiculo_ano" name="veiculo_ano" type="text" maxLength={9} value={newData.veiculo_ano} 
+              <input id="veiculo_ano" name="ano" type="text" maxLength={9} value={currentVeiculo.ano ?? ""} 
                 className="mt-1 block w-full border rounded-md py-1.5 px-3 text-gray-400 focus:outline-none sm:text-sm" 
-                onChange={handleNewDataChange}
+                onChange={handleCurrentVeiculoChange}
               />
             </div>
           </div>

@@ -38,7 +38,7 @@ class Solicitacao(models.Model):
         return f'Solicitação {self.id} - {self.cliente.nome} - Criado por: {self.criado_por.username if self.criado_por else "N/A"}'
 
 class DadosAntigos(models.Model):
-    solicitacao = models.ForeignKey(Solicitacao, related_name='dados_solicitacao_antigos', on_delete=models.CASCADE)
+    solicitacao = models.ForeignKey(Solicitacao, related_name='dados_antigos', on_delete=models.CASCADE)
     dados_referencia = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True)
 
     salario_snapshot = models.DecimalField(max_digits=10, decimal_places=2)
@@ -82,22 +82,26 @@ class SnapshotVeiculo(models.Model):
         return f'RENAVAM {self.renavam} (Snapshot ID: {self.dados_antigos.id})'
 
 class DadosNovos(models.Model):
-    solicitacao = models.ForeignKey(Solicitacao, related_name='dados_solicitacoes_novos', on_delete=models.CASCADE)
+    solicitacao = models.ForeignKey(Solicitacao, related_name='dados_novos', on_delete=models.CASCADE)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
 
     salario = models.DecimalField(max_digits=10, decimal_places=2)
     residencia_endereco = models.CharField(max_length=400)
     residencia_cep = models.CharField(max_length=8)
 
-    imovel_endereco = models.CharField(max_length=150, blank=True, null=True)
-    imovel_bairro = models.CharField(max_length=150, blank=True, null=True)
-    imovel_cidade = models.CharField(max_length=100, blank=True, null=True)
-    imovel_cep = models.CharField(max_length=8, blank=True, null=True)
-
-    veiculo_renavam = models.CharField(max_length=11, blank=True, null=True)
-    veiculo_placa = models.CharField(max_length=7, blank=True, null=True)
-    veiculo_marca_modelo = models.CharField(max_length=90, blank=True, null=True)
-    veiculo_ano = models.CharField(max_length=9, blank=True, null=True)
-
     def __str__(self):
         return f'Dados Atualizados da Solicitação {self.solicitacao.id}'
+
+class Imovel(models.Model):
+    dados_novos = models.ForeignKey(DadosNovos, related_name='imoveis', on_delete=models.CASCADE)
+    endereco = models.CharField(max_length=150, blank=True, null=True)
+    bairro = models.CharField(max_length=150, blank=True, null=True)
+    cidade = models.CharField(max_length=100, blank=True, null=True)
+    cep = models.CharField(max_length=8, blank=True, null=True)
+
+class Veiculo(models.Model):
+    dados_novos = models.ForeignKey(DadosNovos, related_name='veiculos', on_delete=models.CASCADE)
+    renavam = models.CharField(max_length=11, blank=True, null=True)
+    placa = models.CharField(max_length=7, blank=True, null=True)
+    marca_modelo = models.CharField(max_length=90, blank=True, null=True)
+    ano = models.CharField(max_length=9, blank=True, null=True)

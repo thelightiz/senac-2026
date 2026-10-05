@@ -1,32 +1,33 @@
-import os
 import json
-import time  
-from PIL import Image
-from google import genai 
-from google.genai.errors import APIError  
+import os
+import time
 
-# Chave API 
-client = genai.Client(api_key="ChaveAPI")
+from PIL import Image
+
+try:
+    from google import genai
+    from google.genai.errors import APIError
+except ImportError:
+    genai = None
+    APIError = Exception
 
 
 def cpf_verification(image_path):
+    if not image_path or not os.path.exists(image_path):
+        return {"erro": f"Arquivo não encontrado: {image_path}"}
 
-    
-    # Descobre a pasta onde este arquivo .py está salvo
-    diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-
-    
-    # Cria o caminho absoluto para a imagem
-    caminho_absoluto = os.path.join(diretorio_atual, image_path)
-    
     try:
-        if isinstance(image_source, str):
-            diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-            image_source = os.path.join(diretorio_atual, image_source)
-        # Lê a imagem usando PIL com o caminho correto
-        imagem = Image.open(imagem_source)
-        
-        # promt da analise da imagem 
+        imagem = Image.open(image_path)
+        imagem.verify()
+        imagem.close()
+
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key or genai is None:
+            return {
+                "erro": "Chave da API Gemini não configurada. Defina a variável de ambiente GEMINI_API_KEY.",
+            }
+
+        client = genai.Client(api_key=api_key)
         prompt = """
         Analise esta imagem e responda estritamente no formato JSON abaixo:
         {
@@ -39,34 +40,28 @@ def cpf_verification(image_path):
         }
         Certifique-se de que a resposta seja apenas o JSON válido, sem blocos de código markdown (como ```json) ou textos adicionais.
         """
-        
-        max_tentativas = 3  # Número máximo de tentativas 
-        espera_inicial = 4  # Começa esperando 4 segundos
-        
+
+        max_tentativas = 3
+        espera_inicial = 4
+
+        infos = None
         for tentativa in range(max_tentativas):
             try:
-                # Envia as informações 
-                Infos = client.models.generate_content(
-                    model='gemini-3.6-flash',  # Ajustado para a versão padrão de produção
-                    contents=[prompt, imagem]
+                imagem = Image.open(image_path)
+                infos = client.models.generate_content(
+                    model='gemini-3.8-flash',
+                    contents=[prompt, imagem],
                 )
-                
-                # Se funcionar, quebra o loop de repetição e segue o código
                 break
-                
             except APIError as api_err:
-                # Se for a última tentativa, repassa o erro para o bloco principal
                 if tentativa == max_tentativas - 1:
                     raise api_err
-                
-                # Se for erro 503 (servidor instável) ou 429 (limite de requisições)
                 if api_err.code in [503, 429]:
                     print(f"[Aviso] Servidor ocupado (Erro {api_err.code}). Tentativa {tentativa + 1} de {max_tentativas}. Aguardando {espera_inicial}s...")
                     time.sleep(espera_inicial)
-                    espera_inicial *= 2  # Dobra o tempo para a próxima tentativa (4s -> 8s)
+                    espera_inicial *= 2
                 else:
-                    raise api_err  # Se for outro tipo de erro de API, não adianta esperar
-                    
+                    raise api_err
             except Exception as e:
                 if tentativa == max_tentativas - 1:
                     raise e
@@ -74,16 +69,25 @@ def cpf_verification(image_path):
                 time.sleep(espera_inicial)
                 espera_inicial *= 2
 
-        # Converte o texto retornado para um dicionário Python
-        response_data = json.loads(Infos.text.strip())
+        if infos is None:
+            return {
+                "Is_there_cpf": False,
+                "document_data": {
+                    "nome": None,
+                    "numero_cpf": None,
+                    "data_nascimento": None,
+                },
+            }
+
+        response_data = json.loads(infos.text.strip())
         return response_data
-    
+
     except FileNotFoundError:
-        return {"erro": f"O arquivo '{image_path}' não foi encontrado na pasta do projeto. Verifique se ele está em: {caminho_absoluto}"}
+        return {"erro": f"O arquivo '{image_path}' não foi encontrado."}
     except Exception as e:
         return {"erro": f"Falha ao processar: {str(e)}"}
 
-# Testando o bglh
+
 if __name__ == "__main__":
     teste = cpf_verification("fotojapa.jpeg")
     print(json.dumps(teste, indent=2, ensure_ascii=False))

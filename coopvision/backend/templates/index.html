@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interface de Verificação - Sicredi</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
 </head>
 <body>
 
@@ -25,7 +25,7 @@
 
             <div class="drop-zone" id="drop-zone">
                 <div class="processing-zone">
-                    <img src="{{ url_for('static', filename='img/papel-pessoa.svg') }}" alt="documento" id="preview">
+                    <img src="{{ url_for('static', filename='img/papel-botao.png') }}" alt="documento" id="preview">
                 </div>
                 <p id="nome-arquivo">Arraste e solte o documento aqui ou selecione o arquivo</p>
             </div>
@@ -46,7 +46,7 @@
             <p class="step-description">Estamos analisando o seu documento com a inteligência artificial.</p>
 
             <div class="processing-zone">
-                <img src="{{ url_for('static', filename='img/papel-lupa.svg') }}" alt="lupa">
+                <img src="{{ url_for('static', filename='img/papel-lupa.png') }}" alt="lupa">
 
                 <h3 class="analysis-title" id="titulo-analise">Aguardando documento...</h3>
                 <p class="analysis-subtitle">Isso pode levar alguns segundos.</p>

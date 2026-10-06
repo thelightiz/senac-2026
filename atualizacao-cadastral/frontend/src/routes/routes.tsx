@@ -10,6 +10,7 @@ import { Error403Page } from "../pages/errors/403/main";
 import { GNViewRequest } from "../pages/gn/viewRequest";
 import { CADRequestQueue } from "../pages/cad";
 import { CADViewRequestInfo } from "../pages/cad/viewRequest";
+import { GNAdjustRequest } from "../pages/gn/adjustRequest";
 
 export const Rotas = () => {
     return (
@@ -23,9 +24,10 @@ export const Rotas = () => {
             element={
               <ProtectedRoute requiredRole="GN">
                 <Routes>
-                  <Route path="minhas-solicitacoes/" element={<GNIndexPage/>} />
+                  <Route path="minhas-solicitacoes/" element={<GNIndexPage />} />
                   <Route path="minhas-solicitacoes/ver-solicitacao/:id" element={<GNViewRequest />} />
-                  <Route path="criar-solicitacao/" element={<GNCreateRequest/>} />
+                  <Route path="criar-solicitacao/" element={<GNCreateRequest />} />
+                  <Route path="minhas-solicitacoes/editar-solicitacao/:id" element={<GNAdjustRequest />}/>
                 </Routes>
               </ProtectedRoute>
             } 

@@ -1,3 +1,6 @@
 .env
 __pycache__/
 *.pyc
+uploads/
+tmp_validacao.png
+tmp_*.png

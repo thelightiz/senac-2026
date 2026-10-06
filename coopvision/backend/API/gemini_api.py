@@ -21,7 +21,7 @@ def cpf_verification(image_path):
         imagem.verify()
         imagem.close()
 
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = os.getenv('GEMINI_API_KEY')
         if not api_key or genai is None:
             return {
                 "erro": "Chave da API Gemini não configurada. Defina a variável de ambiente GEMINI_API_KEY.",

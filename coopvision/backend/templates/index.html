@@ -10,7 +10,6 @@
 
     <header class="header-bar">
         <img src="{{ url_for('static', filename='img/sicredi.jpg') }}" alt="">
-        <span class="header-icon">⚙</span>
     </header>
 
     <main class="main-container">
@@ -76,10 +75,10 @@
             <input type="text" id="nome" class="nome-completo campo-com-imagem" placeholder="Nome: digite seu nome completo">
 
             <p class="texto-superior-botao">CPF</p>
-            <input type="number" id="cpf" class="nome-completo campo-imagem" placeholder="000.000.000-00">
+            <input type="text" id="cpf" class="nome-completo campo-imagem" placeholder="000.000.000-00">
 
             <p class="texto-superior-botao">Data de Nascimento</p>
-            <input type="date" id="data_nascimento" class="nome-completo campo-imagem" placeholder="DD/MM/AAAA">
+            <input type="text" id="data_nascimento" class="nome-completo campo-imagem" placeholder="DD/MM/AAAA">
 
             <button type="button" class="btn-solid trasso-correto" id="btn-confirmar" style="margin-top: 50px;">Confirmar dados e continuar</button>
             <button type="button" class="btn-link" id="btn-editar">Editar dados</button>
@@ -105,7 +104,7 @@
         // chave do JSON -> id do input no HTML
         const mapa = {
             nome: 'nome',
-            numero_cpf: 'cpf',
+            numero_cpf: 'numero_cpf',
             data_nascimento: 'data_nascimento',
         };
 

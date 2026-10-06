@@ -19,7 +19,8 @@ class Solicitacao(models.Model):
 
     TIPO_ATUALIZACAO = [
         ('Renda', 'Atualização de Renda'),
-        ('Patrimônio', 'Atualização de Patrimônio'),
+        ('Imóvel', 'Atualização de Patrimônio Relacionado a Imóveis'),
+        ('Veículo', 'Atualização de Patrimônio Relacionado a Veículos'),
         ('Endereço', 'Atualização de Endereço'),
     ]
     atualizacao = models.CharField(max_length=20, choices=TIPO_ATUALIZACAO)
@@ -85,9 +86,9 @@ class DadosNovos(models.Model):
     solicitacao = models.ForeignKey(Solicitacao, related_name='dados_novos', on_delete=models.CASCADE)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
 
-    salario = models.DecimalField(max_digits=10, decimal_places=2)
-    residencia_endereco = models.CharField(max_length=400)
-    residencia_cep = models.CharField(max_length=8)
+    salario = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    residencia_endereco = models.CharField(max_length=400, blank=True, null=True)
+    residencia_cep = models.CharField(max_length=8, blank=True, null=True)
 
     def __str__(self):
         return f'Dados Atualizados da Solicitação {self.solicitacao.id}'

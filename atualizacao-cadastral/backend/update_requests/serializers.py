@@ -220,6 +220,7 @@ class GetRequestDadosNovosSerializer(serializers.ModelSerializer):
 class GetRequestInfoSerializer(serializers.ModelSerializer):
     criado_por = serializers.StringRelatedField()
     cliente = serializers.StringRelatedField()
+    cpf = serializers.CharField(source='cliente.cpf', read_only=True)
     status = serializers.CharField(source='get_status_display', read_only=True)
     dados_antigos = GetRequestDadosAntigosSerializer(many=True, read_only=True)
     dados_novos = GetRequestDadosNovosSerializer(many=True, read_only=True)

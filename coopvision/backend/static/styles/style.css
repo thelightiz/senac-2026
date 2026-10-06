@@ -130,29 +130,7 @@ body {
     padding-left: 60px !important;    
 }
 
-.campo-papel-botao {
 
-    background-image: url('papel-botao.png'); 
-    
-    color:  #006405;
-    background-repeat: no-repeat;
-    background-position: 12px center; /* Posiciona a imagem no canto esquerdo */
-    background-size: 20px 20px;       /* Ajusta o tamanho para caber no campo */
-    padding-left: 4px !important;    /* Empurra o texto para não cobrir a imagem */
-
-}
-
-.subir-arquivo {
-
-    background-image: url('subir-arquivo.png'); 
-    
-    color:  #006405;
-    background-repeat: no-repeat;
-    background-position: 12px center; /* Posiciona a imagem no canto esquerdo */
-    background-size: 20px 20px;       /* Ajusta o tamanho para caber no campo */
-    padding-left: 4px !important;    /* Empurra o texto para não cobrir a imagem */
-
-}
 
 .trasso-correto {
 
@@ -260,12 +238,38 @@ body {
 .processing-zone {
     background-color: #f1f9ec;
     border-radius: 8px;
-    padding: 30px 20px;
+    padding: 20px 10px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
     flex-grow: 1;
+}
+
+
+.icone {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+}
+
+.identidade{
+    width: 100px;
+    height: 100px;
+}
+.drop-zone {
+  overflow: hidden;
+}
+
+#preview {
+  display: block;
+  max-width: 100%;
+  max-height: 120px;
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .analysis-title {

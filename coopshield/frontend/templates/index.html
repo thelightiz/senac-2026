@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sicredi Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+
+<!-- Script do Gráfico -->
+<script src="{{ url_for('static', filename='js/grafico.js') }}" defer></script>
+    
+</head>
+
+<body>
+
+    <!-- Barra Superior -->
+    <header class="navbar">
+        <span class="logo">Sicredi</span>
+        <button class="btn-config">⚙</button>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="dashboard-container">
+        <div class="dash-header">
+            <div class="user-box">
+                <span>Dashboard</span>
+                <img src="{{ url_for('static', filename='icone-pessoa.png') }}" alt="User">
+            </div>
+            <select id="filtro-periodo" onchange="atualizarDashboard()">
+                <option value="Últimos 7 dias">Últimos 7 dias</option>
+                <option value="Hoje">Hoje</option>
+            </select>
+        </div>
+
+        <div class="cards-row">
+            <div class="card card-analises">
+                <span class="card-title">Análises</span>
+                <span class="card-value" id="val-analises">180</span>
+            </div>
+            <div class="card card-deteccoes">
+                <span class="card-title">Detecções</span>
+                <span class="card-value" id="val-deteccoes">40</span>
+            </div>
+        </div>
+
+        <div class="content-row">
+            <!-- Painel do Gráfico -->
+             <div class="panel-box chart-box">
+                <h3>Análise</h3>
+                <div class="canvas-container" style="position: relative; height: 230px; width: 100%;">
+                    <canvas id="meuGraficoCanvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Painel de Detalhes Laterais -->
+            <div class="panel-box details-box">
+                <h3>Tipos de detecções</h3><br><br>
+                <div class="progress-group">
+                    <div class="progress-labels">
+                        <span>Múltiplas transferências em menos de 1 minuto.</span>
+                        <span id="txt-alta-min">%88</span>
+                    </div>
+                    <div class="progress-bar"><div id="bar-alta-min" style="width: 88%;"></div></div>
+                </div>
+                <div class="progress-group">
+                    <div class="progress-labels">
+                        <span>Transações altas de madrugada</span>
+                        <span id="txt-alta-mad">%60</span>
+                    </div>
+                    <div class="progress-bar"><div id="bar-alta-mad" style="width: 60%;"></div></div>
+                </div>
+                <div class="progress-group">
+                    <div class="progress-labels">
+                        <span>Outros</span>
+                        <span id="txt-outros">%20</span>
+                    </div>
+                    <div class="progress-bar"><div id="bar-outros" style="width: 20%;"></div></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

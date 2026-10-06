@@ -54,12 +54,12 @@ interface UpdateRequest {
 
 export const GNViewRequest = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  
   const [requestUpdate, setRequestUpdate] = useState<UpdateRequest | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | undefined>(undefined);
   const [selectedDoc, setSelectedDoc] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
-  const navigate = useNavigate();
 
   const formatCurrency = (val: any) => {
     if (val === null || val === undefined) return '-';
@@ -460,6 +460,18 @@ export const GNViewRequest = () => {
               )}
             </div>
           </div>
+
+          {requestUpdate?.status === "Necessita Ajuste do GN" && (
+            <div className="mt-8 flex items-center justify-end gap-x-6">
+              <a
+                href={`/gn/minhas-solicitacoes/editar-solicitacao/${requestUpdate?.id}`}
+                id="botao"
+                className="rounded-md bg-botao-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-botao-1-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar"
+              >
+                Editar Solicitação
+              </a>
+            </div>
+          )}
 
         </div>
       </div>

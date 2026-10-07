@@ -151,11 +151,11 @@ export const GNAdjustRequest = () => {
 
     const cleanNewData = {
       ...newData,
-      residencia_cep: newData.residencia_cep.replace(/\D/g, ''),
+      residencia_cep: newData.residencia_cep ? newData.residencia_cep.replace(/\D/g, ""): "",
 
       imovel: temImovel ? [{
         ...currentImovel,
-        cep: currentImovel.cep ? currentImovel.cep.replace(/\D/g, '') : null
+        cep: currentImovel.cep ? currentImovel.cep.replace(/\D/g, "") : null
       }] : [],
 
       veiculo: temVeiculo ? [currentVeiculo]: []
@@ -167,7 +167,7 @@ export const GNAdjustRequest = () => {
     console.log("Dados Novos JSON:", JSON.stringify(cleanNewData));
 
     try {
-      const response = await api.post(`gn/editar-solicitacao/${id}`, formData);
+      const response = await api.patch(`gn/editar-solicitacao/${id}`, formData);
       console.log("Sucesso:", response.data);
       alert("Solicitação editada com sucesso!");
       
@@ -236,20 +236,20 @@ export const GNAdjustRequest = () => {
         const response = await api.get(`ver-solicitacao/${id}`);
         console.log(response);
         const solicitacao = response.data.solicitacao;
+        const dadosNovos = response.data.solicitacao.dados_novos[0];
+
         setRequestUpdate(solicitacao);
         setCustomerName(solicitacao.cliente);
         setCustomerCPF(solicitacao.cpf);
         setRequestType(solicitacao.atualizacao);
         setNewData({
-            salario: solicitacao.salario,
-            residencia_endereco: solicitacao.residencia_endereco,
-            residencia_cep: solicitacao.residencia_cep,
+            salario: dadosNovos.salario,
+            residencia_endereco: dadosNovos.residencia_endereco,
+            residencia_cep: dadosNovos.residencia_cep,
             imovel: [],
             veiculo: []
         });
 
-        const dadosNovos = response.data.solicitacao.dados_novos[0];
- 
         if (dadosNovos?.veiculo?.length > 0) {
             setCurrentVeiculo(dadosNovos.veiculo[0]);
         } else {

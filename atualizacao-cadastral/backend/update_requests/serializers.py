@@ -219,3 +219,71 @@ class GetRequestInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solicitacao
         fields = '__all__'
+
+class PatchRequestImovelSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = Imovel
+        fields = ['id', 'endereco', 'bairro', 'cidade', 'cep']
+        extra_kwargs = {
+            'endereco': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'bairro': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'cidade': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'cep': {'allow_null': True, 'allow_blank': True, 'required': False},
+        }
+
+class PatchRequestVeiculoSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = Veiculo
+        fields = ['id', 'renavam', 'placa', 'marca_modelo', 'ano']
+        extra_kwargs = {
+            'renavam': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'placa': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'marca_modelo': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'ano': {'allow_null': True, 'allow_blank': True, 'required': False},
+        }
+
+class GNAdjustRequestSerializer(serializers.ModelSerializer):
+    imovel = PatchRequestImovelSerializer(source='imoveis', many=True, required=False)
+    veiculo = PatchRequestVeiculoSerializer(source='veiculos', many=True, required=False)
+    
+    class Meta:
+        model = DadosNovos
+        fields = ['id', 'salario', 'residencia_endereco', 'residencia_cep', 'imovel', 'veiculo']
+
+    def update(self, instance, validated_data):
+        imoveis_data = validated_data.pop('imoveis', None)
+        veiculos_data = validated_data.pop('veiculos', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+
+        if imoveis_data is not None:
+            self._update_or_create_nested(
+                instance=instance,
+                data_list=imoveis_data,
+                model_class=Imovel,
+                related_field_name='dados_novos'
+            )
+
+        if veiculos_data is not None:
+            self._update_or_create_nested(
+                instance=instance,
+                data_list=veiculos_data,
+                model_class=Veiculo,
+                related_field_name='dados_novos'
+            )
+
+        return instance
+
+    def _update_or_create_nested(self, instance, data_list, model_class, related_field_name):
+        for item_data in data_list:
+            item_id = item_data.pop('id', None)
+
+            if item_id:
+                model_class.objects.filter(id=item_id, **{related_field_name: instance}).update(**item_data)

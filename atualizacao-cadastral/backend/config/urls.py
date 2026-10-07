@@ -30,6 +30,7 @@ urlpatterns = [
 
     path('api/gn/minhas-solicitacoes', requests_views.GNMyRequestsView.as_view()),
     path('api/gn/criar-solicitacao', requests_views.GNCreateRequestView.as_view()),
+    path('api/gn/editar-solicitacao/<int:pk>', requests_views.GNAdjustRequestView.as_view()),
 
     path('api/ga/fila-de-solicitacoes', requests_views.GARequestsQueueView.as_view()),
     path('api/ga/aprovar-solicitacao/<int:pk>', requests_views.GAAcceptRequestView.as_view()),

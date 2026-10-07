@@ -1,5 +1,5 @@
-from .models import Solicitacao
-from .serializers import PostRequestSerializer, GetRequestsSerializer, GetRequestInfoSerializer
+from .models import Solicitacao, DadosNovos
+from .serializers import PostRequestSerializer, GetRequestsSerializer, GetRequestInfoSerializer, GNAdjustRequestSerializer
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -8,6 +8,7 @@ from services.permissions import HasRole
 from django.shortcuts import get_object_or_404
 from documents.models import DocumentosSolicitacao
 from django.db import transaction
+import json
 
 class GNMyRequestsView(APIView):
     permission_classes = [HasRole]
@@ -213,3 +214,39 @@ class CADAcceptRequest(APIView):
         return Response({
             'mensagem': 'Solicitação efetivada'
         }, status=status.HTTP_200_OK)
+
+class GNAdjustRequestView(APIView):
+    permission_classes = [HasRole]
+    allowed_roles = ['GN']
+    parser_classes = [MultiPartParser, FormParser]
+    
+    def patch(self, request, pk):
+        solicitacao = get_object_or_404(Solicitacao, pk=pk)
+        dados_novos = get_object_or_404(DadosNovos, solicitacao=solicitacao)
+        raw_dados_novos = request.data.get('dados_novos')
+
+        if isinstance(raw_dados_novos, str):
+            try:
+                payload = json.loads(raw_dados_novos)
+            except json.JSONDecodeError:
+                return Response(
+                    {"dados_novos": ["Formato JSON inválido em dados_novos."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        elif isinstance(raw_dados_novos, dict):
+            payload = raw_dados_novos
+        else:
+            payload = request.data
+
+        print(payload)
+        serializer = GNAdjustRequestSerializer(dados_novos, data=payload, partial=True)
+
+        if serializer.is_valid():
+            with transaction.atomic():
+                solicitacao.status = 'PENDING_AGENCY_REVIEW'
+                solicitacao.save(update_fields=['status'])
+                serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

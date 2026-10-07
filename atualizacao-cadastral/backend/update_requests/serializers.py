@@ -82,16 +82,6 @@ class PostRequestSerializer(serializers.ModelSerializer):
 
         return super().to_internal_value(data)
 
-    def validate_dados_novos(self, value):
-        if not value.get('salario'):
-            cpf = self.initial_data.get('cliente')
-            try:
-                cliente_atual = Cliente.objects.get(cpf=cpf)
-                value['salario'] = cliente_atual.salario
-            except Cliente.DoesNotExist:
-                raise serializers.ValidationError("Cliente não encontrado")
-        return value
-
     @transaction.atomic
     def create(self, validated_data):
         cliente = validated_data.pop('cliente')

@@ -1,8 +1,10 @@
 from django.contrib import admin
-from .models import Solicitacao, DadosAntigos, DadosNovos, Imovel, Veiculo
+from .models import Request, PreviousData, PropertySnapshot, VehicleSnapshot, ProposedData, ProposedProperty, ProposedVehicle
 
-admin.site.register(Solicitacao)
-admin.site.register(DadosNovos)
-admin.site.register(DadosAntigos)
-admin.site.register(Imovel)
-admin.site.register(Veiculo)
+admin.site.register(Request)
+admin.site.register(PreviousData)
+admin.site.register(PropertySnapshot)
+admin.site.register(VehicleSnapshot)
+admin.site.register(ProposedData)
+admin.site.register(ProposedProperty)
+admin.site.register(ProposedVehicle)

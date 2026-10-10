@@ -1,4 +1,4 @@
 from django.contrib import admin
-from .models import DocumentosSolicitacao
+from .models import RequestDocument
 
-admin.site.register(DocumentosSolicitacao)
+admin.site.register(RequestDocument)

@@ -1,31 +1,25 @@
-from .models import Solicitacao, DadosNovos
-from .serializers import PostRequestSerializer, GetRequestsSerializer, GetRequestInfoSerializer, GNAdjustRequestSerializer
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from services.permissions import HasRole
 from django.shortcuts import get_object_or_404
-from documents.models import DocumentosSolicitacao
-from django.db import transaction
 import json
+
+from .selectors import get_requests_for_gn, get_ga_review_queue, get_cadastro_queue, get_request_detail
+from .services import create_request_service, ga_accept_request_service, handle_request_return_service, finalize_request_service
+from .serializers import PostRequestSerializer, GetRequestsSerializer, GetRequestInfoSerializer, GNAdjustRequestSerializer
+from .models import Request, ProposedData
 
 class GNMyRequestsView(APIView):
     permission_classes = [HasRole]
     allowed_roles = ['GN']
 
     def get(self, request):
-        user = request.user
-        requests = Solicitacao.objects.filter(criado_por=user)
+        requests = get_requests_for_gn(request.user)
         serializer = GetRequestsSerializer(requests, many=True)
-        
-        return Response(
-            {'usuario': {
-                'nome': user.username,
-                'role': user.role,
-            },
-            'solicitacoes': serializer.data},
-            status=status.HTTP_200_OK)
+
+        return Response({'user': {'name': request.user.username, 'role': request.user.role}, 'update_requests': serializer.data}, status=status.HTTP_200_OK)
 
 class GNCreateRequestView(APIView):
     permission_classes = [HasRole]
@@ -34,80 +28,89 @@ class GNCreateRequestView(APIView):
 
     def post(self, request):
         serializer = PostRequestSerializer(data=request.data, context={'request': request})
-        print(request.data)
 
         if serializer.is_valid():
-            solicitacao = serializer.save(criado_por=request.user)
-            return Response(
-                {'mensagem': 'criado', 'id': solicitacao.id, 'criado_por_id': solicitacao.criado_por_id}, status=status.HTTP_201_CREATED
+            ip = request.META.get('REMOTE_ADDR')
+            user_agent = request.META.get('HTTP_USER_AGENT')
+            
+            request_update = create_request_service(
+                user=request.user,
+                validated_data=serializer.validated_data,
+                ip=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT')
             )
+
+            return Response({'message': 'created', 'id': request_update.id}, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class GNAdjustRequestView(APIView):
+    permission_classes = [HasRole]
+    allowed_roles = ['GN', 'GA', 'CADASTRO']
+
+    def patch(self, request, pk):
+        proposed_data = get_object_or_404(ProposedData, pk=pk)
+        
+        serializer = GNAdjustRequestSerializer(
+            instance=proposed_data,
+            data=request.data,
+            partial=True
+        )
+        
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {
+                "detail": "Proposed data successfully adjusted.",
+                "data": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
 
 class GARequestsQueueView(APIView):
     permission_classes = [HasRole]
     allowed_roles = ['GA']
 
     def get(self, request):
-        user = request.user
-        requests = Solicitacao.objects.filter(status__in=['PENDING_AGENCY_REVIEW', 'NEEDS_ADJUSTMENT_GA'])
+        requests = get_ga_review_queue()
         serializer = GetRequestsSerializer(requests, many=True)
-        
-        return Response(
-            {'usuario': {
-                'nome': user.username,
-                'role': user.role,
-            },
-            'solicitacoes': serializer.data},
-            status=status.HTTP_200_OK)
+
+        return Response({'user': {'name': request.user.username, 'role': request.user.role}, 'update_requests': serializer.data}, status=status.HTTP_200_OK)
 
 class CADRequestsQueueView(APIView):
     permission_classes = [HasRole]
     allowed_roles = ['CADASTRO']
 
     def get(self, request):
-        user = request.user
-        requests = Solicitacao.objects.filter(status='PENDING_CADASTRO')
+        requests = get_cadastro_queue()
         serializer = GetRequestsSerializer(requests, many=True)
-        
-        return Response(
-            {'usuario': {
-                'nome': user.username,
-                'role': user.role,
-            },
-            'solicitacoes': serializer.data},
-            status=status.HTTP_200_OK)
+        return Response({'user': {'name': request.user.username, 'role': request.user.role}, 'update_requests': serializer.data}, status=status.HTTP_200_OK)
 
 class SeeRequestView(APIView):
     permission_classes = [HasRole]
     allowed_roles = ['GN', 'GA', 'CADASTRO']
 
     def get(self, request, pk):
-        solicitacao = get_object_or_404(Solicitacao, id=pk)
-        
+        solicitacao = get_request_detail(pk)
         serializer = GetRequestInfoSerializer(solicitacao, context={'request': request})
-        
-        return Response(
-            {'solicitacao': serializer.data},
-            status=status.HTTP_200_OK
-        )
+
+        return Response({'update_request': serializer.data}, status=status.HTTP_200_OK)
 
 class GAAcceptRequestView(APIView):
     permission_classes = [HasRole]
     allowed_roles = ['GA']
 
     def post(self, request, pk):
-        solicitacao = get_object_or_404(Solicitacao, pk=pk)
+        solicitacao = get_request_detail(pk)
 
-        if solicitacao.status == 'PENDING_CADASTRO':
+        if solicitacao.status == Request.RequestStatus.PENDING_REGISTRATION:
             return Response({'detail': 'Solicitação já foi aprovada.'}, status=status.HTTP_409_CONFLICT)
-        elif solicitacao.status != 'PENDING_AGENCY_REVIEW':
-            return Response({'detail': 'Sem permissão para alterar o status da solicitação.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        ip = request.META.get('REMOTE_ADDR')
+        ga_accept_request_service(solicitacao, request.user, ip=ip)
 
-        solicitacao.status = 'PENDING_CADASTRO'
-        solicitacao.save()
-
-        return Response({'mensagem': 'Solicitação aprovada'}, status=status.HTTP_200_OK)
+        return Response({'message': 'update request approved'}, status=status.HTTP_200_OK)
 
 class HandleRequestReturnsView(APIView):
     permission_classes = [HasRole]
@@ -115,138 +118,33 @@ class HandleRequestReturnsView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, pk):
-        solicitacao = get_object_or_404(Solicitacao, pk=pk)
+        solicitacao = get_request_detail(pk)
         acao = request.data.get('action')
         parecer = request.FILES.get('parecer')
-        status_solicitacao = None
 
         if acao not in ['REPROVAR', 'SOLICITAR_AJUSTE_GN', 'SOLICITAR_AJUSTE_GA']:
-            return Response({'detail': 'Ação inválida'}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({'detail': 'invalid action'}, status=status.HTTP_400_BAD_REQUEST)
         if not parecer:
-            return Response({'detail': 'A inclusão do parecer é obrigatório'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'the document is mandatory'}, status=status.HTTP_400_BAD_REQUEST)
 
-        DocumentosSolicitacao.objects.create(solicitacao=solicitacao, arquivo=parecer)
-
-        match acao:
-            case 'REPROVAR':
-                status_solicitacao = 'REJECTED'
-            case 'SOLICITAR_AJUSTE_GN':
-                status_solicitacao = 'NEEDS_ADJUSTMENT_GN'
-            case _:
-                status_solicitacao = 'NEEDS_ADJUSTMENT_GA'
-
-        solicitacao.status = status_solicitacao
-        solicitacao.save()
-
-        return Response({
-            'mensagem': 'Documento anexado com sucesso.'
-            }, status=status.HTTP_200_OK
-        )
+        ip = request.META.get('REMOTE_ADDR')
+        handle_request_return_service(solicitacao, acao, parecer, request.user, ip=ip)
+        return Response({'message': 'updated'}, status=status.HTTP_200_OK)
 
 class CADAcceptRequest(APIView):
     permission_classes = [HasRole]
     allowed_roles = ['CADASTRO']
 
-    @transaction.atomic
     def post(self, request, pk):
         parecer = request.FILES.get('parecer')
-
         if not parecer:
-            return Response({
-                'detail': 'O parecer é obrigatório'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'the document is mandatory'}, status=status.HTTP_400_BAD_REQUEST)
         
-        solicitacao = get_object_or_404(Solicitacao, pk=pk)
-        if solicitacao.status == 'UPDATED':
-            return Response({
-                'detail': 'Solicitação já efetivada'
-                }, status=status.HTTP_409_CONFLICT)
+        solicitacao = get_request_detail(pk)
+        if solicitacao.status == Request.RequestStatus.UPDATED:
+            return Response({'detail': 'update request already approved'}, status=status.HTTP_409_CONFLICT)
         
-        if solicitacao.status != 'PENDING_CADASTRO':
-            return Response({
-                'detail': 'A solicitação não está em análise.'
-                }, status=status.HTTP_400_BAD_REQUEST)
+        ip = request.META.get('REMOTE_ADDR')
+        finalize_request_service(solicitacao, parecer, request.user, ip=ip)
 
-        cliente = solicitacao.cliente
-        dados_novos = solicitacao.dados_novos.first()
-
-        if not dados_novos:
-            return Response({
-                'detail': 'Dados novos não encontrados na solicitação'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        if dados_novos.salario:
-            cliente.salario = dados_novos.salario
-
-        if dados_novos.residencia_endereco:
-            cliente.residencia_endereco = dados_novos.residencia_endereco
-
-        if dados_novos.residencia_cep:
-            cliente.residencia_cep = dados_novos.residencia_cep
-
-        novos_imoveis = dados_novos.imoveis.all()
-        if novos_imoveis.exists():
-            for imovel_novo in novos_imoveis:
-                cliente.imoveis.create(
-                    endereco=imovel_novo.endereco,
-                    bairro=imovel_novo.bairro,
-                    cidade=imovel_novo.cidade,
-                    cep=imovel_novo.cep
-                )
-
-        novos_veiculos = dados_novos.veiculos.all()
-        if novos_veiculos.exists():
-            for veiculo_novo in novos_veiculos:
-                cliente.veiculos.create(
-                    renavam=veiculo_novo.renavam,
-                    placa=veiculo_novo.placa,
-                    marca_modelo=veiculo_novo.marca_modelo,
-                    ano=veiculo_novo.ano
-                )
-
-        DocumentosSolicitacao.objects.create(solicitacao=solicitacao, arquivo=parecer)
-
-        solicitacao.status = 'UPDATED'
-        solicitacao.save()
-        cliente.save()
-
-        return Response({
-            'mensagem': 'Solicitação efetivada'
-        }, status=status.HTTP_200_OK)
-
-class GNAdjustRequestView(APIView):
-    permission_classes = [HasRole]
-    allowed_roles = ['GN']
-    parser_classes = [MultiPartParser, FormParser]
-    
-    def patch(self, request, pk):
-        solicitacao = get_object_or_404(Solicitacao, pk=pk)
-        dados_novos = get_object_or_404(DadosNovos, solicitacao=solicitacao)
-        raw_dados_novos = request.data.get('dados_novos')
-
-        if isinstance(raw_dados_novos, str):
-            try:
-                payload = json.loads(raw_dados_novos)
-            except json.JSONDecodeError:
-                return Response(
-                    {"dados_novos": ["Formato JSON inválido em dados_novos."]},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        elif isinstance(raw_dados_novos, dict):
-            payload = raw_dados_novos
-        else:
-            payload = request.data
-
-        print(payload)
-        serializer = GNAdjustRequestSerializer(dados_novos, data=payload, partial=True)
-
-        if serializer.is_valid():
-            with transaction.atomic():
-                solicitacao.status = 'PENDING_AGENCY_REVIEW'
-                solicitacao.save(update_fields=['status'])
-                serializer.save()
-
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'update request approved'}, status=status.HTTP_200_OK)

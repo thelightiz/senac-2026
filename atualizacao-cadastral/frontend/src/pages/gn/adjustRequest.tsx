@@ -600,9 +600,9 @@ export const GNAdjustRequest = () => {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl space-y-4">
+          <div className="bg-white mt-8 border-t border-gray-200 pt-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              <h2 className="text-xl font-semibold mb-4 text-gray-700">
                 Documentos Anexados
               </h2>
             </div>
@@ -647,14 +647,16 @@ export const GNAdjustRequest = () => {
           </div>
 
           <div className="mt-8 flex items-center justify-end gap-x-6">
-            <button
-              type="submit"
-              id="botao"
-              className="rounded-md bg-botao-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-botao-1-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar"
-            >
-              Salvar Solicitação
-            </button>
-          </div>
+              <div className="pt-2 flex justify-end gap-3">
+                <button
+                  type="submit"
+                  id="botao"
+                  className="px-5 py-2.5 rounded-xl bg-botao-1 hover:bg-botao-1-700 text-white text-sm font-semibold transition-colors shadow-sm disabled:opacity-50"
+                >
+                  Salvar Solicitação
+                </button>
+              </div>
+            </div>
         </form>
       </div>
     </>

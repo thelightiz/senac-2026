@@ -463,13 +463,15 @@ export const GNViewRequest = () => {
 
           {requestUpdate?.status === "Necessita Ajuste do GN" && (
             <div className="mt-8 flex items-center justify-end gap-x-6">
-              <a
-                href={`/gn/minhas-solicitacoes/editar-solicitacao/${requestUpdate?.id}`}
-                id="botao"
-                className="rounded-md bg-botao-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-botao-1-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar"
-              >
-                Editar Solicitação
-              </a>
+              <div className="pt-2 flex justify-end gap-3">
+                <a
+                  href={`/gn/minhas-solicitacoes/editar-solicitacao/${requestUpdate?.id}`}
+                  id="botao"
+                  className="px-5 py-2.5 rounded-xl bg-botao-1 hover:bg-botao-1-700 text-white text-sm font-semibold transition-colors shadow-sm disabled:opacity-50"
+                >
+                  Editar Solicitação
+                </a>
+              </div>
             </div>
           )}
 

@@ -46,15 +46,17 @@ export const GNIndexPage = () => {
       <div className="mx-auto p-4">
         <div className="flex items-center justify-between mt-6">
           <p className="text-xl mt-3 text-gray-750">Bem-vindo, {user?.nome}!</p>
-          <a
-            href="/gn/criar-solicitacao"
-            className="rounded-md bg-botao-1 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-botao-1-700 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar"
-          >
-            Criar Solicitação
-          </a>
+          <div className="pt-2 flex justify-end gap-3">
+            <a
+              href="/gn/criar-solicitacao"
+              className="px-5 py-2.5 rounded-xl bg-botao-1 hover:bg-botao-1-700 text-white text-sm font-semibold transition-colors shadow-sm disabled:opacity-50"
+            >
+              Criar Solicitação
+            </a>
+          </div>
         </div>
 
-        <h1 className="text-3xl text-center font-bold my-6">Minhas solicitações</h1>
+        <h1 className="text-3xl text-center font-bold my-6">Minhas Solicitações</h1>
 
         <div className="overflow-x-auto shadow-md sm:rounded-lg">
           <table className="min-w-full text-left text-sm whitespace-nowrap">

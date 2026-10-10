@@ -160,7 +160,8 @@ header.topbar {
 .hero {
   background-color: rgb(22, 139, 28);
   padding: 90px 0;
-  height: 1013px;
+  height: 600px;
+  display: flex;
 }
 .hero-inner {
   display: flex;
@@ -169,7 +170,7 @@ header.topbar {
 }
 
 .hero-image img {
-  width: 120%;
+  width: 400px;
   max-width: none;
 }
 

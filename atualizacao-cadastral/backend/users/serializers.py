@@ -6,21 +6,20 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        print(data)
-        username = data.get('username')
+        username_input = data.get('username')
         password = data.get('password')
 
-        if not username or not password:
+        if not username_input or not password:
             raise serializers.ValidationError('Usuário e senha são obrigatórios.')
 
-        username = authenticate(
+        user = authenticate(
             request=self.context.get('request'),
-            username=username,
+            username=username_input,
             password=password
         )
 
-        if not username:
+        if not user:
             raise serializers.ValidationError('Credenciais inválidas.')
         
-        data['username'] = username
+        data['username'] = user
         return data

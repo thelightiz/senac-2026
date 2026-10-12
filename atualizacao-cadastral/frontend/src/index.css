@@ -10,8 +10,3 @@ html, body {
   padding: 0;
   height: 100%;
 }
-
-#root {
-  min-height: 100vh;
-  padding: 50px;
-}

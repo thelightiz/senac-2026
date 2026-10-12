@@ -6,6 +6,21 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class Solicitacao(models.Model):
+    class TipoAtualizacao(models.TextChoices):
+        RENDA = 'Renda', 'Atualização de Renda'
+        IMOVEL = 'Imóvel', 'Atualização de Patrimônio Relacionado a Imóveis'
+        VEICULO = 'Veículo', 'Atualização de Patrimônio Relacionado a Veículos'
+        ENDERECO = 'Endereço', 'Atualização de Endereço'
+
+    class Status(models.TextChoices):
+        SUBMITING = 'SUBMITTING', 'Enviando Solicitação'
+        PENDING_AGENCY_REVIEW = 'PENDING_AGENCY_REVIEW', 'Pendente Análise do GA'
+        PENDING_CADASTRO = 'PENDING_CADASTRO', 'Pendente Análise do Time de Cadastro'
+        NEEDS_ADJUSTMENT_GN = 'NEEDS_ADJUSTMENT_GN', 'Necessita Ajuste do GN'
+        NEEDS_ADJUSTMENT_GA = 'NEEDS_ADJUSTMENT_GA', 'Necessita Ajuste do GA'
+        UPDATED = 'UPDATED', 'Atualizado'
+        REJECTED = 'REJECTED', 'Rejeitado'
+
     id = models.AutoField(primary_key=True)
     criado_por = models.ForeignKey(
         User,
@@ -16,24 +31,8 @@ class Solicitacao(models.Model):
         help_text="Usuário que criou a solicitação"
     )
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='solicitacoes')
-
-    TIPO_ATUALIZACAO = [
-        ('Renda', 'Atualização de Renda'),
-        ('Imóvel', 'Atualização de Patrimônio Relacionado a Imóveis'),
-        ('Veículo', 'Atualização de Patrimônio Relacionado a Veículos'),
-        ('Endereço', 'Atualização de Endereço'),
-    ]
-    atualizacao = models.CharField(max_length=20, choices=TIPO_ATUALIZACAO)
-
-    STATUS_CHOICES = [
-        ('PENDING_AGENCY_REVIEW', 'Pendente Análise do GA'),
-        ('PENDING_CADASTRO', 'Pendente Análise do Time de Cadastro'),
-        ('NEEDS_ADJUSTMENT_GN', 'Necessita Ajuste do GN'),
-        ('NEEDS_ADJUSTMENT_GA', 'Necessita Ajuste do GA'),
-        ('UPDATED', 'Atualizado'),
-        ('REJECTED', 'Rejeitado'),
-    ]
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='PENDING_AGENCY_REVIEW')
+    atualizacao = models.CharField(max_length=20, choices=TipoAtualizacao.choices)
+    status = models.CharField(max_length=30, choices=Status.choices, default=Status.PENDING_AGENCY_REVIEW)
 
     def __str__(self):
         return f'Solicitação {self.id} - {self.cliente.nome} - Criado por: {self.criado_por.username if self.criado_por else "N/A"}'

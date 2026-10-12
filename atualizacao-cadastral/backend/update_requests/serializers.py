@@ -1,4 +1,4 @@
-from django.db import transaction
+from .services import create_update_request_service, update_new_data_service
 from rest_framework import serializers
 from .models import Solicitacao, DadosAntigos, DadosNovos, SnapshotImovel, SnapshotVeiculo, Imovel, Veiculo
 from documents.models import DocumentosSolicitacao
@@ -82,80 +82,15 @@ class PostRequestSerializer(serializers.ModelSerializer):
 
         return super().to_internal_value(data)
 
-    @transaction.atomic
     def create(self, validated_data):
-        cliente = validated_data.pop('cliente')
-        dados_novos_data = validated_data.pop('dados_novos')
-        validated_data.pop('documentos', None)
-
-        solicitacao = Solicitacao.objects.create(**validated_data, cliente=cliente)
-
+        user = validated_data.pop('criado_por', None)
         request = self.context.get('request')
-        if request and request.FILES:
-            arquivos = request.FILES.getlist('documentos')
-            for arquivo in arquivos:
-                DocumentosSolicitacao.objects.create(
-                    solicitacao=solicitacao,
-                    arquivo=arquivo
-                )
-
-        imoveis_data = dados_novos_data.pop('imoveis', [])
-        veiculos_data = dados_novos_data.pop('veiculos', [])
-
-        dados_novos_instance = DadosNovos.objects.create(
-            solicitacao=solicitacao,
-            cliente=cliente,
-            **dados_novos_data
+        
+        return create_update_request_service(
+            validated_data=validated_data,
+            request=request,
+            user=user
         )
-
-        for imovel_dict in imoveis_data:
-            if any(imovel_dict.values()):
-                Imovel.objects.create(
-                    dados_novos=dados_novos_instance,
-                    **imovel_dict
-                )
-
-        for veiculo_dict in veiculos_data:
-            if any(veiculo_dict.values()):
-                Veiculo.objects.create(
-                    dados_novos=dados_novos_instance,
-                    **veiculo_dict
-                )
-
-        qtd_imoveis = cliente.imoveis.count()
-        qtd_veiculos = cliente.veiculos.count()
-
-        dados_antigos = DadosAntigos.objects.create(
-            solicitacao=solicitacao,
-            dados_referencia=cliente,
-            salario_snapshot=cliente.salario,
-            endereco_snapshot=cliente.endereco,
-            cep_snapshot=cliente.cep,
-            tem_imoveis_snapshot=qtd_imoveis > 0,
-            tem_veiculos_snapshot=qtd_veiculos > 0,
-            qtd_imoveis_snapshot=qtd_imoveis,
-            qtd_veiculos_snapshot=qtd_veiculos,
-        )
-
-        for imovel in cliente.imoveis.all():
-            SnapshotImovel.objects.create(
-                dados_antigos=dados_antigos,
-                endereco=imovel.endereco,
-                bairro=imovel.bairro,
-                cidade=imovel.cidade,
-                cep=imovel.cep,
-            )
-
-        for veiculo in cliente.veiculos.all():
-            SnapshotVeiculo.objects.create(
-                dados_antigos=dados_antigos,
-                renavam=veiculo.renavam,
-                placa=veiculo.placa,
-                marca_modelo=veiculo.marca_modelo,
-                ano=veiculo.ano,
-            )
-
-        return solicitacao
 
 class GetRequestsSerializer(serializers.ModelSerializer):
     cliente = serializers.StringRelatedField() 
@@ -255,35 +190,4 @@ class GNAdjustRequestSerializer(serializers.ModelSerializer):
         fields = ['id', 'salario', 'residencia_endereco', 'residencia_cep', 'imovel', 'veiculo']
 
     def update(self, instance, validated_data):
-        imoveis_data = validated_data.pop('imoveis', None)
-        veiculos_data = validated_data.pop('veiculos', None)
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
-        instance.save()
-
-        if imoveis_data is not None:
-            self._update_or_create_nested(
-                instance=instance,
-                data_list=imoveis_data,
-                model_class=Imovel,
-                related_field_name='dados_novos'
-            )
-
-        if veiculos_data is not None:
-            self._update_or_create_nested(
-                instance=instance,
-                data_list=veiculos_data,
-                model_class=Veiculo,
-                related_field_name='dados_novos'
-            )
-
-        return instance
-
-    def _update_or_create_nested(self, instance, data_list, model_class, related_field_name):
-        for item_data in data_list:
-            item_id = item_data.pop('id', None)
-
-            if item_id:
-                model_class.objects.filter(id=item_id, **{related_field_name: instance}).update(**item_data)
+        return update_new_data_service(instance, validated_data)

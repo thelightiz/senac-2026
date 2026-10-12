@@ -2,27 +2,54 @@ from django.db import models
 from update_requests.models import Solicitacao
 from users.models import Usuarios
 
-class Logs(models.Model):
-    solicitacao = models.ForeignKey(Solicitacao, on_delete=models.SET_NULL, null=True, db_index=True, related_name='logs')
-    usuario = models.ForeignKey(Usuarios, on_delete=models.SET_NULL, null=True, db_index=True, related_name='logs')
+class Log(models.Model):
+    class Status(models.TextChoices):
+        SUBMITING = 'SUBMITTING', 'Enviando Solicitação'
+        PENDING_AGENCY_REVIEW = 'PENDING_AGENCY_REVIEW', 'Pendente Análise do GA'
+        PENDING_CADASTRO = 'PENDING_CADASTRO', 'Pendente Análise do Time de Cadastro'
+        NEEDS_ADJUSTMENT_GN = 'NEEDS_ADJUSTMENT_GN', 'Necessita Ajuste do GN'
+        NEEDS_ADJUSTMENT_GA = 'NEEDS_ADJUSTMENT_GA', 'Necessita Ajuste do GA'
+        UPDATED = 'UPDATED', 'Atualizado'
+        REJECTED = 'REJECTED', 'Rejeitado'
 
-    STATUS_CHOICES = [
-        ('DRAFT', 'Rascunho'),
-        ('SUBMITTED', 'Enviado'),
-        ('PENDING_AGENCY_REVIEW', 'Pendente Análise'),
-        ('APPROVED', 'Aprovado'),
-        ('NEEDS_ADJUSTMENT', 'Necessita Ajuste'),
-        ('PENDING_CADASTRO', 'Pendente Cadastro'),
-        ('UPDATED', 'Atualizado'),
-        ('COMPLETED', 'Concluído'),
-        ('REJECTED', 'Rejeitado'),
-    ]
+    solicitacao = models.ForeignKey(
+        Solicitacao, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        db_index=True, 
+        related_name='status_logs',
+        verbose_name='Solicitação'
+    )
+    usuario = models.ForeignKey(
+        Usuarios, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        db_index=True, 
+        related_name='action_logs',
+        verbose_name='Usuário Responsável'
+    )
     
-    status_novo = models.CharField(max_length=21, choices=STATUS_CHOICES)
-    status_antigo = models.CharField(max_length=21, choices=STATUS_CHOICES)
+    status_anterior = models.CharField(
+        max_length=50, 
+        choices=Status.choices,
+        verbose_name='Status Anterior'
+    )
+    status_atual = models.CharField(
+        max_length=50, 
+        choices=Status.choices,
+        verbose_name='Status Atual'
+    )
     
-    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True, 
+        db_index=True,
+        verbose_name='Criado em'
+    )
 
-    def __str__(self):
-        id_solicitacao = self.solicitacao.id if self.solicitacao else 'N/A'
-        return f'Log Nº. {self.id} - Solicitação {id_solicitacao}: Antes: {self.status_antigo}, Depois: {self.status_novo} | ({self.timestamp})'
+    class Meta:
+        verbose_name = 'Log de Solicitação'
+        verbose_name_plural = 'Logs de Solicitações'
+        ordering = ['-created_at']
+        db_table = 'solicitacao_log'

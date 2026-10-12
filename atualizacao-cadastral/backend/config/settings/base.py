@@ -190,3 +190,24 @@ MAILERS = {
 }
 
 AUTH_USER_MODEL = 'users.Usuarios'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',  # Captura logs de nível INFO para cima (INFO, WARNING, ERROR, CRITICAL)
+    },
+}

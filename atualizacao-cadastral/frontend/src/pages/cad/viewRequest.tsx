@@ -56,12 +56,15 @@ type ActionType = "REPROVAR" | "SOLICITAR_AJUSTE_GN" | "SOLICITAR_AJUSTE_GA" | "
 
 export const CADViewRequestInfo = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
   const [requestUpdate, setRequestUpdate] = useState<UpdateRequest | null>(null);
   const [pdfUrl, SetPdfUrl] = useState<string | undefined>(undefined);
   const [selectedDoc, setSelectedDoc] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
-  const navigate = useNavigate();
+  const [showHistory, setShowHistory] = useState<boolean>(false);
+  const [historicLogs, setHistoricLogs] = useState<any[]>([]);
+  
 
   const [modalAction, setModalAction] = useState<ActionType | null>(null);
   const [parecer, setParecer] = useState<File | null>(null);
@@ -74,6 +77,19 @@ export const CADViewRequestInfo = () => {
 
   let dadosAntigos = null;
   let dadosNovos = null;
+
+  const handleToggleHistory = async () => {
+    if (!showHistory && historicLogs.length === 0) {
+      try {
+        const response = await api.get(`ver-solicitacao/${id}/historico`);
+        console.log(response.data)
+        setHistoricLogs(response.data);
+      } catch (error) {
+        console.log("Erro ao buscar histórico:", error);
+      }
+    }
+    setShowHistory(!showHistory);
+  };
 
   useEffect(() => {
     const fetchSolicitacao = async () => {
@@ -206,7 +222,7 @@ export const CADViewRequestInfo = () => {
               Solicitação de Atualização Cadastral #{id}
             </h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 py-2">
               <div>
                 <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
                   Criado por
@@ -243,8 +259,68 @@ export const CADViewRequestInfo = () => {
                 </p>
               </div>
 
+              <div>
+                <div className="flex items-center justify-center h-full">
+                  <button
+                    onClick={handleToggleHistory}
+                    className="text-sm font-semibold text-slate-900 hover:underline cursor-pointer bg-transparent border-none p-0"
+                  >
+                    {showHistory ? "Ocultar histórico" : "Ver histórico"}
+                  </button>
+                </div>
+              </div>
+
             </div>
           </div>
+
+          {showHistory && (
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Histórico de Movimentações ({historicLogs.length})
+                </h2>
+              </div>
+
+              {historicLogs.length > 0 ? (
+                <div className="relative border-l border-slate-200 ml-4 space-y-8 py-2">
+                  {historicLogs.map((log, index) => (
+                    <div key={log.id || index} className="relative pl-6">
+
+                      <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-[#33820d] ring-4 ring-[#33820d]/10" />
+                      
+                      <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200 space-y-3 shadow-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-xs">
+                          <span className="font-semibold text-slate-500">
+                            {new Date(log.created_at).toLocaleString('pt-BR', {
+                              dateStyle: 'short',
+                              timeStyle: 'medium'
+                            })}
+                          </span>
+                          <span className="font-medium bg-slate-200/60 px-2 py-0.5 rounded text-slate-700 w-fit">
+                            Responsável: <strong className="text-slate-900">{log.usuario_username || 'Sistema'}</strong>
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm pt-1">
+                          <span className="px-2.5 py-1 rounded-md bg-slate-200 text-slate-700 text-xs font-semibold">
+                            {log.status_anterior || 'Início'}
+                          </span>
+                          <span className="text-slate-400 font-bold">➔</span>
+                          <span className="px-2.5 py-1 rounded-md bg-[#33820d]/10 text-[#33820d] text-xs font-semibold border border-[#33820d]/20">
+                            {log.status_atual}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 text-center py-6 italic">
+                  Nenhum registro de histórico encontrado.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 

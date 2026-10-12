@@ -21,6 +21,8 @@ from django.urls import path, include
 from users import views as users_views
 from update_requests import views as requests_views
 from documents import views as documents_views
+from audit import views as log_views
+from core import views as core_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -39,6 +41,10 @@ urlpatterns = [
     path('api/cad/efetivar-solicitacao/<int:pk>', requests_views.CADAcceptRequest.as_view()),
 
     path('api/ver-solicitacao/<int:pk>', requests_views.SeeRequestView.as_view()),
+    path('api/ver-solicitacao/<int:pk>/historico', log_views.RequestLogHistoryView.as_view()),
     path('api/ver-documento/<int:pk>', documents_views.SeePDFView.as_view()),
-    path('api/retornar-solicitacao/<int:pk>', requests_views.HandleRequestReturnsView.as_view())
+    path('api/retornar-solicitacao/<int:pk>', requests_views.HandleRequestReturnsView.as_view()),
+
+    path('api/health', core_views.HealthCheckView().as_view()),
+    path('api/metrics', requests_views.SystemMetricsView.as_view())
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

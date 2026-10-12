@@ -1,13 +1,14 @@
 from .models import Solicitacao, DadosNovos
 from .serializers import PostRequestSerializer, GetRequestsSerializer, GetRequestInfoSerializer, GNAdjustRequestSerializer
+from .services import accept_request_service, handle_request_return_service, formalize_update_request_service, adjust_request_service
+from django.db.models import Count, Q
 from rest_framework import status
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from services.permissions import HasRole
 from django.shortcuts import get_object_or_404
-from documents.models import DocumentosSolicitacao
-from django.db import transaction
 import json
 
 class GNMyRequestsView(APIView):
@@ -99,13 +100,12 @@ class GAAcceptRequestView(APIView):
     def post(self, request, pk):
         solicitacao = get_object_or_404(Solicitacao, pk=pk)
 
-        if solicitacao.status == 'PENDING_CADASTRO':
-            return Response({'detail': 'Solicitação já foi aprovada.'}, status=status.HTTP_409_CONFLICT)
-        elif solicitacao.status != 'PENDING_AGENCY_REVIEW':
-            return Response({'detail': 'Sem permissão para alterar o status da solicitação.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        solicitacao.status = 'PENDING_CADASTRO'
-        solicitacao.save()
+        try:
+            accept_request_service(request_update=solicitacao, user=request.user)
+        except ValidationError as error:
+            return Response(error.detail, status=status.HTTP_409_CONFLICT)
+        except PermissionDenied as error:
+            return Response(error.detail, status=status.HTTP_401_UNAUTHORIZED)
 
         return Response({'mensagem': 'Solicitação aprovada'}, status=status.HTTP_200_OK)
 
@@ -118,98 +118,43 @@ class HandleRequestReturnsView(APIView):
         solicitacao = get_object_or_404(Solicitacao, pk=pk)
         acao = request.data.get('action')
         parecer = request.FILES.get('parecer')
-        status_solicitacao = None
 
-        if acao not in ['REPROVAR', 'SOLICITAR_AJUSTE_GN', 'SOLICITAR_AJUSTE_GA']:
-            return Response({'detail': 'Ação inválida'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not parecer:
-            return Response({'detail': 'A inclusão do parecer é obrigatório'}, status=status.HTTP_400_BAD_REQUEST)
-
-        DocumentosSolicitacao.objects.create(solicitacao=solicitacao, arquivo=parecer)
-
-        match acao:
-            case 'REPROVAR':
-                status_solicitacao = 'REJECTED'
-            case 'SOLICITAR_AJUSTE_GN':
-                status_solicitacao = 'NEEDS_ADJUSTMENT_GN'
-            case _:
-                status_solicitacao = 'NEEDS_ADJUSTMENT_GA'
-
-        solicitacao.status = status_solicitacao
-        solicitacao.save()
+        try:
+            handle_request_return_service(
+                update_request=solicitacao,
+                action=acao,
+                parecer=parecer,
+                user=request.user
+            )
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
             'mensagem': 'Documento anexado com sucesso.'
-            }, status=status.HTTP_200_OK
-        )
+        }, status=status.HTTP_200_OK)
 
 class CADAcceptRequest(APIView):
     permission_classes = [HasRole]
     allowed_roles = ['CADASTRO']
+    parser_classes = [MultiPartParser, FormParser]
 
-    @transaction.atomic
     def post(self, request, pk):
         parecer = request.FILES.get('parecer')
-
-        if not parecer:
-            return Response({
-                'detail': 'O parecer é obrigatório'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
         solicitacao = get_object_or_404(Solicitacao, pk=pk)
-        if solicitacao.status == 'UPDATED':
-            return Response({
-                'detail': 'Solicitação já efetivada'
-                }, status=status.HTTP_409_CONFLICT)
-        
-        if solicitacao.status != 'PENDING_CADASTRO':
-            return Response({
-                'detail': 'A solicitação não está em análise.'
-                }, status=status.HTTP_400_BAD_REQUEST)
 
-        cliente = solicitacao.cliente
-        dados_novos = solicitacao.dados_novos.first()
+        try:
+            formalize_update_request_service(
+                update_request=solicitacao,
+                parecer=parecer,
+                user=request.user
+            )
+        except ValidationError as error:
+            detail = error.detail
 
-        if not dados_novos:
-            return Response({
-                'detail': 'Dados novos não encontrados na solicitação'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        if dados_novos.salario:
-            cliente.salario = dados_novos.salario
-
-        if dados_novos.residencia_endereco:
-            cliente.residencia_endereco = dados_novos.residencia_endereco
-
-        if dados_novos.residencia_cep:
-            cliente.residencia_cep = dados_novos.residencia_cep
-
-        novos_imoveis = dados_novos.imoveis.all()
-        if novos_imoveis.exists():
-            for imovel_novo in novos_imoveis:
-                cliente.imoveis.create(
-                    endereco=imovel_novo.endereco,
-                    bairro=imovel_novo.bairro,
-                    cidade=imovel_novo.cidade,
-                    cep=imovel_novo.cep
-                )
-
-        novos_veiculos = dados_novos.veiculos.all()
-        if novos_veiculos.exists():
-            for veiculo_novo in novos_veiculos:
-                cliente.veiculos.create(
-                    renavam=veiculo_novo.renavam,
-                    placa=veiculo_novo.placa,
-                    marca_modelo=veiculo_novo.marca_modelo,
-                    ano=veiculo_novo.ano
-                )
-
-        DocumentosSolicitacao.objects.create(solicitacao=solicitacao, arquivo=parecer)
-
-        solicitacao.status = 'UPDATED'
-        solicitacao.save()
-        cliente.save()
+            if isinstance(detail, dict) and detail.get('code') == 'already_updated':
+                return Response({'detail': detail['detail']}, status=status.HTTP_409_CONFLICT)
+            
+            return Response(error.detail, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
             'mensagem': 'Solicitação efetivada'
@@ -223,8 +168,8 @@ class GNAdjustRequestView(APIView):
     def patch(self, request, pk):
         solicitacao = get_object_or_404(Solicitacao, pk=pk)
         dados_novos = get_object_or_404(DadosNovos, solicitacao=solicitacao)
+        
         raw_dados_novos = request.data.get('dados_novos')
-
         if isinstance(raw_dados_novos, str):
             try:
                 payload = json.loads(raw_dados_novos)
@@ -238,15 +183,28 @@ class GNAdjustRequestView(APIView):
         else:
             payload = request.data
 
-        print(payload)
         serializer = GNAdjustRequestSerializer(dados_novos, data=payload, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if serializer.is_valid():
-            with transaction.atomic():
-                solicitacao.status = 'PENDING_AGENCY_REVIEW'
-                solicitacao.save(update_fields=['status'])
-                serializer.save()
+        adjust_request_service(
+            request_update=solicitacao,
+            new_data=dados_novos,
+            validated_data=serializer.validated_data,
+            user=request.user
+        )
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class SystemMetricsView(APIView):
+    def get(self, request):
+        metrics = Solicitacao.objects.aggregate(
+            total_solicitacoes_criadas=Count('id'),
+            total_solicitacoes_efetivadas=Count('id', filter=Q(status='UPDATED')),
+            total_solicitacoes_rejeitadas=Count('id', filter=Q(status='REJECTED')),
+            solicitacoes_pendentes_analise_ga=Count('id', filter=Q(status='PENDING_AGENCY_REVIEW')),
+            solicitacoes_pendentes_analise_cad=Count('id', filter=Q(status='PENDING_CADASTRO')),
+            solicitacoes_pendente_ajuste_gn=Count('id', filter=Q(status='NEEDS_ADJUSTMENT_GN')),
+            solicitacoes_pendente_ajuste_ga=Count('id', filter=Q(status='NEEDS_ADJUSTMENT_GA'))
+        )
+        return Response(metrics, status=status.HTTP_200_OK)

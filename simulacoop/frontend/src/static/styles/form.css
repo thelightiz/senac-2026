@@ -1,10 +1,7 @@
-@font-face {
-  font-family: 'Exo 2';
-  src: url('../static/fonts/Exo2-Medium.ttf') format('truetype');
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    --fonte: 'Exo 2', 'Segoe UI', Arial, Helvetica, sans-serif;
+    --fonte: 'Inter', 'Segoe UI', Arial, Helvetica, sans-serif;
     --green: #4C9A2A;
     --green-dark: #3B7A20;
     --green-darker: #2E5F18;
@@ -18,8 +15,12 @@
 
 body {
     margin: 0;
+    font-family: var(--fonte);
     background: var(--page-bg);
     color: var(--text-dark);
+}
+button, input, select, textarea {
+    font-family: inherit;
 }
 
 /* Top bar */

@@ -1,196 +1,205 @@
 from django.db import transaction
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from audit.models import Log
-from documents.models import DocumentosSolicitacao
-from .models import Solicitacao, DadosNovos, Imovel, Veiculo, DadosAntigos, SnapshotImovel, SnapshotVeiculo
+from documents.models import RequestDocument
+from .models import UpdateRequest, NewData, RequestProperty, RequestVehicle, OldData, PropertySnapshot, VehicleSnapshot
 import logging
 
 logger = logging.getLogger(__name__)
 
-def generic_log_register_service(update_request, previous_status, actual_status, user):
+def generic_log_register_service(update_request, previous_status, current_status, user):
     return Log.objects.create(
-        solicitacao=update_request,
-        status_anterior=previous_status,
-        status_atual=actual_status,
-        usuario=user)
+        request=update_request,
+        previous_status=previous_status,
+        current_status=current_status,
+        user=user
+    )
 
 @transaction.atomic
 def create_update_request_service(validated_data, request, user):
-    customer = validated_data.pop('cliente')
-    dados_novos_data = validated_data.pop('dados_novos', {})
-    validated_data.pop('documentos', None)
+    customer = validated_data.pop('customer')
+    new_data_dict = validated_data.pop('new_data', {})
+    validated_data.pop('documents', None)
 
-    update_request = Solicitacao.objects.create(
-        cliente=customer,
-        criado_por=user,
+    update_request = UpdateRequest.objects.create(
+        customer=customer,
+        created_by=user,
         status='PENDING_AGENCY_REVIEW',
         **validated_data
     )
 
     logger.info(
-        f"Nova solicitação {update_request.id} criada pelo usuário {user.username}"
+        f"New request {update_request.id} created by user {user.username}"
     )
 
     log_instance = generic_log_register_service(
         update_request=update_request,
         previous_status='SUBMITTING',
-        actual_status='PENDING_AGENCY_REVIEW',
+        current_status='PENDING_AGENCY_REVIEW',
         user=user
     )
 
     if request:
-        create_request_documents_service(update_request=update_request, request_files=request.FILES, log_instance=log_instance)
+        create_request_documents_service(
+            update_request=update_request, 
+            request_files=request.FILES, 
+            log_instance=log_instance
+        )
 
-    create_update_request_new_data_service(update_request=update_request, validated_data=dados_novos_data)
-    create_request_snapshots_service(update_request=update_request, customer=customer)
+    create_update_request_new_data_service(
+        update_request=update_request, 
+        validated_data=new_data_dict
+    )
+    create_request_snapshots_service(
+        update_request=update_request, 
+        customer=customer
+    )
 
     return update_request
 
 @transaction.atomic
 def create_update_request_new_data_service(update_request, validated_data):
-    new_data = DadosNovos.objects.create(
-        solicitacao=update_request,
-        cliente=update_request.cliente,
-        salario=validated_data.get('salario'),
-        residencia_endereco=validated_data.get('residencia_endereco'),
-        residencia_cep=validated_data.get('residencia_cep')
+    new_data = NewData.objects.create(
+        request=update_request,
+        customer=update_request.customer,
+        salary=validated_data.get('salary'),
+        residence_address=validated_data.get('residence_address'),
+        residence_zip_code=validated_data.get('residence_zip_code')
     )
 
-    imoveis_data = validated_data.get('imoveis', [])
-    for imovel_dict in imoveis_data:
-        if any(imovel_dict.values()):
-            Imovel.objects.create(
-                dados_novos=new_data,
-                **imovel_dict
+    properties_data = validated_data.get('properties', [])
+    for property_dict in properties_data:
+        if any(property_dict.values()):
+            RequestProperty.objects.create(
+                new_data=new_data,
+                **property_dict
             )
 
-    veiculos_data = validated_data.get('veiculos', [])
-    for veiculo_dict in veiculos_data:
-        if any(veiculo_dict.values()):
-            Veiculo.objects.create(
-                dados_novos=new_data,
-                **veiculo_dict
+    vehicles_data = validated_data.get('vehicles', [])
+    for vehicle_dict in vehicles_data:
+        if any(vehicle_dict.values()):
+            RequestVehicle.objects.create(
+                new_data=new_data,
+                **vehicle_dict
             )
             
     return new_data
 
 @transaction.atomic
 def create_request_snapshots_service(update_request, customer):
-    qtd_imoveis = customer.imoveis.count()
-    qtd_veiculos = customer.veiculos.count()
+    properties_count = customer.properties.count()
+    vehicles_count = customer.vehicles.count()
 
-    dados_antigos = DadosAntigos.objects.create(
-        solicitacao=update_request,
-        dados_referencia=customer,
-        salario_snapshot=customer.salario,
-        endereco_snapshot=customer.endereco,
-        cep_snapshot=customer.cep,
-        tem_imoveis_snapshot=qtd_imoveis > 0,
-        tem_veiculos_snapshot=qtd_veiculos > 0,
-        qtd_imoveis_snapshot=qtd_imoveis,
-        qtd_veiculos_snapshot=qtd_veiculos,
+    old_data = OldData.objects.create(
+        request=update_request,
+        reference_customer=customer,
+        salary_snapshot=customer.salary,
+        address_snapshot=customer.address,
+        zip_code_snapshot=customer.zip_code,
+        has_properties_snapshot=properties_count > 0,
+        has_vehicles_snapshot=vehicles_count > 0,
+        properties_count_snapshot=properties_count,
+        vehicles_count_snapshot=vehicles_count,
     )
 
-    for imovel in customer.imoveis.all():
-        SnapshotImovel.objects.create(
-            dados_antigos=dados_antigos,
-            endereco=imovel.endereco,
-            bairro=imovel.bairro,
-            cidade=imovel.cidade,
-            cep=imovel.cep,
+    for property_obj in customer.properties.all():
+        PropertySnapshot.objects.create(
+            old_data=old_data,
+            address=property_obj.address,
+            neighborhood=property_obj.neighborhood,
+            city=property_obj.city,
+            zip_code=property_obj.zip_code,
         )
 
-    for veiculo in customer.veiculos.all():
-        SnapshotVeiculo.objects.create(
-            dados_antigos=dados_antigos,
-            renavam=veiculo.renavam,
-            placa=veiculo.placa,
-            marca_modelo=veiculo.marca_modelo,
-            ano=veiculo.ano,
+    for vehicle_obj in customer.vehicles.all():
+        VehicleSnapshot.objects.create(
+            old_data=old_data,
+            renavam=vehicle_obj.renavam,
+            license_plate=vehicle_obj.license_plate,
+            brand_model=vehicle_obj.brand_model,
+            year=vehicle_obj.year,
         )
     
-    return dados_antigos
+    return old_data
 
 @transaction.atomic
 def create_request_documents_service(update_request, request_files, log_instance):
     if request_files:
-        arquivos = request_files.getlist('documentos', [])
-        for arquivo in arquivos:
-            DocumentosSolicitacao.objects.create(
-                solicitacao=update_request,
+        files = request_files.getlist('documents', [])
+        for file_obj in files:
+            RequestDocument.objects.create(
+                request=update_request,
                 log=log_instance,
-                arquivo=arquivo
+                file=file_obj
             )
 
 @transaction.atomic
 def update_new_data_service(instance, validated_data):
-    imoveis_data = validated_data.pop('imoveis', None)
-    veiculos_data = validated_data.pop('veiculos', None)
+    properties_data = validated_data.pop('properties', None)
+    vehicles_data = validated_data.pop('vehicles', None)
 
     for attr, value in validated_data.items():
         setattr(instance, attr, value)
 
     instance.save()
 
-    if imoveis_data is not None:
-        for item_data in imoveis_data:
+    if properties_data is not None:
+        for item_data in properties_data:
             item_id = item_data.pop('id', None)
             if item_id:
-                Imovel.objects.filter(id=item_id, dados_novos=instance).update(**item_data)
+                RequestProperty.objects.filter(id=item_id, new_data=instance).update(**item_data)
             else:
-                Imovel.objects.create(dados_novos=instance, **item_data)
+                RequestProperty.objects.create(new_data=instance, **item_data)
 
-    if veiculos_data is not None:
-        for item_data in veiculos_data:
+    if vehicles_data is not None:
+        for item_data in vehicles_data:
             item_id = item_data.pop('id', None)
             if item_id:
-                Veiculo.objects.filter(id=item_id, dados_novos=instance).update(**item_data)
+                RequestVehicle.objects.filter(id=item_id, new_data=instance).update(**item_data)
             else:
-                Veiculo.objects.create(dados_novos=instance, **item_data)
+                RequestVehicle.objects.create(new_data=instance, **item_data)
 
     return instance
 
 @transaction.atomic
-def accept_request_service(request_update, user):
-    if request_update.status == 'PENDING_CADASTRO':
+def accept_request_service(update_request, user):
+    if update_request.status == 'PENDING_REGISTRATION':
         logger.warning(
-            f"Tentativa inválida de aprovar a solicitação {request_update.id} pelo usuário {user.username}. Status atual: {request_update.status}"
+            f"Invalid attempt to approve request {update_request.id} by user {user.username}. Current status: {update_request.status}"
         )
-        raise ValidationError({'detail': 'Solicitação já foi aprovada.'})
-    if request_update.status != 'PENDING_AGENCY_REVIEW':
+        raise ValidationError({'detail': 'Request has already been approved.'})
+    if update_request.status != 'PENDING_AGENCY_REVIEW':
         logger.warning(
-            f"Tentativa inválida de aprovar a solicitação {request_update.id} pelo usuário {user.username}. Status atual: {request_update.status}"
+            f"Invalid attempt to approve request {update_request.id} by user {user.username}. Current status: {update_request.status}"
         )
-        raise PermissionDenied({'detail': 'Sem permissão para alterar o status.'})
+        raise PermissionDenied({'detail': 'No permission to change status.'})
 
     logger.info(
-        f"Solicitação {request_update.id} aprovada com sucesso pelo usuário {user.username}."
+        f"Request {update_request.id} successfully approved by user {user.username}."
     )
     
-    return _transition_status(request_update, 'PENDING_CADASTRO', user)
+    return _transition_status(update_request, 'PENDING_REGISTRATION', user)
 
 @transaction.atomic
-def handle_request_return_service(update_request, action, parecer, user):
-    valid_actions = ['REPROVAR', 'SOLICITAR_AJUSTE_GN', 'SOLICITAR_AJUSTE_GA']
+def handle_request_return_service(update_request, action, opinion, user):
+    valid_actions = ['REJECT', 'REQUEST_ADJUSTMENT_GN', 'REQUEST_ADJUSTMENT_GA']
 
     if action not in valid_actions:
         logger.warning(
-            f"Usuário {user.username} tentou executar uma ação inválida ('{action}') na solicitação {update_request.id}"
+            f"User {user.username} tried to execute an invalid action ('{action}') on request {update_request.id}"
         )
+        raise ValidationError({'detail': 'Invalid action'})
 
-        raise ValidationError({'detail': 'Ação inválida'})
-
-    if not parecer:
+    if not opinion:
         logger.warning(
-            f"Usuário {user.username} tentou retornar a solicitação {update_request.id} com a ação '{action}' sem anexar o parecer obrigatório"
+            f"User {user.username} tried to return request {update_request.id} with action '{action}' without attaching the mandatory opinion/review note"
         )
-
-        raise ValidationError({'detail': 'A inclusão do parecer é obrigatório'})
+        raise ValidationError({'detail': 'Attaching an opinion is mandatory'})
 
     status_map = {
-        'REPROVAR': 'REJECTED',
-        'SOLICITAR_AJUSTE_GN': 'NEEDS_ADJUSTMENT_GN',
-        'SOLICITAR_AJUSTE_GA': 'NEEDS_ADJUSTMENT_GA',
+        'REJECT': 'REJECTED',
+        'REQUEST_ADJUSTMENT_GN': 'NEEDS_ADJUSTMENT_GN',
+        'REQUEST_ADJUSTMENT_GA': 'NEEDS_ADJUSTMENT_GA',
     }
     new_status = status_map[action]
     previous_status = update_request.status
@@ -199,19 +208,19 @@ def handle_request_return_service(update_request, action, parecer, user):
     update_request.save()
 
     logger.info(
-        f"Solicitação {update_request.id} processada com a ação '{action}' pelo usuário {user.username}. Status alterado de {previous_status} para {new_status}"
+        f"Request {update_request.id} processed with action '{action}' by user {user.username}. Status changed from {previous_status} to {new_status}"
     )
 
     log_instance = generic_log_register_service(
         update_request=update_request,
         previous_status=previous_status,
-        actual_status=new_status,
+        current_status=new_status,
         user=user
     )
     
-    DocumentosSolicitacao.objects.create(
-        solicitacao=update_request,
-        arquivo=parecer,
+    RequestDocument.objects.create(
+        request=update_request,
+        file=opinion,
         log=log_instance
     )
 
@@ -229,113 +238,112 @@ def adjust_request_service(update_request, new_data, validated_data, user):
         update_request.save(update_fields=['status'])
 
         logger.info(
-            f"Solicitação {update_request.id} foi ajustada e retornada para revisão da agência pelo usuário {user.username}"
+            f"Request {update_request.id} was adjusted and returned to agency review by user {user.username}"
         )
 
         generic_log_register_service(
             update_request=update_request,
             previous_status=previous_status,
-            actual_status=new_status,
+            current_status=new_status,
             user=user
         )
 
     return update_request
 
 @transaction.atomic
-def formalize_update_request_service(update_request, parecer, user):
-    if not parecer:
+def formalize_update_request_service(update_request, opinion, user):
+    if not opinion:
         logger.warning(
-            f"Usuário {user.username} tentou formalizar a solicitação {update_request.id} sem o documento de parecer"
+            f"User {user.username} tried to formalize request {update_request.id} without the opinion document"
         )
-
-        raise ValidationError({'detail': 'O parecer é obrigatório'})
+        raise ValidationError({'detail': 'The opinion document is mandatory'})
 
     if update_request.status == 'UPDATED':
         logger.warning(
-            f"Tentativa de efetivar novamente uma solicitação já efetivada ({update_request.id}) pelo usuário {user.username}"
+            f"Attempt to re-finalize an already finalized request ({update_request.id}) by user {user.username}"
         )
         raise ValidationError({
-            'detail': 'Solicitação já efetivada',
+            'detail': 'Request already finalized',
             'code': 'already_updated'
         })
 
-    if update_request.status != 'PENDING_CADASTRO':
+    if update_request.status != 'PENDING_REGISTRATION':
         logger.warning(
-            f"Tentativa de formalizar solicitação {update_request.id} com status inválido ({update_request.status}) pelo usuário {user.username}"
+            f"Attempt to formalize request {update_request.id} with invalid status ({update_request.status}) by user {user.username}"
         )
-        raise ValidationError({'detail': 'A solicitação não está em análise.'})
+        raise ValidationError({'detail': 'Request is not under registration review.'})
 
-    dados_novos = update_request.dados_novos.first()
-    if not dados_novos:
+    new_data = update_request.new_data.first()
+    if not new_data:
         logger.error(
-            f"Erro de integridade: Dados novos não encontrados para a solicitação {update_request.id} durante a tentativa de formalização por {user.username}"
+            f"Integrity error: New data not found for request {update_request.id} during formalization attempt by {user.username}"
         )
-        raise ValidationError({'detail': 'Dados novos não encontrados na solicitação'})
+        raise ValidationError({'detail': 'New data not found in request'})
 
-    cliente = update_request.cliente
+    customer = update_request.customer
 
-    if dados_novos.salario:
-        cliente.salario = dados_novos.salario
-    if dados_novos.residencia_endereco:
-        cliente.endereco = dados_novos.residencia_endereco
-    if dados_novos.residencia_cep:
-        cliente.cep = dados_novos.residencia_cep
+    if new_data.salary:
+        customer.salary = new_data.salary
+    if new_data.residence_address:
+        customer.address = new_data.residence_address
+    if new_data.residence_zip_code:
+        customer.cep = new_data.residence_zip_code
 
-    for imovel_novo in dados_novos.imoveis.all():
-        cliente.imoveis.create(
-            endereco=imovel_novo.endereco,
-            bairro=imovel_novo.bairro,
-            cidade=imovel_novo.cidade,
-            cep=imovel_novo.cep
-        )
-
-    for veiculo_novo in dados_novos.veiculos.all():
-        cliente.veiculos.create(
-            renavam=veiculo_novo.renavam,
-            placa=veiculo_novo.placa,
-            marca_modelo=veiculo_novo.marca_modelo,
-            ano=veiculo_novo.ano
+    for new_property in new_data.properties.all():
+        customer.properties.create(
+            address=new_property.address,
+            neighborhood=new_property.neighborhood,
+            city=new_property.city,
+            zip_code=new_property.zip_code
         )
 
-    cliente.save()
+    for new_vehicle in new_data.vehicles.all():
+        customer.vehicles.create(
+            renavam=new_vehicle.renavam,
+            license_plate=new_vehicle.license_plate,
+            brand_model=new_vehicle.brand_model,
+            year=new_vehicle.year
+        )
 
-    status_anterior = update_request.status
+    customer.save()
+
+    previous_status = update_request.status
     update_request.status = 'UPDATED'
     update_request.save()
 
     logger.info(
-        f"Solicitação {update_request.id} efetivada e dados do cliente atualizados com sucesso pelo usuário {user.username}"
+        f"Request {update_request.id} finalized and customer data updated successfully by user {user.username}"
     )
 
     log_instance = generic_log_register_service(
         update_request=update_request,
-        previous_status=status_anterior,
-        actual_status='UPDATED',
+        previous_status=previous_status,
+        current_status='UPDATED',
         user=user
     )
 
-    DocumentosSolicitacao.objects.create(
-        solicitacao=update_request,
-        arquivo=parecer,
+    RequestDocument.objects.create(
+        request=update_request,
+        file=opinion,
         log=log_instance
     )
 
     return update_request
 
-def _transition_status(request_update, new_status, user):
-    previous_status = request_update.status
+def _transition_status(update_request, new_status, user):
+    previous_status = update_request.status
 
     if previous_status == new_status:
-        return request_update
+        return update_request
 
-    request_update.status = new_status
-    request_update.save()
+    update_request.status = new_status
+    update_request.save()
 
     generic_log_register_service(
-        update_request=request_update,
+        update_request=update_request,
         previous_status=previous_status,
-        actual_status=new_status,
+        current_status=new_status,
         user=user
     )
 
-    return request_update
+    return update_request

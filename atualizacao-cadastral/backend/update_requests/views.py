@@ -1,4 +1,4 @@
-from .models import Solicitacao, DadosNovos
+from .models import UpdateRequest, NewData
 from .serializers import PostRequestSerializer, GetRequestsSerializer, GetRequestInfoSerializer, GNAdjustRequestSerializer
 from .services import accept_request_service, handle_request_return_service, formalize_update_request_service, adjust_request_service
 from django.db.models import Count, Q
@@ -17,15 +17,15 @@ class GNMyRequestsView(APIView):
 
     def get(self, request):
         user = request.user
-        requests = Solicitacao.objects.filter(criado_por=user)
+        requests = UpdateRequest.objects.filter(created_by=user)
         serializer = GetRequestsSerializer(requests, many=True)
         
         return Response(
-            {'usuario': {
-                'nome': user.username,
+            {'user': {
+                'name': user.username,
                 'role': user.role,
             },
-            'solicitacoes': serializer.data},
+            'requests': serializer.data},
             status=status.HTTP_200_OK)
 
 class GNCreateRequestView(APIView):
@@ -38,9 +38,10 @@ class GNCreateRequestView(APIView):
         print(request.data)
 
         if serializer.is_valid():
-            solicitacao = serializer.save(criado_por=request.user)
+            update_request = serializer.save(created_by=request.user)
             return Response(
-                {'mensagem': 'criado', 'id': solicitacao.id, 'criado_por_id': solicitacao.criado_por_id}, status=status.HTTP_201_CREATED
+                {'message': 'created', 'id': update_request.id, 'created_by_id': update_request.created_by_id}, 
+                status=status.HTTP_201_CREATED
             )
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -51,15 +52,15 @@ class GARequestsQueueView(APIView):
 
     def get(self, request):
         user = request.user
-        requests = Solicitacao.objects.filter(status__in=['PENDING_AGENCY_REVIEW', 'NEEDS_ADJUSTMENT_GA'])
+        requests = UpdateRequest.objects.filter(status__in=['PENDING_AGENCY_REVIEW', 'NEEDS_ADJUSTMENT_GA'])
         serializer = GetRequestsSerializer(requests, many=True)
         
         return Response(
-            {'usuario': {
-                'nome': user.username,
+            {'user': {
+                'name': user.username,
                 'role': user.role,
             },
-            'solicitacoes': serializer.data},
+            'requests': serializer.data},
             status=status.HTTP_200_OK)
 
 class CADRequestsQueueView(APIView):
@@ -68,15 +69,15 @@ class CADRequestsQueueView(APIView):
 
     def get(self, request):
         user = request.user
-        requests = Solicitacao.objects.filter(status='PENDING_CADASTRO')
+        requests = UpdateRequest.objects.filter(status='PENDING_REGISTRATION')
         serializer = GetRequestsSerializer(requests, many=True)
         
         return Response(
-            {'usuario': {
-                'nome': user.username,
+            {'user': {
+                'name': user.username,
                 'role': user.role,
             },
-            'solicitacoes': serializer.data},
+            'requests': serializer.data},
             status=status.HTTP_200_OK)
 
 class SeeRequestView(APIView):
@@ -84,12 +85,11 @@ class SeeRequestView(APIView):
     allowed_roles = ['GN', 'GA', 'CADASTRO']
 
     def get(self, request, pk):
-        solicitacao = get_object_or_404(Solicitacao, id=pk)
-        
-        serializer = GetRequestInfoSerializer(solicitacao, context={'request': request})
+        update_request = get_object_or_404(UpdateRequest, id=pk)
+        serializer = GetRequestInfoSerializer(update_request, context={'request': request})
         
         return Response(
-            {'solicitacao': serializer.data},
+            {'request': serializer.data},
             status=status.HTTP_200_OK
         )
 
@@ -98,16 +98,16 @@ class GAAcceptRequestView(APIView):
     allowed_roles = ['GA']
 
     def post(self, request, pk):
-        solicitacao = get_object_or_404(Solicitacao, pk=pk)
+        update_request = get_object_or_404(UpdateRequest, pk=pk)
 
         try:
-            accept_request_service(request_update=solicitacao, user=request.user)
+            accept_request_service(update_request=update_request, user=request.user)
         except ValidationError as error:
             return Response(error.detail, status=status.HTTP_409_CONFLICT)
         except PermissionDenied as error:
             return Response(error.detail, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response({'mensagem': 'Solicitação aprovada'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Request approved'}, status=status.HTTP_200_OK)
 
 class HandleRequestReturnsView(APIView):
     permission_classes = [HasRole]
@@ -115,22 +115,22 @@ class HandleRequestReturnsView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, pk):
-        solicitacao = get_object_or_404(Solicitacao, pk=pk)
-        acao = request.data.get('action')
-        parecer = request.FILES.get('parecer')
+        update_request = get_object_or_404(UpdateRequest, pk=pk)
+        action = request.data.get('action')
+        opinion = request.FILES.get('opinion')
 
         try:
             handle_request_return_service(
-                update_request=solicitacao,
-                action=acao,
-                parecer=parecer,
+                update_request=update_request,
+                action=action,
+                opinion=opinion,
                 user=request.user
             )
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
-            'mensagem': 'Documento anexado com sucesso.'
+            'message': 'Document attached successfully.'
         }, status=status.HTTP_200_OK)
 
 class CADAcceptRequest(APIView):
@@ -139,13 +139,13 @@ class CADAcceptRequest(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, pk):
-        parecer = request.FILES.get('parecer')
-        solicitacao = get_object_or_404(Solicitacao, pk=pk)
+        opinion = request.FILES.get('opinion')
+        update_request = get_object_or_404(UpdateRequest, pk=pk)
 
         try:
             formalize_update_request_service(
-                update_request=solicitacao,
-                parecer=parecer,
+                update_request=update_request,
+                opinion=opinion,
                 user=request.user
             )
         except ValidationError as error:
@@ -157,7 +157,7 @@ class CADAcceptRequest(APIView):
             return Response(error.detail, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
-            'mensagem': 'Solicitação efetivada'
+            'message': 'Request finalized'
         }, status=status.HTTP_200_OK)
 
 class GNAdjustRequestView(APIView):
@@ -166,30 +166,30 @@ class GNAdjustRequestView(APIView):
     parser_classes = [MultiPartParser, FormParser]
     
     def patch(self, request, pk):
-        solicitacao = get_object_or_404(Solicitacao, pk=pk)
-        dados_novos = get_object_or_404(DadosNovos, solicitacao=solicitacao)
+        update_request = get_object_or_404(UpdateRequest, pk=pk)
+        new_data = get_object_or_404(NewData, request=update_request)
         
-        raw_dados_novos = request.data.get('dados_novos')
-        if isinstance(raw_dados_novos, str):
+        raw_new_data = request.data.get('new_data')
+        if isinstance(raw_new_data, str):
             try:
-                payload = json.loads(raw_dados_novos)
+                payload = json.loads(raw_new_data)
             except json.JSONDecodeError:
                 return Response(
-                    {"dados_novos": ["Formato JSON inválido em dados_novos."]},
+                    {"new_data": ["Invalid JSON format in new_data."]},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        elif isinstance(raw_dados_novos, dict):
-            payload = raw_dados_novos
+        elif isinstance(raw_new_data, dict):
+            payload = raw_new_data
         else:
             payload = request.data
 
-        serializer = GNAdjustRequestSerializer(dados_novos, data=payload, partial=True)
+        serializer = GNAdjustRequestSerializer(new_data, data=payload, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         adjust_request_service(
-            request_update=solicitacao,
-            new_data=dados_novos,
+            update_request=update_request,
+            new_data=new_data,
             validated_data=serializer.validated_data,
             user=request.user
         )
@@ -198,13 +198,13 @@ class GNAdjustRequestView(APIView):
 
 class SystemMetricsView(APIView):
     def get(self, request):
-        metrics = Solicitacao.objects.aggregate(
-            total_solicitacoes_criadas=Count('id'),
-            total_solicitacoes_efetivadas=Count('id', filter=Q(status='UPDATED')),
-            total_solicitacoes_rejeitadas=Count('id', filter=Q(status='REJECTED')),
-            solicitacoes_pendentes_analise_ga=Count('id', filter=Q(status='PENDING_AGENCY_REVIEW')),
-            solicitacoes_pendentes_analise_cad=Count('id', filter=Q(status='PENDING_CADASTRO')),
-            solicitacoes_pendente_ajuste_gn=Count('id', filter=Q(status='NEEDS_ADJUSTMENT_GN')),
-            solicitacoes_pendente_ajuste_ga=Count('id', filter=Q(status='NEEDS_ADJUSTMENT_GA'))
+        metrics = UpdateRequest.objects.aggregate(
+            total_requests_created=Count('id'),
+            total_requests_finalized=Count('id', filter=Q(status='UPDATED')),
+            total_requests_rejected=Count('id', filter=Q(status='REJECTED')),
+            requests_pending_agency_review=Count('id', filter=Q(status='PENDING_AGENCY_REVIEW')),
+            requests_pending_registration=Count('id', filter=Q(status='PENDING_REGISTRATION')),
+            requests_pending_adjustment_gn=Count('id', filter=Q(status='NEEDS_ADJUSTMENT_GN')),
+            requests_pending_adjustment_ga=Count('id', filter=Q(status='NEEDS_ADJUSTMENT_GA'))
         )
         return Response(metrics, status=status.HTTP_200_OK)

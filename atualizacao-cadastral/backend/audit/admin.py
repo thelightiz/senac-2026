@@ -3,5 +3,5 @@ from .models import Log
 
 @admin.register(Log)
 class LogAdmin(admin.ModelAdmin):
-    list_display = ('solicitacao', 'usuario', 'status_anterior', 'status_atual', 'created_at')
+    list_display = ('update_request', 'user', 'previous_status', 'new_status', 'created_at')
     readonly_fields = ('created_at',)

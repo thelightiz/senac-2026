@@ -1,69 +1,73 @@
 from .services import create_update_request_service, update_new_data_service
 from rest_framework import serializers
-from .models import Solicitacao, DadosAntigos, DadosNovos, SnapshotImovel, SnapshotVeiculo, Imovel, Veiculo
-from documents.models import DocumentosSolicitacao
-from customers.models import Cliente
+from .models import UpdateRequest, OldData, NewData, PropertySnapshot, VehicleSnapshot, RequestVehicle, RequestProperty
+from documents.models import RequestDocument
+from customers.models import Customer
 import json
 
-class PostRequestImovelSerializer(serializers.ModelSerializer):
+
+class RequestPropertySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Imovel
-        fields = ['id', 'endereco', 'bairro', 'cidade', 'cep']
+        model = RequestProperty
+        fields = ['id', 'address', 'neighborhood', 'city', 'zip_code']
         extra_kwargs = {
-            'endereco': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'bairro': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'cidade': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'cep': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'address': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'neighborhood': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'city': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'zip_code': {'allow_null': True, 'allow_blank': True, 'required': False},
         }
 
-class PostRequestVeiculoSerializer(serializers.ModelSerializer):
+
+class RequestVehicleSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Veiculo
-        fields = ['id', 'renavam', 'placa', 'marca_modelo', 'ano']
+        model = RequestVehicle
+        fields = ['id', 'renavam', 'license_plate', 'brand_model', 'year']
         extra_kwargs = {
             'renavam': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'placa': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'marca_modelo': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'ano': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'license_plate': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'brand_model': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'year': {'allow_null': True, 'allow_blank': True, 'required': False},
         }
 
-class PostRequestDadosNovosSerializer(serializers.ModelSerializer):
-    imovel = PostRequestImovelSerializer(source='imoveis', many=True, required=False)
-    veiculo = PostRequestVeiculoSerializer(source='veiculos', many=True, required=False)
+
+class RequestNewDataSerializer(serializers.ModelSerializer):
+    properties = RequestPropertySerializer(many=True, required=False)
+    vehicles = RequestVehicleSerializer(many=True, required=False)
 
     class Meta:
-        model = DadosNovos
-        fields = ['salario', 'residencia_endereco', 'residencia_cep', 'imovel', 'veiculo']
+        model = NewData
+        fields = ['salary', 'residence_address', 'residence_zip_code', 'properties', 'vehicles']
+
 
 class PostRequestSerializer(serializers.ModelSerializer):
-    cliente = serializers.SlugRelatedField(
+    customer = serializers.SlugRelatedField(
         slug_field='cpf',
-        queryset=Cliente.objects.all()
+        queryset=Customer.objects.all()
     )
-    dados_novos = PostRequestDadosNovosSerializer()
+    new_data = RequestNewDataSerializer()
 
-    documentos = serializers.ListField(
+    documents = serializers.ListField(
         child=serializers.FileField(),
         required=False,
         write_only=True
     )
 
-    criado_por = serializers.HiddenField(
+    created_by = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
 
     class Meta:
-        model = Solicitacao
+        model = UpdateRequest
         fields = [
-            'id', 'criado_por', 'cliente', 'atualizacao', 'status',
-            'documentos', 'dados_novos',
+            'id', 'created_by', 'customer', 'update_type', 'status',
+            'documents', 'new_data',
         ]
 
     def to_internal_value(self, data):
         if hasattr(data, 'getlist'):
             data_dict = {}
             for key in data.keys():
-                if key == 'documentos':
+                if key == 'documents':
                     data_dict[key] = data.getlist(key)
                 else:
                     data_dict[key] = data.get(key)
@@ -71,19 +75,19 @@ class PostRequestSerializer(serializers.ModelSerializer):
         elif hasattr(data, 'copy'):
             data = data.copy()
 
-        dados_novos_raw = data.get('dados_novos')
-        if isinstance(dados_novos_raw, str):
+        new_data_raw = data.get('new_data')
+        if isinstance(new_data_raw, str):
             try:
-                data['dados_novos'] = json.loads(dados_novos_raw)
+                data['new_data'] = json.loads(new_data_raw)
             except (ValueError, TypeError, json.JSONDecodeError):
                 raise serializers.ValidationError({
-                    'dados_novos': 'A string enviada não é um JSON válido.'
+                    'new_data': 'A string enviada não é um JSON válido.'
                 })
 
         return super().to_internal_value(data)
 
     def create(self, validated_data):
-        user = validated_data.pop('criado_por', None)
+        user = validated_data.pop('created_by', None)
         request = self.context.get('request')
         
         return create_update_request_service(
@@ -92,102 +96,112 @@ class PostRequestSerializer(serializers.ModelSerializer):
             user=user
         )
 
+
 class GetRequestsSerializer(serializers.ModelSerializer):
-    cliente = serializers.StringRelatedField() 
+    customer = serializers.StringRelatedField() 
     status = serializers.CharField(source='get_status_display', read_only=True)
     
     class Meta:
-        model = Solicitacao
-        fields = ['id', 'criado_por', 'cliente', 'atualizacao', 'status', 'documentos']
+        model = UpdateRequest
+        fields = ['id', 'created_by', 'customer', 'update_type', 'status', 'documents']
 
-class GetRequestDocumentsSerializer(serializers.ModelSerializer):
+
+class RequestDocumentSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
     class Meta:
-        model = DocumentosSolicitacao
+        model = RequestDocument
         fields = '__all__'
 
     def get_url(self, obj):
         request = self.context.get('request')
-        relative_url = f'/api/documentos/{obj.id}/visualizar'
+        relative_url = f'/api/documents/{obj.id}/view/'
 
         if request:
             return request.build_absolute_uri(relative_url)
 
         return relative_url
 
-class GetImovelSnapshotSerializer(serializers.ModelSerializer):
+
+class PropertySnapshotSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SnapshotImovel
+        model = PropertySnapshot
         fields = '__all__'
 
-class GetVeiculoSnapshotSerializer(serializers.ModelSerializer):
+
+class VehicleSnapshotSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SnapshotVeiculo
+        model = VehicleSnapshot
         fields = '__all__'
 
-class GetRequestDadosAntigosSerializer(serializers.ModelSerializer):
-    imoveis_snapshot = GetImovelSnapshotSerializer(many=True, read_only=True)
-    veiculos_snapshot = GetVeiculoSnapshotSerializer(many=True, read_only=True)
+
+class RequestOldDataSerializer(serializers.ModelSerializer):
+    property_snapshots = PropertySnapshotSerializer(many=True, read_only=True)
+    vehicle_snapshots = VehicleSnapshotSerializer(many=True, read_only=True)
 
     class Meta:
-        model = DadosAntigos
+        model = OldData
         fields = '__all__'
 
-class GetRequestDadosNovosSerializer(serializers.ModelSerializer):
-    imovel = PostRequestImovelSerializer(source='imoveis', many=True, read_only=True)
-    veiculo = PostRequestVeiculoSerializer(source='veiculos', many=True, read_only=True)
+
+class GetRequestNewDataSerializer(serializers.ModelSerializer):
+    properties = RequestPropertySerializer(source='properties', many=True, read_only=True)
+    vehicles = RequestVehicleSerializer(source='vehicles', many=True, read_only=True)
 
     class Meta:
-        model = DadosNovos
-        fields = ['salario', 'residencia_endereco', 'residencia_cep', 'imovel', 'veiculo']
+        model = NewData
+        fields = ['salary', 'residence_address', 'residence_zip_code', 'properties', 'vehicles']
+
 
 class GetRequestInfoSerializer(serializers.ModelSerializer):
-    criado_por = serializers.StringRelatedField()
-    cliente = serializers.StringRelatedField()
-    cpf = serializers.CharField(source='cliente.cpf', read_only=True)
+    created_by = serializers.StringRelatedField()
+    customer = serializers.StringRelatedField()
+    cpf = serializers.CharField(source='customer.cpf', read_only=True)
     status = serializers.CharField(source='get_status_display', read_only=True)
-    dados_antigos = GetRequestDadosAntigosSerializer(many=True, read_only=True)
-    dados_novos = GetRequestDadosNovosSerializer(many=True, read_only=True)
-    documentos = GetRequestDocumentsSerializer(many=True, read_only=True)
+    old_data = RequestOldDataSerializer(source='old_data', many=True, read_only=True)
+    new_data = GetRequestNewDataSerializer(source='new_data', many=True, read_only=True)
+    documents = RequestDocumentSerializer(source='documents', many=True, read_only=True)
 
     class Meta:
-        model = Solicitacao
+        model = UpdateRequest
         fields = '__all__'
 
-class PatchRequestImovelSerializer(serializers.ModelSerializer):
+
+class PatchRequestPropertySerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
 
     class Meta:
-        model = Imovel
-        fields = ['id', 'endereco', 'bairro', 'cidade', 'cep']
+        model = RequestProperty
+        fields = ['id', 'address', 'neighborhood', 'city', 'zip_code']
         extra_kwargs = {
-            'endereco': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'bairro': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'cidade': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'cep': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'address': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'neighborhood': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'city': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'zip_code': {'allow_null': True, 'allow_blank': True, 'required': False},
         }
 
-class PatchRequestVeiculoSerializer(serializers.ModelSerializer):
+
+class PatchRequestVehicleSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
 
     class Meta:
-        model = Veiculo
-        fields = ['id', 'renavam', 'placa', 'marca_modelo', 'ano']
+        model = RequestVehicle
+        fields = ['id', 'renavam', 'license_plate', 'brand_model', 'year']
         extra_kwargs = {
             'renavam': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'placa': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'marca_modelo': {'allow_null': True, 'allow_blank': True, 'required': False},
-            'ano': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'license_plate': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'brand_model': {'allow_null': True, 'allow_blank': True, 'required': False},
+            'year': {'allow_null': True, 'allow_blank': True, 'required': False},
         }
 
+
 class GNAdjustRequestSerializer(serializers.ModelSerializer):
-    imovel = PatchRequestImovelSerializer(source='imoveis', many=True, required=False)
-    veiculo = PatchRequestVeiculoSerializer(source='veiculos', many=True, required=False)
+    properties = PatchRequestPropertySerializer(source='properties', many=True, required=False)
+    vehicles = PatchRequestVehicleSerializer(source='vehicles', many=True, required=False)
     
     class Meta:
-        model = DadosNovos
-        fields = ['id', 'salario', 'residencia_endereco', 'residencia_cep', 'imovel', 'veiculo']
+        model = NewData
+        fields = ['id', 'salary', 'residence_address', 'residence_zip_code', 'properties', 'vehicles']
 
     def update(self, instance, validated_data):
         return update_new_data_service(instance, validated_data)

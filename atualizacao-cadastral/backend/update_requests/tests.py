@@ -2,37 +2,40 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from django.core.files.uploadedfile import SimpleUploadedFile
-from customers.models import Cliente
-from .models import Solicitacao, DadosNovos
-from .services import create_update_request_service, accept_request_service, handle_request_return_service, formalize_update_request_service, adjust_request_service
+from customers.models import Customer
+from .models import UpdateRequest, NewData
+from .services import (
+    create_update_request_service,
+    accept_request_service,
+    handle_request_return_service,
+    formalize_update_request_service
+)
 
 User = get_user_model()
 
-ItemPermissionTestCase = None 
-
 class RoleBasedWorkflowTestCase(TestCase):
     def setUp(self):
-        self.user_gn = User.objects.create_user(username='gerente_de_negócios', password='123', role='GN')
-        self.user_ga = User.objects.create_user(username='gerente_de_agência', password='123', role='GA')
-        self.user_cad = User.objects.create_user(username='time_de_cadastro', password='123', role='CAD')
+        self.user_gn = User.objects.create_user(username='business_manager', password='123', role='GN')
+        self.user_ga = User.objects.create_user(username='agency_manager', password='123', role='GA')
+        self.user_cad = User.objects.create_user(username='registration_team', password='123', role='CADASTRO')
         
-        self.cliente = Cliente.objects.create(
-            nome='Cliente Teste',
+        self.customer = Customer.objects.create(
+            name='Test Customer',
             cpf='11122233344',
-            salario=4000.00,
-            endereco='Rua Antiga, 10',
-            cep='12345678'
+            salary=4000.00,
+            address='Old Street, 10',
+            zip_code='12345678'
         )
 
     def test_gn_can_create_request(self):
         validated_data = {
-            'cliente': self.cliente,
-            'dados_novos': {
-                'salario': 5000.00,
-                'residencia_endereco': 'Rua Nova, 20',
-                'residencia_cep': '87654321',
-                'imoveis': [],
-                'veiculos': []
+            'customer': self.customer,
+            'new_data': {
+                'salary': 5000.00,
+                'residence_address': 'New Street, 20',
+                'residence_zip_code': '87654321',
+                'properties': [],
+                'vehicles': []
             }
         }
         
@@ -43,68 +46,68 @@ class RoleBasedWorkflowTestCase(TestCase):
         )
         
         self.assertEqual(request_obj.status, 'PENDING_AGENCY_REVIEW')
-        self.assertEqual(request_obj.criado_por, self.user_gn)
+        self.assertEqual(request_obj.created_by, self.user_gn)
 
     def test_ga_can_approve_request(self):
-        solicitacao = Solicitacao.objects.create(
-            cliente=self.cliente,
-            criado_por=self.user_gn,
+        request_obj = UpdateRequest.objects.create(
+            customer=self.customer,
+            created_by=self.user_gn,
             status='PENDING_AGENCY_REVIEW'
         )
 
-        updated_request = accept_request_service(solicitacao, self.user_ga)
-        self.assertEqual(updated_request.status, 'PENDING_CADASTRO')
+        updated_request = accept_request_service(request_obj, self.user_ga)
+        self.assertEqual(updated_request.status, 'PENDING_REGISTRATION')
 
-    def test_ga_can_request_adjustment_with_parecer(self):
-        solicitacao = Solicitacao.objects.create(
-            cliente=self.cliente,
-            criado_por=self.user_gn,
+    def test_ga_can_request_adjustment_with_opinion(self):
+        request_obj = UpdateRequest.objects.create(
+            customer=self.customer,
+            created_by=self.user_gn,
             status='PENDING_AGENCY_REVIEW'
         )
-        parecer = SimpleUploadedFile("parecer.pdf", b"conteudo", content_type="application/pdf")
+        opinion = SimpleUploadedFile("opinion.pdf", b"content", content_type="application/pdf")
 
         returned_request = handle_request_return_service(
-            update_request=solicitacao,
-            action='SOLICITAR_AJUSTE_GN',
-            parecer=parecer,
+            update_request=request_obj,
+            action='REQUEST_ADJUSTMENT_GN',
+            opinion=opinion,
             user=self.user_ga
         )
         
         self.assertEqual(returned_request.status, 'NEEDS_ADJUSTMENT_GN')
 
     def test_cad_can_formalize_request(self):
-        solicitacao = Solicitacao.objects.create(
-            cliente=self.cliente,
-            criado_por=self.user_gn,
-            status='PENDING_CADASTRO'
+        request_obj = UpdateRequest.objects.create(
+            customer=self.customer,
+            created_by=self.user_gn,
+            status='PENDING_REGISTRATION'
         )
-        DadosNovos.objects.create(
-            solicitacao=solicitacao,
-            cliente=self.cliente,
-            salario=6000.00,
-            residencia_endereco='Rua Efetivada, 99',
-            residencia_cep='99999999'
+        NewData.objects.create(
+            request=request_obj,
+            customer=self.customer,
+            salary=6000.00,
+            residence_address='Finalized Street, 99',
+            residence_zip_code='99999999'
         )
-        parecer = SimpleUploadedFile("parecer.pdf", b"conteudo", content_type="application/pdf")
+        opinion = SimpleUploadedFile("opinion.pdf", b"content", content_type="application/pdf")
 
         formalized_request = formalize_update_request_service(
-            update_request=solicitacao,
-            parecer=parecer,
+            update_request=request_obj,
+            opinion=opinion,
             user=self.user_cad
         )
         
         self.assertEqual(formalized_request.status, 'UPDATED')
         
-        self.cliente.refresh_from_db()
-        self.assertEqual(self.cliente.salario, 6000.00)
-        self.assertEqual(self.cliente.endereco, 'Rua Efetivada, 99')
+        self.customer.refresh_from_db()
+        self.assertEqual(self.customer.salary, 6000.00)
+        self.assertEqual(self.customer.address, 'Finalized Street, 99')
 
     def test_unauthorized_role_action_raises_permission_error(self):
-        solicitacao = Solicitacao.objects.create(
-            cliente=self.cliente,
-            criado_por=self.user_gn,
+        request_obj = UpdateRequest.objects.create(
+            customer=self.customer,
+            created_by=self.user_gn,
             status='REJECTED'
         )
 
         with self.assertRaises(PermissionDenied):
-            accept_request_service(solicitacao, self.user_ga)
+            accept_request_service(request_obj, self.user_ga)

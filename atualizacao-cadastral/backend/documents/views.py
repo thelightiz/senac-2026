@@ -6,8 +6,7 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
-from update_requests.models import Solicitacao
-from .models import DocumentosSolicitacao
+from .models import RequestDocument
 
 @method_decorator(xframe_options_exempt, name='dispatch')
 class SeePDFView(APIView):
@@ -15,13 +14,13 @@ class SeePDFView(APIView):
     allowed_roles = ['GN', 'GA', 'CADASTRO']
 
     def get(self, request, pk):
-        documento = get_object_or_404(DocumentosSolicitacao, pk=pk)
+        document = get_object_or_404(RequestDocument, pk=pk)
 
-        if not documento.arquivo:
+        if not document.file:
             return Response(
-                {"detail": "Nenhum arquivo anexado a este registro."}, 
+                {'detail': 'No files attached to this record.'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        return FileResponse(documento.arquivo.open('rb'), content_type='application/pdf')
+        return FileResponse(document.file.open('rb'), content_type='application/pdf')
     

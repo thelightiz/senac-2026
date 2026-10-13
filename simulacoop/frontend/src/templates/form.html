@@ -40,15 +40,6 @@
                             <span class="input-suffix">R$</span>
                         </div>
                     </div>
-
-                    <div class="field">
-                        <label for="interest-rate">Juros</label>
-                        <div class="input-wrap">
-                            <input type="text" inputmode="decimal" id="interest-rate" name="interest-rate" placeholder="Ex.: 1,5">
-                            <span class="input-suffix">%</span>
-                        </div>
-                    </div>
-
                     <div class="field">
                         <label for="installments">Quantidade de parcelas</label>
                         <div class="input-wrap">
@@ -79,7 +70,7 @@
                         <line x1="12" y1="20" x2="12" y2="4"></line>
                         <line x1="6" y1="20" x2="6" y2="14"></line>
                     </svg>
-                    2. Resultado da Simulação
+                    2. Resultados
                 </h2>
                 <div class="result-area" id="result-area">
                     <div class="result-grid">
@@ -88,18 +79,24 @@
                             <span class="result-value" id="result-value">R$ 0,00</span>
                         </div>
                         <div class="result-box">
-                            <span class="result-label">Juros</span>
-                            <span class="result-value" id="result-loan">R$ 0,00</span>
-                        </div>
-                        <div class="result-box">
                             <span class="result-label">CET (custo Efetivo total)</span>
-                            <span class="result-value" id="result-cet">0,00%</span>
+                            <span class="result-value" id="result-loan"> 00,0%</span>
                         </div>
                         <div class="result-box">
                             <span class="result-label">Total a pagar</span>
-                            <span class="result-value" id="result-total">R$ 0,00</span>
+                            <span class="result-value" id="result-cet">R$ 0,00</span>
                         </div>
-                        
+                        <div class="result-box">
+                            <span class="result-label">Quantidade de parcelas</span>
+                            <span class="result-value" id="result-total">0</span>
+                        </div>
+                        <div class="result-juros">
+                            <p>Os valores são estimativos e podem variar.</p>
+                        </div>
+                        <div class="result-juros">
+                            <icon src="info.png" alt="Info"></icon>
+                            <p>Valor do juros utilizado: 1,5%</p>
+                        </div>
                     </div>
                 </div>
                 <p class="form-message" id="form-message" hidden></p>

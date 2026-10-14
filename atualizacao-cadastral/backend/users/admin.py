@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Usuarios
+from .models import User
 
-@admin.register(Usuarios)
+@admin.register(User)
 class UsuariosAdmin(UserAdmin):
     # Exibe o campo 'role' no formulário de edição de usuário
     fieldsets = UserAdmin.fieldsets + (

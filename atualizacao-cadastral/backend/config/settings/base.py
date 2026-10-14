@@ -189,7 +189,7 @@ MAILERS = {
     },
 }
 
-AUTH_USER_MODEL = 'users.Usuarios'
+AUTH_USER_MODEL = 'users.User'
 
 LOGGING = {
     'version': 1,

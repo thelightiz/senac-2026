@@ -11,7 +11,7 @@ class LoginSerializer(serializers.Serializer):
         password = data.get('password')
 
         if not username or not password:
-            raise serializers.ValidationError('Usuário e senha são obrigatórios.')
+            raise serializers.ValidationError('User and password are required.')
 
         username = authenticate(
             request=self.context.get('request'),
@@ -20,7 +20,7 @@ class LoginSerializer(serializers.Serializer):
         )
 
         if not username:
-            raise serializers.ValidationError('Credenciais inválidas.')
+            raise serializers.ValidationError('Invalid login credentials.')
         
         data['username'] = username
         return data

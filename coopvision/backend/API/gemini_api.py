@@ -1,9 +1,12 @@
 import json
 import os
 import time
+import io
 
 from PIL import Image
+from dotenv import load_dotenv
 
+load_dotenv()
 try:
     from google import genai
     from google.genai.errors import APIError
@@ -12,12 +15,12 @@ except ImportError:
     APIError = Exception
 
 
-def cpf_verification(image_path):
-    if not image_path or not os.path.exists(image_path):
-        return {"erro": f"Arquivo não encontrado: {image_path}"}
+def cpf_verification(image_bytes):
+    if not image_bytes:
+        return {"erro": "Nenhuma imagem recebida."}
 
     try:
-        imagem = Image.open(image_path)
+        imagem = Image.open(io.BytesIO(image_bytes))
         imagem.verify()
         imagem.close()
 
@@ -47,7 +50,7 @@ def cpf_verification(image_path):
         infos = None
         for tentativa in range(max_tentativas):
             try:
-                imagem = Image.open(image_path)
+                imagem = Image.open(io.BytesIO(image_bytes))
                 infos = client.models.generate_content(
                     model='gemini-3.8-flash',
                     contents=[prompt, imagem],
@@ -82,12 +85,11 @@ def cpf_verification(image_path):
         response_data = json.loads(infos.text.strip())
         return response_data
 
-    except FileNotFoundError:
-        return {"erro": f"O arquivo '{image_path}' não foi encontrado."}
     except Exception as e:
         return {"erro": f"Falha ao processar: {str(e)}"}
 
 
 if __name__ == "__main__":
-    teste = cpf_verification("fotojapa.jpeg")
+    with open("fotojapa.jpg", "rb") as arquivo:
+        teste = cpf_verification(arquivo.read())
     print(json.dumps(teste, indent=2, ensure_ascii=False))

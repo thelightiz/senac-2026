@@ -55,16 +55,23 @@ body {
     flex-direction: column;
 }
 
-.nome-completo{
+.full-name{
+    display: flex;
+    justify-items: left;
     outline: none;
     border: #d0ebd0 1px solid;
     background: #f1f9ec;
     padding: 10px;
     border-radius: 10px;
+    color: #757e75;
+}
+.icon-person{
+    display:flexbox;
+    justify-items: left;
 }
 
 /* Classe que cria a linha divisória acima do botão */
-.divisor-botao {
+.button-divider {
     border-top: 1px solid #e0e0e0; /* Cor cinza clara idêntica à do card */
     margin-top: 15px;              /* Espaço entre a linha e o elemento de cima */
     padding-top: 15px;             /* Espaço entre a linha e o texto do botão */
@@ -72,7 +79,7 @@ body {
 
 
 
-.texto-superior-botao {
+.button-top-text {
     font-size: 13px;
     color: #000000;       /* Cor preta que você escolheu */
     font-weight: bold;    /* Deixa em negrito */
@@ -94,7 +101,7 @@ body {
     
 }
 
-.campo-com-imagem {
+.field-with-image {
     /* IMPORTANTE: Troque 'nome-da-sua-imagem.png' pelo nome real do arquivo que você baixou */
     background-image: url('icone-pessoa.png'); 
     
@@ -105,7 +112,7 @@ body {
     padding-left: 42px !important;    /* Empurra o texto para não cobrir a imagem */
 }
 
-.campo-imagem {
+.image-field {
     /* IMPORTANTE: Troque 'nome-da-sua-imagem.png' pelo nome real do arquivo que você baixou */
     background-image: url('calendario.png'); 
     
@@ -117,7 +124,7 @@ body {
 
 }
 
-.campo-imagem-papelIA {
+.paper-ai-image-field {
 
     background-image: url('papel-lupa.png'); /* Lembre de manter o nome correto do arquivo */
     background-repeat: no-repeat;
@@ -132,7 +139,7 @@ body {
 
 
 
-.trasso-correto {
+.correct-mark {
 
     background-image: url('trasso-correto.png'); 
     
@@ -247,13 +254,13 @@ body {
 }
 
 
-.icone {
+.icon {
   width: 15px;
   height: 15px;
   object-fit: contain;
 }
 
-.identidade{
+.identity{
     width: 100px;
     height: 100px;
 }
@@ -311,33 +318,68 @@ body {
 
 /* --- CARD 3: Dados Pessoais --- */
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .form-group label {
     display: block;
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 6px;
-    color: #333333;
+    font-size: 15px;
+    font-weight: 400;
+    margin-bottom: 8px;
+    color: #000000;
 }
 
 .input-container {
     display: flex;
     align-items: center;
-    background-color: #f1f9ec;
-    border: 1px solid #d0ebd0;
-    border-radius: 6px;
-    padding: 12px 14px;
-    font-size: 14px;
+    gap: 10px;
+    background-color: #eaf4e2;
+    border: 1px solid #c9dcc4;
+    border-radius: 10px;
+    padding: 0 14px;
+    height: 46px;
+}
+
+.input-container:focus-within {
+    border-color: #3f9c35;
+}
+
+.input-container input {
+    flex: 1;
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 15px;
     color: #222222;
 }
 
-.input-container span {
-    margin-right: 10px;
-    opacity: 0.6;
+.input-container input::placeholder {
+    color: #8a948a;
 }
 
+.field-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.btn-confirm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: auto;
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.btn-confirm .icon-check {
+    width: 18px;
+    height: 18px;
+    filter: brightness(0) invert(1); /* deixa o check branco */
+}
 .btn-link {
     background: none;
     border: none;

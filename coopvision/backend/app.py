@@ -1,12 +1,8 @@
-import os
-from werkzeug.utils import secure_filename
 import flask as fl
 from API.gemini_api import cpf_verification
 
 
 app = fl.Flask(__name__, template_folder='templates', static_folder='static')
-app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
 @app.route('/')
@@ -21,11 +17,7 @@ def ler_imagem():
     if imagem is None or imagem.filename == '':
         return fl.jsonify({'erro': 'Nenhuma imagem foi enviada.'}), 400
 
-    nome_arquivo = secure_filename(imagem.filename)
-    caminho_arquivo = os.path.join(app.config['UPLOAD_FOLDER'], nome_arquivo)
-    imagem.save(caminho_arquivo)
-
-    resultado = cpf_verification(caminho_arquivo)
+    resultado = cpf_verification(imagem.read())
 
     if 'erro' in resultado:
         return fl.jsonify(resultado), 400

@@ -5,7 +5,7 @@ TEMPLATE_DIR = os.path.join(BACKEND_DIR, "..", "..", "frontend", "src", "templat
 STATIC_DIR = os.path.join(BACKEND_DIR, "..", "..", "frontend", "src", "static")
 
 from flask import Flask, render_template, request
-from app.services import loan_calculation_service as lcs
+from services import loan_calculation_service as lcs
 
 app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 

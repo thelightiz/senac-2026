@@ -5,7 +5,7 @@ TEMPLATE_DIR = os.path.join(BACKEND_DIR, "..", "..", "frontend", "src", "templat
 STATIC_DIR = os.path.join(BACKEND_DIR, "..", "..", "frontend", "src", "static")
 
 from flask import Flask, render_template, request
-import services.loan_calculation_service as lcs
+from app.services import loan_calculation_service as lcs
 
 app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 
@@ -19,12 +19,27 @@ def inicio():
 def calcular():
     if request.method == "POST":
         # Processa apenas quando o formulário é enviado
-        
-        # Uso do .get() evita crash de KeyError caso falte algum campo
-        loan_amount_str = request.form.get("loan-amount", "0")
-        number_of_installments = int(request.form.get("number_of_installments", 0))
-        interest_rate = float(request.form.get("interest_rate", 0))
-        amortization_type = request.form.get("amortization_type", "")
+
+        loan_amount_str = (
+            request.form.get("loan_amount")
+            or request.form.get("loan-amount")
+            or "0"
+        )
+        number_of_installments = int(
+            request.form.get("number_of_installments")
+            or request.form.get("installments")
+            or 0
+        )
+        interest_rate = float(
+            request.form.get("interest_rate")
+            or request.form.get("interest-rate")
+            or 1.5
+        )
+        amortization_type = (
+            request.form.get("amortization_type")
+            or request.form.get("amortization-type")
+            or ""
+        )
 
         # Trata formatação brasileira de valores (ex: "10.000,00" -> "10000.00")
         loan_amount_str = loan_amount_str.replace(".", "").replace(",", ".")
@@ -34,7 +49,7 @@ def calcular():
             loan_amount,
             number_of_installments,
             amortization_type,
-            interest_rate
+            interest_rate,
         )
 
         return render_template("form.html", resultado=resultado)

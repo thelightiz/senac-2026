@@ -2,7 +2,7 @@ from django.db import models
 
 class RequestDocument(models.Model):
     request = models.ForeignKey(
-        'update_requests.Request', 
+        'update_requests.UpdateRequest', 
         on_delete=models.CASCADE, 
         related_name='documents',
         verbose_name='Solicitação'

@@ -18,12 +18,12 @@ class LoginView(APIView):
         refresh_token = str(refresh)
 
         response = Response(
-            {'status': 'sucesso',
-                'mensagem': 'Login realizado com sucesso!',
-                'usuario': {
-                    'id': user.id,
-                    'nome': user.username,
-                    'role': user.role}
+            {'status': 'success',
+            'mensagem': 'Login successfully completed!',
+            'usuario': {
+                'id': user.id,
+                'nome': user.username,
+                'role': user.role}
             }, status=status.HTTP_200_OK
         )
 
@@ -54,4 +54,4 @@ class AuthView(APIView):
         user = request.user
         if user.is_authenticated:
             return Response({'role': user.role}, status=status.HTTP_200_OK)
-        return Response({'mensagem': 'Usuário não autenticado'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'message': 'User not authenticated.'}, status=status.HTTP_401_UNAUTHORIZED)

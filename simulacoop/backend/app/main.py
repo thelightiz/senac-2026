@@ -1,61 +1,62 @@
 import os
 
+from flask import Flask, render_template, request
+from services import loan_calculation_service as lcs
+
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BACKEND_DIR, "..", "..", "frontend", "src", "templates")
 STATIC_DIR = os.path.join(BACKEND_DIR, "..", "..", "frontend", "src", "static")
 
-from flask import Flask, render_template, request
-from services import loan_calculation_service as lcs
-
 app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 
 
-@app.route("/", methods=["GET"])
+def parse_brl(valor: str) -> float:
+    """Converte '10.000,00' em 10000.00."""
+    return float(valor.replace(".", "").replace(",", "."))
+
+
+@app.route("/", methods=["GET", "POST"])
 def inicio():
-    return render_template("index.html")
+    # Requisição GET: apenas exibe a página sem resultado
+    if request.method == "GET":
+        return render_template("form.html", resultado=None)
 
+    # Requisição POST: processa o formulário
+    loan_amount_str = (
+        request.form.get("loan_amount")
+        or request.form.get("loan-amount")
+        or "0"
+    )
+    number_of_installments = int(
+        request.form.get("number_of_installments")
+        or request.form.get("installments")
+        or 0
+    )
+    interest_rate = float(
+        (request.form.get("interest_rate")
+         or request.form.get("interest-rate")
+         or "1.5").replace(",", ".")
+    )
+    amortization_type = (
+        request.form.get("amortization_type")
+        or request.form.get("amortization-type")
+        or ""
+    )
 
-@app.route("/form.html", methods=["POST", "GET"])
-def calcular():
-    if request.method == "POST":
-        # Processa apenas quando o formulário é enviado
+    try:
+        loan_amount = parse_brl(loan_amount_str)
+    except ValueError:
+        return render_template("form.html", resultado=None, erro="Valor inválido.")
 
-        loan_amount_str = (
-            request.form.get("loan_amount")
-            or request.form.get("loan-amount")
-            or "0"
-        )
-        number_of_installments = int(
-            request.form.get("number_of_installments")
-            or request.form.get("installments")
-            or 0
-        )
-        interest_rate = float(
-            request.form.get("interest_rate")
-            or request.form.get("interest-rate")
-            or 1.5
-        )
-        amortization_type = (
-            request.form.get("amortization_type")
-            or request.form.get("amortization-type")
-            or ""
-        )
+    resultado = lcs.calculate_loan(
+        loan_amount,
+        number_of_installments,
+        amortization_type,
+        interest_rate,
+    )
 
-        # Trata formatação brasileira de valores (ex: "10.000,00" -> "10000.00")
-        loan_amount_str = loan_amount_str.replace(".", "").replace(",", ".")
-        loan_amount = float(loan_amount_str)
+    return render_template("form.html", resultado=resultado)
 
-        resultado = lcs.calculate_loan(
-            loan_amount,
-            number_of_installments,
-            amortization_type,
-            interest_rate,
-        )
-
-        return render_template("form.html", resultado=resultado)
-
-    # Se for requisição GET, apenas exibe a página sem resultado
-    return render_template("form.html", resultado=None)
 
 if __name__ == "__main__":
     app.run(debug=True)

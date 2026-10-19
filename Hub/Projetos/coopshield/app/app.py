@@ -1,18 +1,29 @@
 from flask import Flask, render_template, jsonify, request
 from Projetos.coopshield.database.database import read_transactions_from_db
 from datetime import timedelta
+from flask import Blueprint
 
-app = Flask(
+# Cria o blueprint
+
+coopshield = Blueprint(
+    'coopshield',
     __name__,
-    template_folder="../frontend/templates",
-    static_folder="../frontend/static"
+    template_folder='../frontend/templates',
+    static_folder='../frontend/static',
+    static_url_path='/coopshield-static'
 )
 
-@app.route('/')
-def index():
-    return render_template('index.html')
 
-@app.route('/api/filtrar', methods=['POST'])
+
+
+
+
+@coopshield.route('/coopshield')
+@coopshield.route('/coopshield.html')
+def index():
+    return render_template('coopshield.html')
+
+@coopshield.route('/api/filtrar', methods=['POST'])
 def filtrar_dados():
     dados = request.get_json() or {}
     periodo = dados.get('periodo', 'Últimos 7 dias')

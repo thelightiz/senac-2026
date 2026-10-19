@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sicredi Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('coopshield.static', filename='style.css') }}">
     
 
 <!-- Script do Gráfico -->
-<script src="{{ url_for('static', filename='js/grafico.js') }}?v=2" defer></script>
+<script src="{{ url_for('coopshield.static', filename='js/grafico.js') }}?v=2" defer></script>
 
     
 </head>
@@ -26,7 +26,7 @@
         <div class="dash-header">
             <div class="user-box">
                 <span>Dashboard</span>
-                <img src="{{ url_for('static', filename='icone-pessoa.png') }}" alt="User">
+                <img src="{{ url_for('coopshield.static', filename='icone-pessoa.png') }}" alt="User">
             </div>
             <select id="filtro-periodo" onchange="atualizarDashboard()">
                 <option value="Últimos 7 dias">Últimos 7 dias</option>

@@ -38,7 +38,7 @@
                     <h2>SimulaCoop</h2>
                 </div>
                 <p>Calcula e demonstra a evolução de um empréstimo.</p>
-                <a href="#" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+                <a href="{{ url_for('simulacoop.calcular') }}" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
             </div>
 
             <!-- quadrado 2: CoopVision -->
@@ -49,7 +49,7 @@
                     <h2>CoopVision</h2>
                 </div>
                 <p>Ler documentos e extrair dados automaticamente.</p>
-                <a href="#" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+                <a href="{{ url_for('coopvision.index') }}" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
             </div>
 
             <!-- quadrado 3: Atualização Cadastral -->
@@ -71,7 +71,7 @@
                     <h2>CoopShield</h2>
                 </div>
                 <p>Monitoramento de transações que identifica e bloqueia anomalias.</p>
-                <a href="#" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+                <a href="{{ url_for('coopshield.index') }}" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
             </div>
 
         </div>

@@ -6,8 +6,22 @@ STATIC_DIR = os.path.join(BACKEND_DIR, "..", "..", "frontend", "src", "static")
 
 from flask import Flask, render_template, request
 import Projetos.simulacoop.backend.app.services.loan_calculation_service as lcs
+from flask import Blueprint
+
+# Cria o blueprint
+simulacoop = Blueprint(
+    'simulacoop',
+    __name__,
+    url_prefix='/simulacoop',
+    template_folder='../../frontend/src/templates',
+    static_folder='../../frontend/src/static',
+    static_url_path='/simulacoop-static'
+)
+
 
 app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
+
+
 
 
 @app.route("/", methods=["GET"])
@@ -15,7 +29,7 @@ def inicio():
     return render_template("index.html")
 
 
-@app.route("/form.html", methods=["POST", "GET"])
+@simulacoop.route("/form.html", methods=["POST", "GET"])
 def calcular():
     if request.method == "POST":
         # Processa apenas quando o formulário é enviado

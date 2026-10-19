@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('simulacoop.static', filename='styles/form.css') }}">
     <title>Simulador de Empréstimo — Sicredi</title>
-    <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+    <script src="{{ url_for('simulacoop.static', filename='js/chart.umd.min.js') }}"></script>
 
 </head>
 
 <body>
     <header class="topbar">
-        <img class="brand" src="../static/img/sicredi_transparente.png" alt="Sicredi">
+        <img class="brand" src="{{ url_for('simulacoop.static', filename='img/sicredi_transparente.png') }}" alt="Sicredi">
         <div class="actions">
             <a href="/"><button class="solid">Inicial</button></a>
         </div>

@@ -9,12 +9,25 @@ app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
-@app.route('/')
+from flask import Blueprint
+
+# Cria o blueprint
+coopvision = Blueprint(
+    'coopvision',
+    __name__,
+    url_prefix='/coopvision',
+    template_folder='templates',
+    static_folder='static',
+    static_url_path='/coopvision-static'
+)
+
+
+@coopvision.route('/')
 def index():
-    return fl.render_template('index.html')
+    return fl.render_template('coopvision_index.html')
 
 
-@app.route('/ler-imagem', methods=['POST'])
+@coopvision.route('/ler-imagem', methods=['POST'])
 def ler_imagem():
     imagem = fl.request.files.get('imagem')
 

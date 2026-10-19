@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interface de Verificação - Sicredi</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('coopvision.static', filename='styles/style.css') }}">
 </head>
 <body>
 
     <header class="header-bar">
-        <img src="{{ url_for('static', filename='img/sicredi.jpg') }}" alt="">
+        <img src="{{ url_for('coopvision.static', filename='img/sicredi.jpg') }}" alt="">
     </header>
 
     <main class="main-container">
@@ -24,7 +24,7 @@
 
             <div class="drop-zone" id="drop-zone">
                 <div class="processing-zone">
-                    <img clas="identidade" src="{{ url_for('static', filename='img/papel-botao.png') }}" alt="documento" id="preview">
+                    <img clas="identidade" src="{{ url_for('coopvision.static', filename='img/papel-botao.png') }}" alt="documento" id="preview">
                 </div>
                 <p id="nome-arquivo">Arraste e solte o documento aqui ou selecione o arquivo</p>
             </div>
@@ -33,11 +33,11 @@
             <input type="file" id="input-arquivo" accept="image/*" hidden>
 
             <button type="button" class="btn-outline campo-papel-botao" id="btn-selecionar">
-                <img class="icone" src="{{ url_for('static', filename='img/papel-bot.png') }}" alt="">
+                <img class="icone" src="{{ url_for('coopvision.static', filename='img/papel-bot.png') }}" alt="">
                 <span>Selecione o documento</span>
             </button>
             <button type="button" class="btn-solid subir-arquivo" id="btn-enviar">
-                <img class="icone" src="{{ url_for('static', filename='icon/subir-arquivo.png') }}" alt="">
+                <img class="icone" src="{{ url_for('coopvision.static', filename='icon/subir-arquivo.png') }}" alt="">
                 <span>Enviar para o processamento</span>
             </button>
         </section>
@@ -51,7 +51,7 @@
             <p class="step-description">Estamos analisando o seu documento com a inteligência artificial.</p>
 
             <div class="processing-zone">
-                <img src="{{ url_for('static', filename='img/papel-lupa.png') }}" alt="lupa">
+                <img src="{{ url_for('coopvision.static', filename='img/papel-lupa.png') }}" alt="lupa">
 
                 <h3 class="analysis-title" id="titulo-analise">Aguardando documento...</h3>
                 <p class="analysis-subtitle">Isso pode levar alguns segundos.</p>

@@ -1,7 +1,17 @@
 import os
+import sys
+from pathlib import Path
+
 from werkzeug.utils import secure_filename
 import flask as fl
-from Projetos.coopvision.backend.API.gemini_api import cpf_verification
+
+try:
+    from Projetos.coopvision.backend.API.gemini_api import cpf_verification
+except ModuleNotFoundError:
+    project_root = Path(__file__).resolve().parents[3]
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+    from Projetos.coopvision.backend.API.gemini_api import cpf_verification
 
 
 app = fl.Flask(__name__, template_folder='templates', static_folder='static')
@@ -22,7 +32,7 @@ coopvision = Blueprint(
 )
 
 
-@coopvision.route('/')
+@coopvision.route('/', methods=['GET'])
 def index():
     return fl.render_template('coopvision_index.html')
 

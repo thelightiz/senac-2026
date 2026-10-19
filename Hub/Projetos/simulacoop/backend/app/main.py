@@ -1,60 +1,74 @@
 import os
 
+from flask import Blueprint, Flask, render_template, request
+
+try:
+    from .services import loan_calculation_service as lcs
+except ImportError:
+    from Projetos.simulacoop.backend.app.services import loan_calculation_service as lcs
+
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BACKEND_DIR, "..", "..", "frontend", "src", "templates")
 STATIC_DIR = os.path.join(BACKEND_DIR, "..", "..", "frontend", "src", "static")
 
-from flask import Flask, render_template, request
-import Projetos.simulacoop.backend.app.services.loan_calculation_service as lcs
-from flask import Blueprint
-
-# Cria o blueprint
 simulacoop = Blueprint(
-    'simulacoop',
+    "simulacoop",
     __name__,
-    url_prefix='/simulacoop',
-    template_folder='../../frontend/src/templates',
-    static_folder='../../frontend/src/static',
-    static_url_path='/simulacoop-static'
+    url_prefix="/simulacoop",
+    template_folder="../../frontend/src/templates",
+    static_folder="../../frontend/src/static",
+    static_url_path="/simulacoop-static",
 )
-
 
 app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 
 
+def parse_brl(valor: str) -> float:
+    """Converte '10.000,00' em 10000.00."""
+    return float(valor.replace(".", "").replace(",", "."))
 
 
-@app.route("/", methods=["GET"])
+@simulacoop.route("/", methods=["GET", "POST"])
 def inicio():
-    return render_template("index.html")
+    if request.method == "GET":
+        return render_template("form.html", resultado=None)
 
+    # Requisição POST: processa o formulário
+    loan_amount_str = (
+        request.form.get("loan_amount")
+        or request.form.get("loan-amount")
+        or "0"
+    )
+    number_of_installments = int(
+        request.form.get("number_of_installments")
+        or request.form.get("installments")
+        or 0
+    )
+    interest_rate = float(
+        (request.form.get("interest_rate")
+         or request.form.get("interest-rate")
+         or "1.5").replace(",", ".")
+    )
+    amortization_type = (
+        request.form.get("amortization_type")
+        or request.form.get("amortization-type")
+        or ""
+    )
 
-@simulacoop.route("/form.html", methods=["POST", "GET"])
-def calcular():
-    if request.method == "POST":
-        # Processa apenas quando o formulário é enviado
-        
-        # Uso do .get() evita crash de KeyError caso falte algum campo
-        loan_amount_str = request.form.get("loan-amount", "0")
-        number_of_installments = int(request.form.get("number_of_installments", 0))
-        interest_rate = float(request.form.get("interest_rate", 0))
-        amortization_type = request.form.get("amortization_type", "")
+    try:
+        loan_amount = parse_brl(loan_amount_str)
+    except ValueError:
+        return render_template("form.html", resultado=None, erro="Valor inválido.")
 
-        # Trata formatação brasileira de valores (ex: "10.000,00" -> "10000.00")
-        loan_amount_str = loan_amount_str.replace(".", "").replace(",", ".")
-        loan_amount = float(loan_amount_str)
+    resultado = lcs.calculate_loan(
+        loan_amount,
+        number_of_installments,
+        amortization_type,
+        interest_rate,
+    )
 
-        resultado = lcs.calculate_loan(
-            loan_amount,
-            number_of_installments,
-            amortization_type,
-            interest_rate
-        )
+    return render_template("form.html", resultado=resultado)
 
-        return render_template("form.html", resultado=resultado)
-
-    # Se for requisição GET, apenas exibe a página sem resultado
-    return render_template("form.html", resultado=None)
 
 if __name__ == "__main__":
     app.run(debug=True)

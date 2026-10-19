@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sicredi - Dashboard</title>
+    <!-- Link para o CSS customizado -->
+    
+    <!-- Ícones gratuitos Font Awesome -->
+    <!-- LINKAGEM CORRETA PARA O FLASK ENCONTRAR O ARQUIVO SEPARADO -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Cabeçalho (Navbar) -->
+    <header class="navbar">
+        <div class="logo">
+            <span class="brand-sicredi"><i class="fa-solid fa-leaf"><img src="{{ url_for('static', filename='imagem_sicredi.png') }}" class="minha-imagem" alt="imagem sicredi"></i></span>
+        </div>
+        <div class="nav-menu">
+
+            
+            
+            <button class="nav-icon"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button class="nav-icon"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <!-- Container Principal dos Cards -->
+    <main class="dashboard-container">
+        <div class="grid-cards">
+            
+            <!-- quadrado 1: SimulaCoop -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fa-solid fa-users-gear icon-green"></i>
+                    <img src="{{ url_for('static', filename='groups (1).png') }}" alt="imagem de grupo de pessoas">
+                    <h2>SimulaCoop</h2>
+                </div>
+                <p>Calcula e demonstra a evolução de um empréstimo.</p>
+                <a href="#" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+            </div>
+
+            <!-- quadrado 2: CoopVision -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fa-solid fa-file-invoice icon-green"></i>
+                    <img src="{{ url_for('static', filename='Swoosh Star.png') }}" alt="imagem de papel com estrela">
+                    <h2>CoopVision</h2>
+                </div>
+                <p>Ler documentos e extrair dados automaticamente.</p>
+                <a href="#" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+            </div>
+
+            <!-- quadrado 3: Atualização Cadastral -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fa-solid fa-user-check icon-green"></i>
+                    <img src="{{ url_for('static', filename='Swoosh Star.png') }}" alt="imagem de papel com estrela">
+                    <h2>Atualização Cadastral</h2>
+                </div>
+                <p>Gerencia a solicitação, avaliação e aprovação de alterações de dados.</p>
+                <a href="#" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+            </div>
+
+            <!-- Card 4: CoopShield -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fa-solid fa-shield-halved icon-green"></i>
+                    <img src="{{ url_for('static', filename='Verified User.png') }}" alt="imagem escudo verificado">
+                    <h2>CoopShield</h2>
+                </div>
+                <p>Monitoramento de transações que identifica e bloqueia anomalias.</p>
+                <a href="#" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

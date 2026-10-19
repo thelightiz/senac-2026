@@ -1,0 +1,165 @@
+/* Configurações Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #3ca03c; /* Fundo verde do Sicredi */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 81px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.btn-conta {
+    color: #008744;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.nav-icon {
+    background: none;
+    border: none;
+    color: #008744;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* Container de Cards */
+.dashboard-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.grid-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    max-width: 1000px;
+    width: 100%;
+}
+
+/* Estilo Individual dos Cards */
+.card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 35px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 240px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+}
+
+/* Efeito de seleção da borda azul do primeiro card */
+.card-selected {
+    outline: 3px solid #2b6cb0;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    justify-content: center;
+}
+
+.icon-green {
+    color: #008744;
+    font-size: 28px;
+}
+
+.card h2 {
+    color: #008744;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.card p {
+    color: #000000;
+    font-size: 20px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+    flex-grow: 1;
+    
+}
+
+/* Botões "Entrar" */
+.btn-entrar {
+    background-color: #449e37;
+    color: #ffffff;
+    text-decoration: none;
+    text-align: center;
+    padding: 10px 100px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: fit-content;
+    align-self: center;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;       /* Alinha verticalmente no centro */
+    justify-content: center;    /* Centraliza o bloco de conteúdo */
+    gap: 8px;                  /* Espaço perfeito entre o texto e a seta */
+}
+
+/* Ajuste específico para a imagem da seta */
+.btn-icone {
+    height: 14px;              /* Ajuste essa altura para combinar com o tamanho da sua fonte */
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;    /* Alinhamento extra de segurança para texto */
+    margin: 10;                 /* Remove qualquer margem que possa empurrar a seta para baixo */
+}
+
+
+.btn-entrar:hover {
+    background-color: #357a2a;
+}
+
+.minha-imagem {
+    width: 250px;          /* Ajuste para o tamanho que você quiser */
+    height: auto;
+    background: transparent !important; /* Força o fundo a ser invisível */
+    background-color: transparent !important; 
+    border: none !important; /* Remove qualquer borda */
+    box-shadow: none !important; /* Remove qualquer sombra */
+}
+
+/* Responsividade para Celulares */
+@media (max-width: 768px) {
+    .grid-cards {
+        grid-template-columns: 1fr;
+    }
+    .navbar {
+        padding: 15px 20px;
+    }
+}

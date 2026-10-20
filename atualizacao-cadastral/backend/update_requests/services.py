@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def generic_log_register_service(update_request, previous_status, current_status, user):
     return Log.objects.create(
-        request=update_request,
+        update_request=update_request,
         previous_status=previous_status,
         current_status=current_status,
         user=user

@@ -5,7 +5,7 @@ import { GNIndexPage} from "../pages/gn/index";
 import { GNCreateRequest } from "../pages/gn/createRequest";
 import { GARequestQueue } from "../pages/ga/index";
 import { GAViewRequestInfo } from "../pages/ga/viewRequest";
-import { ProtectedRoute } from "../services/permissions";
+import { ProtectedRoute } from "../utils/permissions";
 import { Error403Page } from "../pages/errors/403/main";
 import { GNViewRequest } from "../pages/gn/viewRequest";
 import { CADRequestQueue } from "../pages/cad";

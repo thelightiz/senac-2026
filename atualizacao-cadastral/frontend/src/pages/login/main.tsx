@@ -1,6 +1,6 @@
 import { useState, SyntheticEvent } from "react";
-import { api } from "../../services/api";
-import { RoleRedirect } from "../../services/routeRedirector";
+import { api } from "../../utils/api";
+import { RoleRedirect } from "../../utils/routeRedirector";
 import { Link } from "react-router-dom";
 
 export const Login = () => {

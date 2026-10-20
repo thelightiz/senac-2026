@@ -1,36 +1,27 @@
 import { useEffect, useState } from "react";
-import { api } from "../../services/api";
+import { api } from "../../utils/api";
+import { UpdateRequest } from "../../interfaces/updateRequest";
 
 interface UserData {
-  nome: string;
+  name: string;
   role: string;
-}
-
-interface Request {
-  id: number;
-  criado_por: string;
-  cliente: string;
-  atualizacao: string;
-  status: string;
-  documento: string | null;
 }
 
 export const GNIndexPage = () => {
   const [user, setUser] = useState<UserData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [requests, setRequests] = useState<Request[]>([]);
+  const [requests, setRequests] = useState<UpdateRequest[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await api.get("/gn/minhas-solicitacoes");
-        setUser(response.data.usuario);
-
-        setRequests(response.data.solicitacoes)
+        setUser(response.data.user);
+        setRequests(response.data.requests)
       } catch (error: any) {
         console.error("Status:", error.response?.status);
-        console.error("Dados do erro (Django):", error.response?.data);
-        setError("Ocorreu um erro ao carregar a página.");
+        console.error("Error data (API):", error.response?.data);
+        setError("An error occurred while loading the page.");
       }
     };
 
@@ -45,7 +36,7 @@ export const GNIndexPage = () => {
     <>
       <div className="mx-auto p-4">
         <div className="flex items-center justify-between mt-6">
-          <p className="text-xl mt-3 text-gray-750">Bem-vindo, {user?.nome}!</p>
+          <p className="text-xl mt-3 text-gray-750">Bem-vindo, {user?.name}!</p>
           <a
             href="/gn/criar-solicitacao"
             className="rounded-md bg-botao-1 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-botao-1-700 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar"
@@ -68,15 +59,15 @@ export const GNIndexPage = () => {
               </tr>
             </thead>
             <tbody>
-              {requests.map((r) => (
-                <tr key={r.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-900">{r.id}</td>
-                  <td className="px-6 py-4">{r.cliente}</td>
-                  <td className="px-6 py-4">{r.atualizacao}</td>
-                  <td className="px-6 py-4">{r.status}</td>
+              {requests.map((update_request) => (
+                <tr key={update_request.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-gray-900">{update_request.id}</td>
+                  <td className="px-6 py-4">{update_request.customer}</td>
+                  <td className="px-6 py-4">{update_request.update_type}</td>
+                  <td className="px-6 py-4">{update_request.status}</td>
                   <td className="px-6 py-4">
                     <a
-                      href={`/gn/minhas-solicitacoes/ver-solicitacao/${r.id}`}
+                      href={`/gn/minhas-solicitacoes/ver-solicitacao/${update_request.id}`}
                       className="inline-flex items-center justify-center gap-1 hover:text-botao-1-700 hover:underline"
                     >
                       Ver

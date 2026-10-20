@@ -1,65 +1,8 @@
 import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
-import { api } from "../../services/api";
+import { api } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-
-interface Imovel {
-  endereco: string | null;
-  bairro: string | null;
-  cidade: string | null;
-  cep: string | null;
-}
-
-interface Veiculo {
-  renavam: string | null;
-  placa: string | null;
-  marca_modelo: string | null;
-  ano: string | null;
-}
-
-interface NewDataState {
-  salario: string;
-  residencia_endereco: string;
-  residencia_cep: string;
-  imovel: Imovel[];
-  veiculo: Veiculo[];
-}
-
-interface Documento {
-  id: number;
-  nome?: string;
-}
-
-interface DadosAntigos {
-  id: number;
-  salario_snapshot: number;
-  endereco_snapshot: string;
-  cep_snapshot: string;
-  tem_imoveis_snapshot: boolean;
-  tem_veiculos_snapshot: boolean;
-  imoveis_snapshot: Imovel[];
-  veiculos_snapshot: Veiculo[];
-}
-
-interface DadosNovos {
-  id: number;
-  salario: number;
-  residencia_endereco: string;
-  residencia_cep: string;
-  imovel?: Imovel[];
-  veiculo?: Veiculo[];
-}
-
-interface UpdateRequest {
-  id: number;
-  criado_por: string;
-  cliente: string;
-  atualizacao: string;
-  status: string;
-  dados_antigos: DadosAntigos[] | null;
-  dados_novos: DadosNovos[] | null;
-  documentos: Documento[] | null;
-}
+import { UpdateRequest, NewDataState, Property, Vehicle } from "../../interfaces/updateRequest";
 
 export const GNAdjustRequest = () => {
   const { id } = useParams<{ id: string }>();
@@ -75,27 +18,27 @@ export const GNAdjustRequest = () => {
   const [pdfUrl, setPdfUrl] = useState<string | undefined>(undefined);
 
   const [newData, setNewData] = useState<NewDataState>({
-    salario: "",
-    residencia_endereco: "",
-    residencia_cep: "",
-    imovel: [],
-    veiculo: []
+    salary: "",
+    residence_adress: "",
+    residence_zip_code: "",
+    property: [],
+    vehicle: []
   });
 
   
   // Estados para formulário
-  const [currentImovel, setCurrentImovel] = useState<Imovel>({
-    endereco: "",
-    bairro: "",
-    cidade: "",
-    cep: ""
+  const [currentProperty, setCurrentProperty] = useState<Property>({
+    adress: "",
+    neighborhood: "",
+    city: "",
+    zip_code: ""
   });
 
-  const [currentVeiculo, setCurrentVeiculo] = useState<Veiculo>({
+  const [currentVehicle, setCurrentVehicle] = useState<Vehicle>({
     renavam: "",
-    placa: "",
-    marca_modelo: "",
-    ano: ""
+    plate: "",
+    brand_model: "",
+    year: ""
   });
 
 
@@ -108,17 +51,17 @@ export const GNAdjustRequest = () => {
     }));
   };
 
-  const handleCurrentImovelChange = (e:ChangeEvent<HTMLInputElement>) => {
+  const handlecurrentPropertyChange = (e:ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setCurrentImovel((prev) => ({
+    setCurrentProperty((prev) => ({
       ...prev,
       [name]: value
     }));
   };
 
-  const handleCurrentVeiculoChange = (e:ChangeEvent<HTMLInputElement>) => {
+  const handlecurrentVehicleChange = (e:ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setCurrentVeiculo((prev) => ({
+    setCurrentVehicle((prev) => ({
       ...prev,
       [name]: value
     }));
@@ -136,29 +79,29 @@ export const GNAdjustRequest = () => {
     
     const cleanCPF = customerCPF.replace(/\D/g, '');
 
-    formData.append("nome", customerName);
-    formData.append("cliente", cleanCPF);
-    formData.append("atualizacao", requestType);
-    formData.append("documentos", selectedFile);
+    formData.append("name", customerName);
+    formData.append("customer", cleanCPF);
+    formData.append("update_type", requestType);
+    formData.append("documents", selectedFile);
 
-    const temImovel = Boolean(
-      currentImovel.endereco || currentImovel.bairro || currentImovel.cidade || currentImovel.cep
+    const temproperty = Boolean(
+      currentProperty.adress || currentProperty.neighborhood || currentProperty.city || currentProperty.zip_code
     );
 
-    const temVeiculo = Boolean(
-      currentVeiculo.renavam || currentVeiculo.placa || currentVeiculo.marca_modelo || currentVeiculo.ano
+    const temvehicle = Boolean(
+      currentVehicle.renavam || currentVehicle.plate || currentVehicle.brand_model || currentVehicle.year
     );
 
     const cleanNewData = {
       ...newData,
-      residencia_cep: newData.residencia_cep ? newData.residencia_cep.replace(/\D/g, ""): "",
+      residencia_cep: newData.residence_zip_code ? newData.residence_zip_code.replace(/\D/g, ""): "",
 
-      imovel: temImovel ? [{
-        ...currentImovel,
-        cep: currentImovel.cep ? currentImovel.cep.replace(/\D/g, "") : null
+      property: temproperty ? [{
+        ...currentProperty,
+        cep: currentProperty.zip_code ? currentProperty.zip_code.replace(/\D/g, "") : null
       }] : [],
 
-      veiculo: temVeiculo ? [currentVeiculo]: []
+      vehicle: temvehicle ? [currentVehicle]: []
     };
 
     formData.append("dados_novos", JSON.stringify(cleanNewData));
@@ -174,23 +117,23 @@ export const GNAdjustRequest = () => {
       setCustomerName("");
       setRequestType("");
       setNewData({
-        salario: "",
-        residencia_endereco: "",
-        residencia_cep: "",
-        imovel: [],
-        veiculo: []
+        salary: "",
+        residence_adress: "",
+        residence_zip_code: "",
+        property: [],
+        vehicle: []
       });
-      setCurrentImovel({
-        endereco: "",
-        bairro: "",
-        cidade: "",
-        cep: ""
+      setCurrentProperty({
+        adress: "",
+        neighborhood: "",
+        city: "",
+        zip_code: ""
       });
-      setCurrentVeiculo({
+      setCurrentVehicle({
         renavam: "",
-        placa: "",
-        marca_modelo: "",
-        ano: ""
+        plate: "",
+        brand_model: "",
+        year: ""
       });
       setSelectedFile(null);
       
@@ -210,23 +153,22 @@ export const GNAdjustRequest = () => {
     const file = e.target.files?.[0];
     if (file) {
       const allowedTypes = [
-        "application/pdf",
-        "image/jpeg",
-        "image/png",
-        "image/jpg"
+        "application/pdf"
       ];
+
       if (!allowedTypes.includes(file.type)) {
         console.error("Por favor, selecione um arquivo PDF ou imagem (JPG/PNG).");
         setSelectedFile(null);
         return;
       }
+
       if (file.size > 5 * 1024 * 1024) {
         console.error("O arquivo deve ter no máximo 5MB.");
         setSelectedFile(null);
         return;
       }
+
       setSelectedFile(file);
-      console.log("GG pro max");
     }
   };
 
@@ -235,29 +177,29 @@ export const GNAdjustRequest = () => {
       try {
         const response = await api.get(`ver-solicitacao/${id}`);
         console.log(response);
-        const solicitacao = response.data.solicitacao;
-        const dadosNovos = response.data.solicitacao.dados_novos[0];
+        const request = response.data.solicitacao;
+        const newData = response.data.request.new_data[0];
 
-        setRequestUpdate(solicitacao);
-        setCustomerName(solicitacao.cliente);
-        setCustomerCPF(solicitacao.cpf);
-        setRequestType(solicitacao.atualizacao);
+        setRequestUpdate(request);
+        setCustomerName(request.customer);
+        setCustomerCPF(request.cpf);
+        setRequestType(request.request_type);
         setNewData({
-            salario: dadosNovos.salario,
-            residencia_endereco: dadosNovos.residencia_endereco,
-            residencia_cep: dadosNovos.residencia_cep,
-            imovel: [],
-            veiculo: []
+            salary: newData.salario,
+            residence_adress: newData.residencia_endereco,
+            residence_zip_code: newData.residencia_cep,
+            property: [],
+            vehicle: []
         });
 
-        if (dadosNovos?.veiculo?.length > 0) {
-            setCurrentVeiculo(dadosNovos.veiculo[0]);
+        if (newData?.vehicle?.length > 0) {
+            setCurrentVehicle(newData.vehicle[0]);
         } else {
             console.log("Nenhum veículo encontrado para esta solicitação.");
         }
 
-        if (dadosNovos?.imovel?.length > 0) {
-            setCurrentImovel(dadosNovos.imovel[0]);
+        if (newData?.property?.length > 0) {
+            setCurrentProperty(newData.property[0]);
         } else {
             console.log("Nenhum imóvel encontrado para esta solicitação.");
         }
@@ -377,10 +319,10 @@ export const GNAdjustRequest = () => {
                   required
                 >
                   <option value="" disabled>Selecione uma opção</option>
-                  <option value="Renda">Renda</option>
-                  <option value="Endereço">Endereço</option>
-                  <option value="Imóvel">Patrimônio (Imóvel)</option>
-                  <option value="Veículo">Patrimônio (Veículo)</option>
+                  <option value="INCOME">Renda</option>
+                  <option value="ADRESS">Endereço</option>
+                  <option value="PROPERTY">Patrimônio (Imóvel)</option>
+                  <option value="VEHICLE">Patrimônio (Veículo)</option>
                 </select>
               </div>
             </div>
@@ -391,7 +333,7 @@ export const GNAdjustRequest = () => {
               <h2 className="text-xl font-semibold mb-4 text-gray-700">Dados Novos</h2>
 
               <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
-                {requestType === "Renda" && (
+                {requestType === "INCOME" && (
                   <div className="sm:col-span-2">
                     <label htmlFor="salario" className="block text-sm font-medium text-gray-900">
                       Salário Atual (R$)
@@ -401,7 +343,7 @@ export const GNAdjustRequest = () => {
                       name="salario"
                       type="number"
                       step="0.01"
-                      value={newData.salario}
+                      value={newData.salary}
                       className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
                       onChange={handleNewDataChange}
                       required
@@ -409,65 +351,65 @@ export const GNAdjustRequest = () => {
                   </div>
                 )}
 
-                {requestType === "Imóvel" && (
+                {requestType === "PROPERTY" && (
                   <>
                     <div className="sm:col-span-2">
-                      <label htmlFor="imovel_endereco" className="block text-sm font-medium text-gray-900">
+                      <label htmlFor="property_endereco" className="block text-sm font-medium text-gray-900">
                         Endereço do Imóvel
                       </label>
                       <input
-                        id="imovel_endereco"
+                        id="property_endereco"
                         name="endereco"
                         type="text"
-                        value={currentImovel.endereco ?? ""}
+                        value={currentProperty.adress ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handleCurrentImovelChange}
+                        onChange={handlecurrentPropertyChange}
                         required
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="imovel_bairro" className="block text-sm font-medium text-gray-900">
+                      <label htmlFor="property_bairro" className="block text-sm font-medium text-gray-900">
                         Bairro
                       </label>
                       <input
-                        id="imovel_bairro"
+                        id="property_bairro"
                         name="bairro"
                         type="text"
-                        value={currentImovel.bairro ?? ""}
+                        value={currentProperty.neighborhood ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handleCurrentImovelChange}
+                        onChange={handlecurrentPropertyChange}
                         required
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="imovel_cidade" className="block text-sm font-medium text-gray-900">
+                      <label htmlFor="property_cidade" className="block text-sm font-medium text-gray-900">
                         Cidade
                       </label>
                       <input
-                        id="imovel_cidade"
+                        id="property_cidade"
                         name="cidade"
                         type="text"
-                        value={currentImovel.cidade ?? ""}
+                        value={currentProperty.city ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handleCurrentImovelChange}
+                        onChange={handlecurrentPropertyChange}
                         required
                       />
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label htmlFor="imovel_cep" className="block text-sm font-medium text-gray-900">
+                      <label htmlFor="property_cep" className="block text-sm font-medium text-gray-900">
                         CEP Imóvel
                       </label>
                       <input
-                        id="imovel_cep"
+                        id="property_cep"
                         name="cep"
                         type="text"
                         maxLength={8}
-                        value={currentImovel.cep ?? ""}
+                        value={currentProperty.zip_code ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handleCurrentImovelChange}
+                        onChange={handlecurrentPropertyChange}
                         placeholder="00000000"
                         required
                       />
@@ -475,67 +417,67 @@ export const GNAdjustRequest = () => {
                     </>
                 )}
 
-                {requestType === "Veículo" && (
+                {requestType === "VEHICLE" && (
                   <>
                     <div>
-                      <label htmlFor="veiculo_renavam" className="block text-sm font-medium text-gray-900">
+                      <label htmlFor="vehicle_renavam" className="block text-sm font-medium text-gray-900">
                         RENAVAM
                       </label>
                       <input
-                        id="veiculo_renavam"
+                        id="vehicle_renavam"
                         name="renavam"
                         type="text"
                         maxLength={11}
-                        value={currentVeiculo.renavam ?? ""}
+                        value={currentVehicle.renavam ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handleCurrentVeiculoChange}
+                        onChange={handlecurrentVehicleChange}
                         required
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="veiculo_placa" className="block text-sm font-medium text-gray-900">
+                      <label htmlFor="vehicle_placa" className="block text-sm font-medium text-gray-900">
                         Placa
                       </label>
                       <input
-                        id="veiculo_placa"
+                        id="vehicle_placa"
                         name="placa"
                         type="text"
                         maxLength={7}
-                        value={currentVeiculo.placa ?? ""}
+                        value={currentVehicle.plate ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handleCurrentVeiculoChange}
+                        onChange={handlecurrentVehicleChange}
                         required
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="veiculo_marca_modelo" className="block text-sm font-medium text-gray-900">
+                      <label htmlFor="vehicle_marca_modelo" className="block text-sm font-medium text-gray-900">
                         Marca/Modelo
                       </label>
                       <input
-                        id="veiculo_marca_modelo"
+                        id="vehicle_marca_modelo"
                         name="marca_modelo"
                         type="text"
-                        value={currentVeiculo.marca_modelo ?? ""}
+                        value={currentVehicle.brand_model ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handleCurrentVeiculoChange}
+                        onChange={handlecurrentVehicleChange}
                         required
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="veiculo_ano" className="block text-sm font-medium text-gray-900">
+                      <label htmlFor="vehicle_ano" className="block text-sm font-medium text-gray-900">
                         Ano
                       </label>
                       <input
-                        id="veiculo_ano"
+                        id="vehicle_ano"
                         name="ano"
                         type="text"
                         maxLength={9}
-                        value={currentVeiculo.ano ?? ""}
+                        value={currentVehicle.year ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handleCurrentVeiculoChange}
+                        onChange={handlecurrentVehicleChange}
                         required
                       />
                     </div>
@@ -552,7 +494,7 @@ export const GNAdjustRequest = () => {
                         id="residencia_endereco"
                         name="residencia_endereco"
                         type="text"
-                        value={newData.residencia_endereco}
+                        value={newData.residence_adress}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
                         onChange={handleNewDataChange}
                         required
@@ -568,7 +510,7 @@ export const GNAdjustRequest = () => {
                         name="residencia_cep"
                         type="text"
                         maxLength={8}
-                        value={newData.residencia_cep}
+                        value={newData.residence_zip_code}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
                         onChange={handleNewDataChange}
                         placeholder="00000000"
@@ -608,20 +550,20 @@ export const GNAdjustRequest = () => {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {requestUpdate?.documentos?.map((doc, index) => {
-                const isSelected = selectedDoc === doc.id;
+              {requestUpdate?.documents?.map((document, index) => {
+                const isSelected = selectedDoc === document.id;
                 return (
                   <button
                     type="button"
-                    key={doc.id}
-                    onClick={() => setSelectedDoc(doc.id)}
+                    key={document.id}
+                    onClick={() => setSelectedDoc(document.id)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       isSelected
                         ? 'bg-botao-1 text-white shadow-sm'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    {doc.nome || `Documento ${index + 1}`}
+                    {document.name || `Documento ${index + 1}`}
                   </button>
                 );
               })}

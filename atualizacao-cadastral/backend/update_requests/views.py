@@ -35,7 +35,6 @@ class GNCreateRequestView(APIView):
 
     def post(self, request):
         serializer = PostRequestSerializer(data=request.data, context={'request': request})
-        print(request.data)
 
         if serializer.is_valid():
             update_request = serializer.save(created_by=request.user)

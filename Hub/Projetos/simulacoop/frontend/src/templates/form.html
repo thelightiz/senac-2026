@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('simulacoop.static', filename='styles/form.css') }}">
     <title>Simulador de Empréstimo — Sicredi</title>
-    <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+    <script src="{{ url_for('simulacoop.static', filename='js/chart.umd.min.js') }}"></script>
 
 </head>
 
 <body>
     <header class="topbar">
-        <img class="brand" src="../static/img/sicredi_transparente.png" alt="Sicredi">
+        <img class="brand" src="{{ url_for('simulacoop.static', filename='img/sicredi_transparente.png') }}" alt="Sicredi">
     </header>
 
 
@@ -87,11 +87,11 @@
                             <span class="result-value" id="number_of_installments">0</span>
                         </div>
                         <div class="result-juros">
-                            <img src="../static/icon/info.png" alt="Info">
+                            <img src="{{ url_for('simulacoop.static', filename='icon/info.png') }}" alt="Info">
                             <p>Os valores são estimativos e podem variar.</p>
                         </div>
                         <div class="result-juros">
-                            <img src="../static/icon/info.png" alt="Info">
+                            <img src="{{ url_for('simulacoop.static', filename='icon/info.png') }}" alt="Info">
                             <p>Valor do juros utilizado: 1,5%</p>
                         </div>
                     </div>

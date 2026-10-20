@@ -145,8 +145,8 @@ class RequestOldDataSerializer(serializers.ModelSerializer):
 
 
 class GetRequestNewDataSerializer(serializers.ModelSerializer):
-    properties = RequestPropertySerializer(source='properties', many=True, read_only=True)
-    vehicles = RequestVehicleSerializer(source='vehicles', many=True, read_only=True)
+    properties = RequestPropertySerializer(many=True, read_only=True)
+    vehicles = RequestVehicleSerializer(many=True, read_only=True)
 
     class Meta:
         model = NewData
@@ -158,9 +158,9 @@ class GetRequestInfoSerializer(serializers.ModelSerializer):
     customer = serializers.StringRelatedField()
     cpf = serializers.CharField(source='customer.cpf', read_only=True)
     status = serializers.CharField(source='get_status_display', read_only=True)
-    old_data = RequestOldDataSerializer(source='old_data', many=True, read_only=True)
-    new_data = GetRequestNewDataSerializer(source='new_data', many=True, read_only=True)
-    documents = RequestDocumentSerializer(source='documents', many=True, read_only=True)
+    old_data = RequestOldDataSerializer(many=True, read_only=True)
+    new_data = GetRequestNewDataSerializer(many=True, read_only=True)
+    documents = RequestDocumentSerializer(many=True, read_only=True)
 
     class Meta:
         model = UpdateRequest

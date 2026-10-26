@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { Property, Vehicle, NewDataState } from "../../interfaces/updateRequest";
 
 export const GNCreateRequest = () => {
+  const navigate = useNavigate();
+  
   const [customerName, setCustomerName] = useState("");
   const [customerCPF, setCustomerCPF] = useState("");
   const [requestType, setRequestType] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  const navigate = useNavigate();
 
   const [newData, setNewData] = useState<NewDataState>({
     salary: "",
@@ -78,24 +78,24 @@ export const GNCreateRequest = () => {
     formData.append("update_type", requestType);
     formData.append("documents", selectedFile);
 
-    const temImovel = Boolean(
+    const hasProperty = Boolean(
       currentProperty.adress || currentProperty.neighborhood || currentProperty.city || currentProperty.zip_code
     );
 
-    const temVeiculo = Boolean(
+    const hasVehicle = Boolean(
       currentVehicle.renavam || currentVehicle.plate || currentVehicle.brand_model || currentVehicle.year
     );
 
     const cleanNewData = {
       ...newData,
-      residencia_cep: newData.residence_zip_code.replace(/\D/g, ''),
+      residence_cep: newData.residence_zip_code.replace(/\D/g, ''),
 
-      imovel: temImovel ? [{
+      property: hasProperty ? [{
         ...currentProperty,
-        cep: currentProperty.zip_code ? currentProperty.zip_code.replace(/\D/g, '') : null
+        zip_code: currentProperty.zip_code ? currentProperty.zip_code.replace(/\D/g, '') : null
       }] : [],
 
-      veiculo: temVeiculo ? [currentVehicle]: []
+      vehicle: hasVehicle ? [currentVehicle]: []
     };
 
     formData.append("new_data", JSON.stringify(cleanNewData));
@@ -134,7 +134,7 @@ export const GNCreateRequest = () => {
       return navigate("/gn/minhas-solicitacoes");
 
     } catch (error: any) {
-      console.error("Erro ao criar solicitação:", error);
+      console.error("Error creating update request:", error);
       if (error.response?.data) {
         alert(`Erro: ${JSON.stringify(error.response.data)}`);
       } else {
@@ -203,9 +203,11 @@ export const GNCreateRequest = () => {
                   id="customerCPF"
                   type="text"
                   name="customerCPF"
+                  maxLength={11}
                   value={customerCPF}
                   className="block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-600 focus:outline-none"
                   onChange={(e) => setCustomerCPF(e.target.value)}
+                  placeholder="00000000000"
                   required
                 />
               </div>
@@ -228,7 +230,7 @@ export const GNCreateRequest = () => {
                 >
                   <option value="" disabled>Selecione uma opção</option>
                   <option value="INCOME">Renda</option>
-                  <option value="ADRESS">Endereço</option>
+                  <option value="ADDRESS">Endereço</option>
                   <option value="PROPERTY">Patrimônio (Imóvel)</option>
                   <option value="VEHICLE">Patrimônio (Veículo)</option>
                 </select>
@@ -259,7 +261,7 @@ export const GNCreateRequest = () => {
                   </div>
                 )}
 
-                {requestType === "ADRESS" && (
+                {requestType === "PROPERTY" && (
                   <>
                     <div className="sm:col-span-2">
                       <label htmlFor="imovel_endereco" className="block text-sm font-medium text-gray-900">
@@ -392,7 +394,7 @@ export const GNCreateRequest = () => {
                   </>
                 )}
 
-                {requestType === "ADRESS" && (
+                {requestType === "ADDRESS" && (
                   <>
                     <div className="sm:col-span-2">
                       <label htmlFor="residencia_endereco" className="block text-sm font-medium text-gray-900">

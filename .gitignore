@@ -1,4 +1,4 @@
 # Ignorar arquivos de ambiente locais
-.env
+Hub/.env
 .env.local
 .env.*.local

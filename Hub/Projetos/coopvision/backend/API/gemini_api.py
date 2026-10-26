@@ -1,8 +1,12 @@
 import json
 import os
 import time
+from pathlib import Path
 
+from dotenv import load_dotenv
 from PIL import Image
+
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[4] / '.env')
 
 try:
     from google import genai

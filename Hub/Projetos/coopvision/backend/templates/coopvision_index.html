@@ -88,6 +88,7 @@
 
     <script>
     window.addEventListener('DOMContentLoaded', () => {
+        const endpointLeitura = '{{ url_for("coopvision.ler_imagem") }}';
         const inputArquivo = document.getElementById('input-arquivo');
         const btnSelecionar = document.getElementById('btn-selecionar');
         const btnEnviar = document.getElementById('btn-enviar');
@@ -173,7 +174,7 @@
             iniciarBarra();
 
             try {
-                const resposta = await fetch('/ler-imagem', {
+                const resposta = await fetch(endpointLeitura, {
                  method: 'POST',
                  body: formData
                  });

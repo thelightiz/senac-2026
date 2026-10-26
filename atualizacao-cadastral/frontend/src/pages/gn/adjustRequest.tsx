@@ -19,16 +19,15 @@ export const GNAdjustRequest = () => {
 
   const [newData, setNewData] = useState<NewDataState>({
     salary: "",
-    residence_adress: "",
+    residence_address: "",
     residence_zip_code: "",
-    property: [],
-    vehicle: []
+    properties: [],
+    vehicles: []
   });
 
-  
   // Estados para formulário
   const [currentProperty, setCurrentProperty] = useState<Property>({
-    adress: "",
+    address: "",
     neighborhood: "",
     city: "",
     zip_code: ""
@@ -84,47 +83,44 @@ export const GNAdjustRequest = () => {
     formData.append("update_type", requestType);
     formData.append("documents", selectedFile);
 
-    const temproperty = Boolean(
-      currentProperty.adress || currentProperty.neighborhood || currentProperty.city || currentProperty.zip_code
+    const hasProperty = Boolean(
+      currentProperty.address || currentProperty.neighborhood || currentProperty.city || currentProperty.zip_code
     );
 
-    const temvehicle = Boolean(
+    const hasVehicle = Boolean(
       currentVehicle.renavam || currentVehicle.plate || currentVehicle.brand_model || currentVehicle.year
     );
 
     const cleanNewData = {
       ...newData,
-      residencia_cep: newData.residence_zip_code ? newData.residence_zip_code.replace(/\D/g, ""): "",
+      residence_cep: newData.residence_zip_code ? newData.residence_zip_code.replace(/\D/g, ""): "",
 
-      property: temproperty ? [{
+      properties: hasProperty ? [{
         ...currentProperty,
-        cep: currentProperty.zip_code ? currentProperty.zip_code.replace(/\D/g, "") : null
+        zip_code: currentProperty.zip_code ? currentProperty.zip_code.replace(/\D/g, "") : null
       }] : [],
 
-      vehicle: temvehicle ? [currentVehicle]: []
+      vehicles: hasVehicle ? [currentVehicle]: []
     };
 
-    formData.append("dados_novos", JSON.stringify(cleanNewData));
-
-    console.log("Enviando payload...");
-    console.log("Dados Novos JSON:", JSON.stringify(cleanNewData));
+    formData.append("new_data", JSON.stringify(cleanNewData));
 
     try {
       const response = await api.patch(`gn/editar-solicitacao/${id}`, formData);
-      console.log("Sucesso:", response.data);
+      console.log("Sucess:", response.data);
       alert("Solicitação editada com sucesso!");
       
       setCustomerName("");
       setRequestType("");
       setNewData({
         salary: "",
-        residence_adress: "",
+        residence_address: "",
         residence_zip_code: "",
-        property: [],
-        vehicle: []
+        properties: [],
+        vehicles: []
       });
       setCurrentProperty({
-        adress: "",
+        address: "",
         neighborhood: "",
         city: "",
         zip_code: ""
@@ -186,10 +182,10 @@ export const GNAdjustRequest = () => {
         setRequestType(request.request_type);
         setNewData({
             salary: newData.salario,
-            residence_adress: newData.residencia_endereco,
+            residence_address: newData.residencia_endereco,
             residence_zip_code: newData.residencia_cep,
-            property: [],
-            vehicle: []
+            properties: [],
+            vehicles: []
         });
 
         if (newData?.vehicle?.length > 0) {
@@ -244,7 +240,6 @@ export const GNAdjustRequest = () => {
         console.log("Erro:", error)
       }
     };
-
     
     fetchPdf();
     
@@ -320,7 +315,7 @@ export const GNAdjustRequest = () => {
                 >
                   <option value="" disabled>Selecione uma opção</option>
                   <option value="INCOME">Renda</option>
-                  <option value="ADRESS">Endereço</option>
+                  <option value="ADDRESS">Endereço</option>
                   <option value="PROPERTY">Patrimônio (Imóvel)</option>
                   <option value="VEHICLE">Patrimônio (Veículo)</option>
                 </select>
@@ -340,7 +335,7 @@ export const GNAdjustRequest = () => {
                     </label>
                     <input
                       id="salario"
-                      name="salario"
+                      name="salary"
                       type="number"
                       step="0.01"
                       value={newData.salary}
@@ -359,9 +354,9 @@ export const GNAdjustRequest = () => {
                       </label>
                       <input
                         id="property_endereco"
-                        name="endereco"
+                        name="address"
                         type="text"
-                        value={currentProperty.adress ?? ""}
+                        value={currentProperty.address ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
                         onChange={handlecurrentPropertyChange}
                         required
@@ -374,7 +369,7 @@ export const GNAdjustRequest = () => {
                       </label>
                       <input
                         id="property_bairro"
-                        name="bairro"
+                        name="neighborhood"
                         type="text"
                         value={currentProperty.neighborhood ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
@@ -389,7 +384,7 @@ export const GNAdjustRequest = () => {
                       </label>
                       <input
                         id="property_cidade"
-                        name="cidade"
+                        name="city"
                         type="text"
                         value={currentProperty.city ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
@@ -404,7 +399,7 @@ export const GNAdjustRequest = () => {
                       </label>
                       <input
                         id="property_cep"
-                        name="cep"
+                        name="zip_code"
                         type="text"
                         maxLength={8}
                         value={currentProperty.zip_code ?? ""}
@@ -441,7 +436,7 @@ export const GNAdjustRequest = () => {
                       </label>
                       <input
                         id="vehicle_placa"
-                        name="placa"
+                        name="plate"
                         type="text"
                         maxLength={7}
                         value={currentVehicle.plate ?? ""}
@@ -457,7 +452,7 @@ export const GNAdjustRequest = () => {
                       </label>
                       <input
                         id="vehicle_marca_modelo"
-                        name="marca_modelo"
+                        name="brand_model"
                         type="text"
                         value={currentVehicle.brand_model ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
@@ -472,7 +467,7 @@ export const GNAdjustRequest = () => {
                       </label>
                       <input
                         id="vehicle_ano"
-                        name="ano"
+                        name="year"
                         type="text"
                         maxLength={9}
                         value={currentVehicle.year ?? ""}
@@ -484,7 +479,7 @@ export const GNAdjustRequest = () => {
                   </>
                 )}
 
-                {requestType === "Endereço" && (
+                {requestType === "ADDRESS" && (
                   <>
                     <div className="sm:col-span-2">
                       <label htmlFor="residencia_endereco" className="block text-sm font-medium text-gray-900">
@@ -492,9 +487,9 @@ export const GNAdjustRequest = () => {
                       </label>
                       <input
                         id="residencia_endereco"
-                        name="residencia_endereco"
+                        name="residence_address"
                         type="text"
-                        value={newData.residence_adress}
+                        value={newData.residence_address}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
                         onChange={handleNewDataChange}
                         required
@@ -507,7 +502,7 @@ export const GNAdjustRequest = () => {
                       </label>
                       <input
                         id="residencia_cep"
-                        name="residencia_cep"
+                        name="residence_zip"
                         type="text"
                         maxLength={8}
                         value={newData.residence_zip_code}

@@ -40,7 +40,7 @@ export const GNViewRequest = () => {
         const response = await api.get(`ver-solicitacao/${id}`);
         setUpdateRequest(response.data.request);
 
-        if (response.data.solicitacao.documentos?.length > 0) {
+        if (response.data.request.documents?.length > 0) {
           setSelectedDoc(response.data.request.documents[0].id);
         }
       } catch (error) {
@@ -52,7 +52,6 @@ export const GNViewRequest = () => {
 
     if (id) {
       fetchUpdateRequest()
-      console.log(updateRequest)
     }
   }, [id]);
 
@@ -80,8 +79,7 @@ export const GNViewRequest = () => {
         console.log("Error:", error)
       }
     };
-
-    
+    console.log(updateRequest)
     fetchPdf();
     
     return () => {
@@ -93,7 +91,7 @@ export const GNViewRequest = () => {
   
   oldData = updateRequest?.old_data?.[0];
   newData = updateRequest?.new_data?.[0];
-  
+
   if (loading) {
     return (
       <div className="w-full min-h-screen bg-white flex items-center justify-center text-slate-500 font-medium">
@@ -197,7 +195,7 @@ export const GNViewRequest = () => {
                           </span>
                           <span className="text-slate-400 font-bold">➔</span>
                           <span className="px-2.5 py-1 rounded-md bg-[#33820d]/10 text-[#33820d] text-xs font-semibold border border-[#33820d]/20">
-                            {log.new_status}
+                            {log.current_status}
                           </span>
                         </div>
                       </div>
@@ -253,11 +251,11 @@ export const GNViewRequest = () => {
 
                     <div>
                       <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">
-                        Imóveis Cadastrados ({oldData.property_snapshot?.length || 0})
+                        Imóveis Cadastrados ({oldData.properties_snapshot?.length || 0})
                       </h3>
-                      {oldData.property_snapshot && oldData.property_snapshot.length > 0 ? (
+                      {oldData.properties_snapshot && oldData.properties_snapshot.length > 0 ? (
                         <div className="space-y-2">
-                          {oldData.property_snapshot.map((imovel: any, index: number) => (
+                          {oldData.properties_snapshot.map((property: any, index: number) => (
                             <div
                               key={index}
                               className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1"
@@ -265,17 +263,17 @@ export const GNViewRequest = () => {
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Endereço:
-                                </span> {imovel.endereco || '-'}
+                                </span> {property.address || '-'}
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Bairro/Cidade:
-                                </span> {imovel.bairro || '-'} - {imovel.cidade || '-'}
+                                </span> {property.neighborhood || '-'} / {property.city || '-'}
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   CEP:
-                                </span> {imovel.cep || '-'}
+                                </span> {property.zip_code || '-'}
                               </p>
                             </div>
                           ))}
@@ -289,25 +287,25 @@ export const GNViewRequest = () => {
 
                     <div>
                       <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">
-                        Veículos Cadastrados ({oldData.vehicle_snapshot?.length || 0})
+                        Veículos Cadastrados ({oldData.vehicles_snapshot?.length || 0})
                       </h3>
-                      {oldData.vehicle_snapshot && oldData.vehicle_snapshot.length > 0 ? (
+                      {oldData.vehicles_snapshot && oldData.vehicles_snapshot.length > 0 ? (
                         <div className="space-y-2">
-                          {oldData.vehicle_snapshot.map((veiculo: any, index: number) => (
+                          {oldData.vehicles_snapshot.map((vehicle: any, index: number) => (
                             <div
                               key={index}
                               className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1"
                             >
                               <p className="font-semibold text-slate-800">
-                                {veiculo.marca_modelo || '-'} ({veiculo.ano || '-'})
+                                {vehicle.brand_model || '-'} ({vehicle.year || '-'})
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Placa:
-                                </span> {veiculo.placa || '-'} | 
+                                </span> {vehicle.plate || '-'} | 
                                 <span className="font-medium text-slate-500">
                                   RENAVAM:
-                                </span> {veiculo.renavam || '-'}
+                                </span> {vehicle.renavam || '-'}
                               </p>
                             </div>
                           ))}
@@ -351,7 +349,7 @@ export const GNViewRequest = () => {
                           Endereço
                         </span>
                         <span className="font-semibold text-slate-900 text-right">
-                          {newData.residence_adress || '-'}
+                          {newData.residence_address || '-'}
                         </span>
                       </div>
                       <div className="flex justify-between py-1">
@@ -366,28 +364,28 @@ export const GNViewRequest = () => {
 
                     <div>
                       <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">
-                        Imóveis Solicitados ({newData.property?.length || 0})
+                        Imóveis Solicitados ({newData.properties?.length || 0})
                       </h3>
-                      {newData.property && newData.property.length > 0 ? (
+                      {newData.properties && newData.properties.length > 0 ? (
                         <div className="space-y-2">
-                          {newData.property.map((property: any, index: number) => (
+                          {newData.properties.map((property: any, index: number) => (
                             <div
                               key={index}
                               className="bg-blue-50/30 p-3 rounded-lg border border-blue-100 text-xs space-y-1">
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Endereço:
-                                </span> {property.endereco || '-'}
+                                </span> {property.address || '-'}
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Bairro/Cidade:
-                                </span> {property.bairro || '-'} - {property.cidade || '-'}
+                                </span> {property.neighborhood || '-'} / {property.city || '-'}
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   CEP:
-                                </span> {property.cep || '-'}
+                                </span> {property.zip_code || '-'}
                               </p>
                             </div>
                           ))}
@@ -401,11 +399,11 @@ export const GNViewRequest = () => {
 
                     <div>
                       <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">
-                        Veículos Solicitados ({newData.vehicle?.length || 0})
+                        Veículos Solicitados ({newData.vehicles?.length || 0})
                       </h3>
-                      {newData.vehicle && newData.vehicle.length > 0 ? (
+                      {newData.vehicles && newData.vehicles.length > 0 ? (
                         <div className="space-y-2">
-                          {newData.vehicle.map((vehicle: any, index: number) => (
+                          {newData.vehicles.map((vehicle: any, index: number) => (
                             <div
                               key={index}
                               className="bg-blue-50/30 p-3 rounded-lg border border-blue-100 text-xs space-y-1"

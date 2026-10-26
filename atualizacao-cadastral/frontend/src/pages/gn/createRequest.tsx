@@ -13,16 +13,16 @@ export const GNCreateRequest = () => {
 
   const [newData, setNewData] = useState<NewDataState>({
     salary: "",
-    residence_adress: "",
+    residence_address: "",
     residence_zip_code: "",
-    property: [],
-    vehicle: []
+    properties: [],
+    vehicles: []
   });
 
   
   // Estados para formulário
   const [currentProperty, setCurrentProperty] = useState<Property>({
-    adress: "",
+    address: "",
     neighborhood: "",
     city: "",
     zip_code: ""
@@ -45,7 +45,7 @@ export const GNCreateRequest = () => {
     }));
   };
 
-  const handlecurrentPropertyChange = (e:ChangeEvent<HTMLInputElement>) => {
+  const handleCurrentPropertyChange = (e:ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCurrentProperty((prev) => ({
       ...prev,
@@ -53,7 +53,7 @@ export const GNCreateRequest = () => {
     }));
   };
 
-  const handlecurrentVehicleChange = (e:ChangeEvent<HTMLInputElement>) => {
+  const handleCurrentVehicleChange = (e:ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCurrentVehicle((prev) => ({
       ...prev,
@@ -79,7 +79,7 @@ export const GNCreateRequest = () => {
     formData.append("documents", selectedFile);
 
     const hasProperty = Boolean(
-      currentProperty.adress || currentProperty.neighborhood || currentProperty.city || currentProperty.zip_code
+      currentProperty.address || currentProperty.neighborhood || currentProperty.city || currentProperty.zip_code
     );
 
     const hasVehicle = Boolean(
@@ -90,12 +90,12 @@ export const GNCreateRequest = () => {
       ...newData,
       residence_cep: newData.residence_zip_code.replace(/\D/g, ''),
 
-      property: hasProperty ? [{
+      properties: hasProperty ? [{
         ...currentProperty,
         zip_code: currentProperty.zip_code ? currentProperty.zip_code.replace(/\D/g, '') : null
       }] : [],
 
-      vehicle: hasVehicle ? [currentVehicle]: []
+      vehicles: hasVehicle ? [currentVehicle]: []
     };
 
     formData.append("new_data", JSON.stringify(cleanNewData));
@@ -112,13 +112,13 @@ export const GNCreateRequest = () => {
       setRequestType("");
       setNewData({
         salary: "",
-        residence_adress: "",
+        residence_address: "",
         residence_zip_code: "",
-        property: [],
-        vehicle: []
+        properties: [],
+        vehicles: []
       });
       setCurrentProperty({
-        adress: "",
+        address: "",
         neighborhood: "",
         city: "",
         zip_code: ""
@@ -269,11 +269,11 @@ export const GNCreateRequest = () => {
                       </label>
                       <input
                         id="imovel_endereco"
-                        name="adress"
+                        name="address"
                         type="text"
-                        value={currentProperty.adress ?? ""}
+                        value={currentProperty.address ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handlecurrentPropertyChange}
+                        onChange={handleCurrentPropertyChange}
                         required
                       />
                     </div>
@@ -288,7 +288,7 @@ export const GNCreateRequest = () => {
                         type="text"
                         value={currentProperty.neighborhood ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handlecurrentPropertyChange}
+                        onChange={handleCurrentPropertyChange}
                         required
                       />
                     </div>
@@ -303,7 +303,7 @@ export const GNCreateRequest = () => {
                         type="text"
                         value={currentProperty.city ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handlecurrentPropertyChange}
+                        onChange={handleCurrentPropertyChange}
                         required
                       />
                     </div>
@@ -319,7 +319,7 @@ export const GNCreateRequest = () => {
                         maxLength={8}
                         value={currentProperty.zip_code ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handlecurrentPropertyChange}
+                        onChange={handleCurrentPropertyChange}
                         placeholder="00000000"
                         required
                       />
@@ -340,7 +340,7 @@ export const GNCreateRequest = () => {
                         maxLength={11}
                         value={currentVehicle.renavam ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handlecurrentVehicleChange}
+                        onChange={handleCurrentVehicleChange}
                         required
                       />
                     </div>
@@ -356,7 +356,7 @@ export const GNCreateRequest = () => {
                         maxLength={7}
                         value={currentVehicle.plate ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handlecurrentVehicleChange}
+                        onChange={handleCurrentVehicleChange}
                         required
                       />
                     </div>
@@ -371,7 +371,7 @@ export const GNCreateRequest = () => {
                         type="text"
                         value={currentVehicle.brand_model ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handlecurrentVehicleChange}
+                        onChange={handleCurrentVehicleChange}
                         required
                       />
                     </div>
@@ -387,7 +387,7 @@ export const GNCreateRequest = () => {
                         maxLength={9}
                         value={currentVehicle.year ?? ""}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
-                        onChange={handlecurrentVehicleChange}
+                        onChange={handleCurrentVehicleChange}
                         required
                       />
                     </div>
@@ -402,9 +402,9 @@ export const GNCreateRequest = () => {
                       </label>
                       <input
                         id="residencia_endereco"
-                        name="residence_adress"
+                        name="residence_address"
                         type="text"
-                        value={newData.residence_adress}
+                        value={newData.residence_address}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-indigo-600 focus:outline-none"
                         onChange={handleNewDataChange}
                         required

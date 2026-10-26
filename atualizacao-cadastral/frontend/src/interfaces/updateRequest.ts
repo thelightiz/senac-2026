@@ -6,18 +6,18 @@ export interface Document {
 export interface NewData {
   id: number;
   salary: number;
-  residence_adress: string;
+  residence_address: string;
   residence_zip_code: string;
-  property?: Property[];
-  vehicle?: Vehicle[];
+  properties?: Property[];
+  vehicles?: Vehicle[];
 }
 
 export interface NewDataState {
   salary: string;
-  residence_adress: string;
+  residence_address: string;
   residence_zip_code: string;
-  property?: Property[];
-  vehicle?: Vehicle[];
+  properties?: Property[];
+  vehicles?: Vehicle[];
 }
 
 export interface OldData {
@@ -27,12 +27,12 @@ export interface OldData {
   zip_code_snapshot: string;
   has_property_snapshot: boolean;
   has_vehicle_snapshot: boolean;
-  property_snapshot: Property[];
-  vehicle_snapshot: Vehicle[];
+  properties_snapshot: Property[];
+  vehicles_snapshot: Vehicle[];
 }
 
 export interface Property {
-  adress: string | null;
+  address: string | null;
   neighborhood: string | null;
   city: string | null;
   zip_code: string | null;

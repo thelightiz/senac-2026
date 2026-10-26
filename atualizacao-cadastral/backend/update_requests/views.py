@@ -86,7 +86,7 @@ class SeeRequestView(APIView):
     def get(self, request, pk):
         update_request = get_object_or_404(UpdateRequest, id=pk)
         serializer = GetRequestInfoSerializer(update_request, context={'request': request})
-        
+
         return Response(
             {'request': serializer.data},
             status=status.HTTP_200_OK

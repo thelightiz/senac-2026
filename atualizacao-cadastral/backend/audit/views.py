@@ -9,7 +9,7 @@ class RequestLogHistoryView(APIView):
     allowed_roles = ['GN', 'GA', 'CADASTRO']
 
     def get(self, request, pk):
-        logs = Log.objects.filter(solicitacao_id=pk)
+        logs = Log.objects.filter(update_request_id=pk)
         serializer = LogHistorySerializer(logs, many=True)
         
         return Response(serializer.data)

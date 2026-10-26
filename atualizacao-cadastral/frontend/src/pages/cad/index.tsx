@@ -1,7 +1,7 @@
 import { useRequests } from "../../hooks/useRequests";
 import { RequestTable } from "../../components/RequestTable";
 
-export const GARequestQueue = () => {
+export const CADRequestQueue = () => {
   const { user, requests, error, isLoading } = useRequests("/cad/fila-de-solicitacoes");
 
   if (error) {

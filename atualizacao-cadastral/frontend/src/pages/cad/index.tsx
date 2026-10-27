@@ -17,7 +17,7 @@ export const CADRequestQueue = () => {
       title="Lista de Solicitações"
       userName={user?.name}
       requests={requests}
-      viewLinkPrefix="/ga/fila-de-solicitacoes/solicitacao"
+      viewLinkPrefix="/cad/fila-de-solicitacoes/solicitacao"
     />
   );
 };

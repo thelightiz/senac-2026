@@ -6,20 +6,15 @@ body {
     color: #333;
 }
 
+.sicredi{
+    padding: 15px;
+}
 /* Navbar Superior do Sicredi */
 .navbar {
     background-color: #3f9227; /* Verde Sicredi corporativo */
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 24px;
+    height: 81px;
 }
 
-.logo {
-    font-size: 22px;
-    font-weight: bold;
-}
 
 .btn-config {
     background: none;

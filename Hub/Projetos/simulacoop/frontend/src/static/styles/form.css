@@ -31,17 +31,13 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* Top bar */
 header.topbar {
-    display: flex;
-    align-items: center;
-    padding: 0 32px;
-    height: 60px;
+    height: 81px;
     background: var(--green);
 }
 
 .brand {
-    max-width: 150px;
+    padding: 15px;
     display: flex;
-    align-items: center;
 }
 
 /* Content / panels */

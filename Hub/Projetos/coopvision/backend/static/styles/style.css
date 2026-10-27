@@ -14,17 +14,13 @@ body {
     min-height: 100vh;
 }
 
+.sicredi{
+    padding: 15px;
+}
 /* Barra de Topo Verde */
 .header-bar {
+    height: 81px;
     background-color: #3f9c35;
-    color: #ffffff;
-    padding: 15px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 22px;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .header-icon {

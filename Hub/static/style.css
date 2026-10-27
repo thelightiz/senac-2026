@@ -13,22 +13,14 @@ body {
     flex-direction: column;
 }
 
+.brand-sicredi{
+    padding: 15px;
+}
+
 /* Navbar */
 .navbar {
     background-color: #ffffff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     height: 81px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-
-
-.nav-menu {
-    display: flex;
-    align-items: center;
-    gap: 25px;
 }
 
 .btn-conta {

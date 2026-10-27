@@ -5,58 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sicredi - Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
 <body>
     <header class="navbar">
-        <div class="logo">
-            <span class="brand-sicredi"><i class="fa-solid fa-leaf"><img src="{{ url_for('static', filename='imagem_sicredi.png') }}" class="minha-imagem" alt="imagem sicredi"></i></span>
-        </div>
-        <div class="nav-menu">
-            <button class="nav-icon"><i class="fa-solid fa-magnifying-glass"></i></button>
-            <button class="nav-icon"><i class="fa-solid fa-bars"></i></button>
-        </div>
+        <img src="{{ url_for('static', filename='imagem_sicredi.png') }}" class="brand-sicredi" alt="imagem sicredi">
     </header>
 
     <main class="dashboard-container">
         <div class="grid-cards">
             <div class="card">
                 <div class="card-header">
-                    <i class="fa-solid fa-users-gear icon-green"></i>
                     <img src="{{ url_for('static', filename='groups (1).png') }}" alt="imagem de grupo de pessoas">
                     <h2>SimulaCoop</h2>
                 </div>
                 <p>Calcula e demonstra a evolução de um empréstimo.</p>
-                <a href="{{ url_for('simulacoop.inicio') }}" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+                <a href="{{ url_for('simulacoop.inicio') }}" class="btn-entrar">Entrar<img src="{{ url_for('static', filename='Arrow Forward.png') }}"></a>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <i class="fa-solid fa-file-invoice icon-green"></i>
                     <img src="{{ url_for('static', filename='Swoosh Star.png') }}" alt="imagem de papel com estrela">
                     <h2>CoopVision</h2>
                 </div>
                 <p>Ler documentos e extrair dados automaticamente.</p>
-                <a href="{{ url_for('coopvision.index') }}" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+                <a href="{{ url_for('coopvision.index') }}" class="btn-entrar">Entrar<img src="{{ url_for('static', filename='Arrow Forward.png') }}"></a>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <i class="fa-solid fa-user-check icon-green"></i>
                     <img src="{{ url_for('static', filename='Swoosh Star.png') }}" alt="imagem de papel com estrela">
                     <h2>Atualização Cadastral</h2>
                 </div>
                 <p>Gerencia a solicitação, avaliação e aprovação de alterações de dados.</p>
-                <a href="https://atualizacao-cadastral-3122.onrender.com/" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+                <a href="https://atualizacao-cadastral-3122.onrender.com/" class="btn-entrar">Entrar<img src="{{ url_for('static', filename='Arrow Forward.png') }}"></a>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <i class="fa-solid fa-shield-halved icon-green"></i>
                     <img src="{{ url_for('static', filename='Verified User.png') }}" alt="imagem escudo verificado">
                     <h2>CoopShield</h2>
                 </div>
                 <p>Monitoramento de transações que identifica e bloqueia anomalias.</p>
-                <a href="{{ url_for('coopshield.index') }}" class="btn-entrar">Entrar <i class="fa-solid fa-arrow-right"><img src="{{ url_for('static', filename='Arrow Forward.png') }}"></i></a>
+                <a href="{{ url_for('coopshield.index') }}" class="btn-entrar">Entrar<img src="{{ url_for('static', filename='Arrow Forward.png') }}"></a>
             </div>
         </div>
     </main>

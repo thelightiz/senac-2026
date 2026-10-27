@@ -196,8 +196,8 @@ class PatchRequestVehicleSerializer(serializers.ModelSerializer):
 
 
 class GNAdjustRequestSerializer(serializers.ModelSerializer):
-    properties = PatchRequestPropertySerializer(source='properties', many=True, required=False)
-    vehicles = PatchRequestVehicleSerializer(source='vehicles', many=True, required=False)
+    properties = PatchRequestPropertySerializer(many=True, required=False)
+    vehicles = PatchRequestVehicleSerializer(many=True, required=False)
     
     class Meta:
         model = NewData

@@ -172,36 +172,35 @@ export const GNAdjustRequest = () => {
     const fetchSolicitacao = async () => {
       try {
         const response = await api.get(`ver-solicitacao/${id}`);
-        console.log(response);
-        const request = response.data.solicitacao;
+        const request = response.data.request;
         const newData = response.data.request.new_data[0];
 
         setRequestUpdate(request);
         setCustomerName(request.customer);
         setCustomerCPF(request.cpf);
-        setRequestType(request.request_type);
+        setRequestType(request.update_type);
         setNewData({
-            salary: newData.salario,
-            residence_address: newData.residencia_endereco,
-            residence_zip_code: newData.residencia_cep,
+            salary: newData.salary,
+            residence_address: newData.residence_address,
+            residence_zip_code: newData.residence_zip_code,
             properties: [],
             vehicles: []
         });
 
-        if (newData?.vehicle?.length > 0) {
-            setCurrentVehicle(newData.vehicle[0]);
+        if (newData?.vehicles?.length > 0) {
+            setCurrentVehicle(newData.vehicles[0]);
         } else {
             console.log("Nenhum veículo encontrado para esta solicitação.");
         }
 
         if (newData?.property?.length > 0) {
-            setCurrentProperty(newData.property[0]);
+            setCurrentProperty(newData.properties[0]);
         } else {
             console.log("Nenhum imóvel encontrado para esta solicitação.");
         }
 
-        if (response.data.solicitacao.documentos?.length > 0) {
-          setSelectedDoc(response.data.solicitacao.documentos[0].id);
+        if (response.data.request.documents?.length > 0) {
+          setSelectedDoc(response.data.request.documents[0].id);
         }
 
       } catch (error) {
@@ -269,7 +268,7 @@ export const GNAdjustRequest = () => {
                 <input
                   id="customerName"
                   type="text"
-                  name="customerName"
+                  name="customer"
                   value={customerName}
                   className="block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-600 focus:outline-none"
                   onChange={(e) => setCustomerName(e.target.value)}

@@ -1,58 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../utils/api';
+import { UpdateRequest } from "../../interfaces/updateRequest";
+import { ParecerModal } from '../../components/ParecerModal';
 
-interface Documento {
-  id: number;
-  nome?: string;
-}
-
-interface DadosAntigos {
-  id: number;
-  salario_snapshot: number;
-  endereco_snapshot: string;
-  cep_snapshot: string;
-  tem_imoveis_snapshot: boolean;
-  tem_veiculos_snapshot: boolean;
-  imoveis_snapshot: Imovel[];
-  veiculos_snapshot: Veiculo[];
-}
-
-interface DadosNovos {
-  id: number;
-  salario: number;
-  residencia_endereco: string;
-  residencia_cep: string;
-  imovel?: Imovel[];
-  veiculo?: Veiculo[];
-}
-
-interface Imovel {
-  endereco: string | null;
-  bairro: string | null;
-  cidade: string | null;
-  cep: string | null;
-}
-
-interface Veiculo {
-  renavam: string | null;
-  placa: string | null;
-  marca_modelo: string | null;
-  ano: string | null;
-}
-
-interface UpdateRequest {
-  id: number;
-  criado_por: string;
-  cliente: string;
-  atualizacao: string;
-  status: string;
-  dados_antigos: DadosAntigos[] | null;
-  dados_novos: DadosNovos[] | null;
-  documentos: Documento[] | null;
-}
-
-type ActionType = "REPROVAR" | "SOLICITAR_AJUSTE_GN";
+type ActionType = "REJECT" | "REQUEST_ADJUSTMENT_GN";
 
 export const GAViewRequestInfo = () => {
   const { id } = useParams<{ id: string }>();
@@ -75,8 +27,8 @@ export const GAViewRequestInfo = () => {
     return `R$ ${Number(val).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   };
 
-  let dadosAntigos = null;
-  let dadosNovos = null;
+  let oldData = null;
+  let newData = null;
 
   const handleToggleHistory = async () => {
     if (!showHistory && historicLogs.length === 0) {
@@ -85,30 +37,30 @@ export const GAViewRequestInfo = () => {
         console.log(response.data)
         setHistoricLogs(response.data);
       } catch (error) {
-        console.log("Erro ao buscar histórico:", error);
+        console.log("Error when searching history:", error);
       }
     }
     setShowHistory(!showHistory);
   };
 
   useEffect(() => {
-    const fetchSolicitacao = async () => {
+    const fetchUpdateRequest = async () => {
       try {
         const response = await api.get(`ver-solicitacao/${id}`);
-        setRequestUpdate(response.data.solicitacao);
+        setRequestUpdate(response.data.request);
 
-        if (response.data.solicitacao.documentos?.length > 0) {
-          setSelectedDoc(response.data.solicitacao.documentos[0].id);
+        if (response.data.request.documents?.length > 0) {
+          setSelectedDoc(response.data.request.documents[0].id);
         }
       } catch (error) {
-        console.error("Erro ao carregar os detalhes:", error);
+        console.error("Error:", error);
       } finally {
         setLoading(false);
       }
     };
 
     if (id) {
-      fetchSolicitacao();
+      fetchUpdateRequest();
     }
 
   }, [id]);
@@ -133,7 +85,7 @@ export const GAViewRequestInfo = () => {
           activeBlobUrl = URL.createObjectURL(response.data);
           SetPdfUrl(activeBlobUrl);
         } catch (error) {
-        console.error("Erro ao carregar o PDF:", error);
+        console.error("Error loading document:", error);
         }
       };
 
@@ -149,11 +101,11 @@ export const GAViewRequestInfo = () => {
   const handleAccept = async () => {
     try {
       const response = await api.post(`ga/aprovar-solicitacao/${requestUpdate?.id}`)
-      console.log("Aceitado, resposta:", response.data)
+      console.log("Accepted, response:", response.data)
       
       return navigate("/ga/fila-de-solicitacoes/");
     } catch (error) {
-      console.error("Erro ao aceitar a solicitação:", error);
+      console.error("Error accepting the update request:", error);
     }
   };
 
@@ -180,13 +132,13 @@ export const GAViewRequestInfo = () => {
     try {
       const formData = new FormData();
       formData.append("action", modalAction || "");
-      formData.append("parecer", parecer);
+      formData.append("opinion", parecer);
 
       await api.post(`retornar-solicitacao/${requestUpdate?.id}`, formData);
       handleCloseModal();
       navigate("/ga/fila-de-solicitacoes/");
     } catch (error) {
-      console.error("Erro ao enviar decisão:", error);
+      console.error("Error sending decision:", error);
       alert("Ocorreu um erro ao processar a ação. Tente novamente.");
     } finally {
       setSubmitting(false);
@@ -194,8 +146,8 @@ export const GAViewRequestInfo = () => {
 
   };
 
-  dadosAntigos = requestUpdate?.dados_antigos?.[0];
-  dadosNovos = requestUpdate?.dados_novos?.[0];
+  oldData = requestUpdate?.old_data?.[0];
+  newData = requestUpdate?.new_data?.[0];
 
   if (loading) return <p>Carregando...</p>;
 
@@ -215,7 +167,7 @@ export const GAViewRequestInfo = () => {
                   Criado por
                 </span>
                 <p className="text-base font-semibold text-slate-900">
-                  {requestUpdate?.criado_por}
+                  {requestUpdate?.created_by}
                 </p>
               </div>
 
@@ -224,7 +176,7 @@ export const GAViewRequestInfo = () => {
                   Cliente
                 </span>
                 <p className="text-base font-semibold text-slate-900">
-                  {requestUpdate?.cliente}
+                  {requestUpdate?.customer}
                 </p>
               </div>
 
@@ -233,7 +185,7 @@ export const GAViewRequestInfo = () => {
                   Tipo de Atualização
                 </span>
                 <p className="text-base font-semibold text-slate-900">
-                  {requestUpdate?.atualizacao || '-'}
+                  {requestUpdate?.update_type || '-'}
                 </p>
               </div>
 
@@ -284,17 +236,17 @@ export const GAViewRequestInfo = () => {
                             })}
                           </span>
                           <span className="font-medium bg-slate-200/60 px-2 py-0.5 rounded text-slate-700 w-fit">
-                            Responsável: <strong className="text-slate-900">{log.usuario_username || 'Sistema'}</strong>
+                            Responsável: <strong className="text-slate-900">{log.user_username || 'Sistema'}</strong>
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2 text-sm pt-1">
                           <span className="px-2.5 py-1 rounded-md bg-slate-200 text-slate-700 text-xs font-semibold">
-                            {log.status_anterior || 'Início'}
+                            {log.old_status || 'Início'}
                           </span>
                           <span className="text-slate-400 font-bold">➔</span>
                           <span className="px-2.5 py-1 rounded-md bg-[#33820d]/10 text-[#33820d] text-xs font-semibold border border-[#33820d]/20">
-                            {log.status_atual}
+                            {log.current_status}
                           </span>
                         </div>
                       </div>
@@ -319,7 +271,7 @@ export const GAViewRequestInfo = () => {
               </div>
 
               <div className="p-5 space-y-6 flex-1 text-sm">
-                {dadosAntigos ? (
+                {oldData ? (
                   <>
                     <div className="space-y-2 bg-slate-50/80 p-4 rounded-xl border border-slate-100">
                       <div className="flex justify-between py-1 border-b border-slate-200/60">
@@ -327,7 +279,7 @@ export const GAViewRequestInfo = () => {
                           Salário
                         </span>
                         <span className="font-semibold text-slate-800">
-                          {formatCurrency(dadosAntigos.salario_snapshot)}
+                          {formatCurrency(oldData.salary_snapshot)}
                         </span>
                       </div>
                       <div className="flex justify-between py-1 border-b border-slate-200/60">
@@ -335,7 +287,7 @@ export const GAViewRequestInfo = () => {
                           Endereço
                         </span>
                         <span className="font-semibold text-slate-800 text-right">
-                          {dadosAntigos.endereco_snapshot || '-'}
+                          {oldData.address_snapshot || '-'}
                         </span>
                       </div>
                       <div className="flex justify-between py-1">
@@ -343,18 +295,18 @@ export const GAViewRequestInfo = () => {
                           CEP
                         </span>
                         <span className="font-semibold text-slate-800">
-                          {dadosAntigos.cep_snapshot || '-'}
+                          {oldData.zip_code_snapshot || '-'}
                         </span>
                       </div>
                     </div>
 
                     <div>
                       <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">
-                        Imóveis Cadastrados ({dadosAntigos.imoveis_snapshot?.length || 0})
+                        Imóveis Cadastrados ({oldData.properties_snapshot?.length || 0})
                       </h3>
-                      {dadosAntigos.imoveis_snapshot && dadosAntigos.imoveis_snapshot.length > 0 ? (
+                      {oldData.properties_snapshot && oldData.properties_snapshot.length > 0 ? (
                         <div className="space-y-2">
-                          {dadosAntigos.imoveis_snapshot.map((imovel: any, index: number) => (
+                          {oldData.properties_snapshot.map((property: any, index: number) => (
                             <div
                               key={index}
                               className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1"
@@ -362,17 +314,17 @@ export const GAViewRequestInfo = () => {
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Endereço:
-                                </span> {imovel.endereco || '-'}
+                                </span> {property.adress || '-'}
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Bairro/Cidade:
-                                </span> {imovel.bairro || '-'} - {imovel.cidade || '-'}
+                                </span> {property.neighborhood || '-'} / {property.city || '-'}
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   CEP:
-                                </span> {imovel.cep || '-'}
+                                </span> {property.zip_code || '-'}
                               </p>
                             </div>
                           ))}
@@ -386,25 +338,25 @@ export const GAViewRequestInfo = () => {
 
                     <div>
                       <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">
-                        Veículos Cadastrados ({dadosAntigos.veiculos_snapshot?.length || 0})
+                        Veículos Cadastrados ({oldData.vehicles_snapshot?.length || 0})
                       </h3>
-                      {dadosAntigos.veiculos_snapshot && dadosAntigos.veiculos_snapshot.length > 0 ? (
+                      {oldData.vehicles_snapshot && oldData.vehicles_snapshot.length > 0 ? (
                         <div className="space-y-2">
-                          {dadosAntigos.veiculos_snapshot.map((veiculo: any, index: number) => (
+                          {oldData.vehicles_snapshot.map((vehicle: any, index: number) => (
                             <div
                               key={index}
                               className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1"
                             >
                               <p className="font-semibold text-slate-800">
-                                {veiculo.marca_modelo || '-'} ({veiculo.ano || '-'})
+                                {vehicle.brand_model || '-'} ({vehicle.ano || '-'})
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Placa:
-                                </span> {veiculo.placa || '-'} | 
+                                </span> {vehicle.plate || '-'} | 
                                 <span className="font-medium text-slate-500">
                                   RENAVAM:
-                                </span> {veiculo.renavam || '-'}
+                                </span> {vehicle.renavam || '-'}
                               </p>
                             </div>
                           ))}
@@ -432,7 +384,7 @@ export const GAViewRequestInfo = () => {
               </div>
 
               <div className="p-5 space-y-6 flex-1 text-sm">
-                {dadosNovos ? (
+                {newData ? (
                   <>
                     <div className="space-y-2 bg-blue-50/40 p-4 rounded-xl border border-blue-100">
                       <div className="flex justify-between py-1 border-b border-blue-100">
@@ -440,7 +392,7 @@ export const GAViewRequestInfo = () => {
                           Salário
                         </span>
                         <span className="font-semibold text-slate-900">
-                          {formatCurrency(dadosNovos.salario)}
+                          {formatCurrency(newData.salary)}
                         </span>
                       </div>
                       <div className="flex justify-between py-1 border-b border-blue-100">
@@ -448,7 +400,7 @@ export const GAViewRequestInfo = () => {
                           Endereço
                         </span>
                         <span className="font-semibold text-slate-900 text-right">
-                          {dadosNovos.residencia_endereco || '-'}
+                          {newData.residence_address || '-'}
                         </span>
                       </div>
                       <div className="flex justify-between py-1">
@@ -456,35 +408,35 @@ export const GAViewRequestInfo = () => {
                           CEP
                         </span>
                         <span className="font-semibold text-slate-900">
-                          {dadosNovos.residencia_cep || '-'}
+                          {newData.residence_zip_code || '-'}
                         </span>
                       </div>
                     </div>
 
                     <div>
                       <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">
-                        Imóveis Solicitados ({dadosNovos.imovel?.length || 0})
+                        Imóveis Solicitados ({newData.properties?.length || 0})
                       </h3>
-                      {dadosNovos.imovel && dadosNovos.imovel.length > 0 ? (
+                      {newData.properties && newData.properties.length > 0 ? (
                         <div className="space-y-2">
-                          {dadosNovos.imovel.map((imovel: any, index: number) => (
+                          {newData.properties.map((property: any, index: number) => (
                             <div
                               key={index}
                               className="bg-blue-50/30 p-3 rounded-lg border border-blue-100 text-xs space-y-1">
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Endereço:
-                                </span> {imovel.endereco || '-'}
+                                </span> {property.address || '-'}
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Bairro/Cidade:
-                                </span> {imovel.bairro || '-'} - {imovel.cidade || '-'}
+                                </span> {property.neighborhood || '-'} - {property.city || '-'}
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   CEP:
-                                </span> {imovel.cep || '-'}
+                                </span> {property.zip_code || '-'}
                               </p>
                             </div>
                           ))}
@@ -498,24 +450,24 @@ export const GAViewRequestInfo = () => {
 
                     <div>
                       <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">
-                        Veículos Solicitados ({dadosNovos.veiculo?.length || 0})
+                        Veículos Solicitados ({newData.vehicles?.length || 0})
                       </h3>
-                      {dadosNovos.veiculo && dadosNovos.veiculo.length > 0 ? (
+                      {newData.vehicles && newData.vehicles.length > 0 ? (
                         <div className="space-y-2">
-                          {dadosNovos.veiculo.map((veiculo: any, index: number) => (
+                          {newData.vehicles.map((vehicle: any, index: number) => (
                             <div
                               key={index}
                               className="bg-blue-50/30 p-3 rounded-lg border border-blue-100 text-xs space-y-1"
                             >
                               <p className="font-semibold text-slate-800">
-                                {veiculo.marca_modelo || '-'} ({veiculo.ano || '-'})
+                                {vehicle.brand_model || '-'} ({vehicle.year || '-'})
                               </p>
                               <p>
                                 <span className="font-medium text-slate-500">
                                   Placa:
-                                </span> {veiculo.placa || '-'} | 
+                                </span> {vehicle.plate || '-'} | 
                                 <span className="font-medium text-slate-500">
-                                  RENAVAM:</span> {veiculo.renavam || '-'}
+                                  RENAVAM:</span> {vehicle.renavam || '-'}
                               </p>
                             </div>
                           ))}
@@ -545,7 +497,7 @@ export const GAViewRequestInfo = () => {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {requestUpdate?.documentos?.map((doc, index) => {
+              {requestUpdate?.documents?.map((doc, index) => {
                 const isSelected = selectedDoc === doc.id;
                 return (
                   <button
@@ -557,7 +509,7 @@ export const GAViewRequestInfo = () => {
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
-                    {doc.nome || `Documento ${index + 1}`}
+                    {doc.name || `Documento ${index + 1}`}
                   </button>
                 );
               })}
@@ -585,16 +537,16 @@ export const GAViewRequestInfo = () => {
         </div>
       </div>
 
-        <div className="pt-6 mt-8 border-t border-slate-200 flex flex-col sm:flex-row justify-end items-center gap-4 max-w-7xl mx-auto w-full">
+        <div className="pt-6 mt-8 border-t bordersource='vehicles', -slate-200 flex flex-col sm:flex-row justify-end items-center gap-4 max-w-7xl mx-auto w-full">
           <button
-            onClick={() => handleOpenModal('REPROVAR')}
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-medium text-sm border border-slate-300 transition-colors'"
+            onClick={() => handleOpenModal("REJECT")}
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-medium text-sm border border-slate-300 transition-colors"
           >
             Rejeitar Solicitação
           </button>
           
           <button
-            onClick={() => handleOpenModal('SOLICITAR_AJUSTE_GN')}
+            onClick={() => handleOpenModal("REQUEST_ADJUSTMENT_GN")}
             className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-medium text-sm border border-slate-300 transition-colors"
           >
             Devolver para Ajuste
@@ -608,59 +560,13 @@ export const GAViewRequestInfo = () => {
           </button>
         </div>
 
-      {modalAction && (
-        <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm space-y-6 max-w-7xl mx-auto w-full transition-all">
-          <div className="flex justify-between items-start border-b border-slate-200 pb-4">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">
-                {modalAction === 'REPROVAR' ? 'Rejeitar Solicitação' : 'Devolver para Ajuste'}
-              </h2>
-              <p className="text-sm text-slate-500 mt-0.5">
-                Preencha a justificativa e anexe o documento comprobatório para concluir a ação.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleCloseModal}
-              className="text-xs font-semibold text-slate-500 hover:text-slate-800 underline"
-            >
-              Cancelar e fechar
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmitParecer} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
-                Parecer Obrigatório
-              </label>
-              <input
-                type="file"
-                required
-                onChange={(e) => setParecer(e.target.files ? e.target.files[0] : null)}
-                className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 cursor-pointer"
-              />
-            </div>
-
-            <div className="pt-2 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={handleCloseModal}
-                disabled={submitting}
-                className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-sm font-medium border border-slate-300 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="px-5 py-2.5 rounded-xl bg-botao-1 hover:bg-botao-1-700 text-white text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
-              >
-                {submitting ? 'Enviando...' : 'Confirmar e Enviar'}
-              </button>
-            </div>
-          </form>
-        </div>
+     {modalAction && (
+        <ParecerModal
+          modalAction={modalAction}
+          submitting={submitting}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmitParecer}
+        />
       )}
     </>
   );

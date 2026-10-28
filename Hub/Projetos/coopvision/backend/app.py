@@ -13,10 +13,16 @@ except ModuleNotFoundError:
         sys.path.insert(0, str(project_root))
     from Projetos.coopvision.backend.API.gemini_api import cpf_verification
 
+BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = BASE_DIR.parent / 'frontend'
+TEMPLATES_DIR = str(FRONTEND_DIR / 'templates')
+STATIC_DIR = str(FRONTEND_DIR / 'static')
 
-app = fl.Flask(__name__, template_folder='templates', static_folder='static')
+
+app = fl.Flask(__name__, template_folder=TEMPLATES_DIR, static_folder=STATIC_DIR)
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
 
 
 from flask import Blueprint
@@ -26,9 +32,9 @@ coopvision = Blueprint(
     'coopvision',
     __name__,
     url_prefix='/coopvision',
-    template_folder='templates',
-    static_folder='static',
-    static_url_path='/coopvision-static'
+    template_folder=TEMPLATES_DIR,
+    static_folder=STATIC_DIR,
+    static_url_path='/static'
 )
 
 

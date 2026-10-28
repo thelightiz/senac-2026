@@ -1,8 +1,9 @@
 import mysql.connector
 
 connection = mysql.connector.connect(
-    host="REDDEVS.mysql.pythonanywhere-services.com",
-    user="REDDEVS",
-    password="SenhaTopzeraDoYanzera",
-    database="REDDEVS$coopshield"
+    host="127.0.0.1",
+    port=3306,
+    user="root",
+    password="",
+    database="testes",
 )

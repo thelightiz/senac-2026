@@ -1,5 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 from Projetos.coopshield.database.database import read_transactions_from_db
+from Projetos.coopshield.rules.rules import read_from_json
+from Projetos.coopshield.database.database import add_transactions_to_db
 from datetime import timedelta
 from flask import Blueprint
 
@@ -12,9 +14,6 @@ coopshield = Blueprint(
     static_folder='../frontend/static',
     static_url_path='/coopshield-static'
 )
-
-
-
 
 
 

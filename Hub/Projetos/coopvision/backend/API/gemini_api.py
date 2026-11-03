@@ -45,8 +45,8 @@ def cpf_verification(image_path):
         Certifique-se de que a resposta seja apenas o JSON válido, sem blocos de código markdown (como ```json) ou textos adicionais.
         """
 
-        max_tentativas = 3
-        espera_inicial = 4
+        max_tentativas = 5
+        espera_inicial = 2
 
         infos = None
         for tentativa in range(max_tentativas):

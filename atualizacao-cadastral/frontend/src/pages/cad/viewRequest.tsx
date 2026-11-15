@@ -69,7 +69,7 @@ export const CADViewRequestInfo = () => {
     try {
       const formData = new FormData();
       formData.append("action", modalAction || "");
-      formData.append("parecer", parecer);
+      formData.append("opinion", parecer);
 
       if (modalAction === 'FORMALIZE') {
         await handleAccept(formData);

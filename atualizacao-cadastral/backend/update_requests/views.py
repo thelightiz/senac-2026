@@ -166,6 +166,10 @@ class GNAdjustRequestView(APIView):
     
     def patch(self, request, pk):
         update_request = get_object_or_404(UpdateRequest, pk=pk)
+
+        if not update_request.status == 'NEEDS_ADJUSTMENT_GN':
+            return Response(serializer.data, status=status.HTTP_409_CONFLICT)
+        
         new_data = get_object_or_404(NewData, request=update_request)
         
         raw_new_data = request.data.get('new_data')

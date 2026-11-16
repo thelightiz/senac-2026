@@ -61,15 +61,15 @@ function desenharGrafico(labels, valores) {
 
     const contexto = canvas.getContext('2d');
 
-    const largura = canvas.parentElement.clientWidth;
-    const altura = canvas.parentElement.clientHeight;
+    const largura = canvas.parentElement ? canvas.parentElement.clientWidth : 700;
+    const altura = canvas.parentElement ? canvas.parentElement.clientHeight : 230;
 
     canvas.width = largura;
     canvas.height = altura;
 
     contexto.clearRect(0, 0, largura, altura);
 
-    if (valores.length === 0) {
+    if (!Array.isArray(valores) || valores.length === 0) {
         return;
     }
 
@@ -78,39 +78,30 @@ function desenharGrafico(labels, valores) {
     const cima = 20;
     const baixo = 30;
 
-    const larguraGrafico =
-        largura - esquerda - direita;
+    const larguraGrafico = largura - esquerda - direita;
+    const alturaGrafico = altura - cima - baixo;
 
-    const alturaGrafico =
-        altura - cima - baixo;
-
-    let maiorValor = Math.max(...valores);
+    const numeros = valores.map(v => Number(v) || 0);
+    let maiorValor = Math.max(...numeros);
 
     if (maiorValor < 1) {
         maiorValor = 1;
     }
 
-    const quantidadeLinhas = maiorValor;
+    const linhasNoEixo = 5;
+    const passo = Math.ceil(maiorValor / linhasNoEixo / 10) * 10 || 1;
+    const maxEixo = Math.ceil(maiorValor / passo) * passo;
 
-    for (let i = 0; i <= quantidadeLinhas; i++) {
-
+    for (let i = 0; i <= linhasNoEixo; i++) {
+        const valorEixo = i * (maxEixo / linhasNoEixo);
         const y =
             cima +
             alturaGrafico -
-            (i / maiorValor) * alturaGrafico;
+            (valorEixo / maxEixo) * alturaGrafico;
 
         contexto.beginPath();
-
-        contexto.moveTo(
-            esquerda,
-            y
-        );
-
-        contexto.lineTo(
-            largura - direita,
-            y
-        );
-
+        contexto.moveTo(esquerda, y);
+        contexto.lineTo(largura - direita, y);
         contexto.strokeStyle = '#e5e5e5';
         contexto.lineWidth = 1;
         contexto.stroke();
@@ -118,9 +109,8 @@ function desenharGrafico(labels, valores) {
         contexto.fillStyle = '#555';
         contexto.font = '12px Arial';
         contexto.textAlign = 'right';
-
         contexto.fillText(
-            i,
+            Math.round(valorEixo),
             esquerda - 8,
             y + 4
         );
@@ -128,22 +118,16 @@ function desenharGrafico(labels, valores) {
 
     contexto.beginPath();
 
-    for (let i = 0; i < valores.length; i++) {
-
+    for (let i = 0; i < numeros.length; i++) {
         let x;
 
-        if (valores.length === 1) {
+        if (numeros.length === 1) {
             x = esquerda + larguraGrafico / 2;
         } else {
-            x =
-                esquerda +
-                (larguraGrafico / (valores.length - 1)) * i;
+            x = esquerda + (larguraGrafico / (numeros.length - 1)) * i;
         }
 
-        const y =
-            cima +
-            alturaGrafico -
-            (valores[i] / maiorValor) * alturaGrafico;
+        const y = cima + alturaGrafico - (numeros[i] / maxEixo) * alturaGrafico;
 
         if (i === 0) {
             contexto.moveTo(x, y);
@@ -156,33 +140,19 @@ function desenharGrafico(labels, valores) {
     contexto.lineWidth = 3;
     contexto.stroke();
 
-    for (let i = 0; i < valores.length; i++) {
-
+    for (let i = 0; i < numeros.length; i++) {
         let x;
 
-        if (valores.length === 1) {
+        if (numeros.length === 1) {
             x = esquerda + larguraGrafico / 2;
         } else {
-            x =
-                esquerda +
-                (larguraGrafico / (valores.length - 1)) * i;
+            x = esquerda + (larguraGrafico / (numeros.length - 1)) * i;
         }
 
-        const y =
-            cima +
-            alturaGrafico -
-            (valores[i] / maiorValor) * alturaGrafico;
+        const y = cima + alturaGrafico - (numeros[i] / maxEixo) * alturaGrafico;
 
         contexto.beginPath();
-
-        contexto.arc(
-            x,
-            y,
-            5,
-            0,
-            Math.PI * 2
-        );
-
+        contexto.arc(x, y, 5, 0, Math.PI * 2);
         contexto.fillStyle = '#3f9227';
         contexto.fill();
 
@@ -190,11 +160,8 @@ function desenharGrafico(labels, valores) {
         contexto.font = '12px Arial';
         contexto.textAlign = 'center';
 
-        contexto.fillText(
-            labels[i],
-            x,
-            altura - 8
-        );
+        const label = Array.isArray(labels) && labels[i] ? labels[i] : '';
+        contexto.fillText(label, x, altura - 8);
     }
 }
 

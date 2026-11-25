@@ -8,9 +8,12 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [userRole, setUserRole] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
+    setError("");
+    setIsLoading(true);
 
     try {
       const response = await api.post("login/", {username, password});
@@ -28,6 +31,8 @@ export const Login = () => {
         console.error("No response from the server:", error.message);
         setError("Sem resposta do servidor, tente novamente")
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -106,7 +111,7 @@ export const Login = () => {
             type="submit"
             id="botao"
             className="rounded-md bg-botao-1 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-botao-1-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar">
-              Entrar
+              {isLoading ? "Entrando..." : "Entrar"}
           </button>
         </div>
       </form>

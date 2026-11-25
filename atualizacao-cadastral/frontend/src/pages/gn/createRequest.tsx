@@ -11,6 +11,7 @@ export const GNCreateRequest = () => {
   const [requestType, setRequestType] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const [newData, setNewData] = useState<NewDataState>({
     salary: "",
@@ -64,7 +65,9 @@ export const GNCreateRequest = () => {
 
   const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
-    
+    setError("");
+    setIsLoading(true);
+
     if (!selectedFile) {
       setError("Por favor, selecione um arquivo antes de enviar.");
       return;
@@ -110,6 +113,7 @@ export const GNCreateRequest = () => {
       alert("Solicitação criada com sucesso!");
       
       setCustomerName("");
+      setCustomerCPF("");
       setRequestType("");
       setNewData({
         salary: "",
@@ -137,6 +141,8 @@ export const GNCreateRequest = () => {
     } catch (error: any) {
       console.error("Error creating update request:", error);
       setError("Ocorreu um erro ao tentar criar a solicitação")
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -159,6 +165,7 @@ export const GNCreateRequest = () => {
         return;
       }
 
+      setError("");
       setSelectedFile(file);
     }
   };
@@ -448,7 +455,7 @@ export const GNCreateRequest = () => {
                   name="selectedFile"
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-black file:hover:bg-gray-200 cursor-pointer"
                   onChange={handleFileChange}
-                  accept=".pdf,.jpg,.png,.jpeg"
+                  accept=".pdf"
                   required
                 />
               </div>
@@ -459,9 +466,10 @@ export const GNCreateRequest = () => {
             <button
               type="submit"
               id="botao"
+              disabled={isLoading}
               className="rounded-md bg-botao-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-botao-1-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar"
             >
-              Criar Solicitação
+              {isLoading ? "Criando Solicitação..." : "Criar Solicitação"}
             </button>
           </div>
         </form>

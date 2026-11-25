@@ -13,6 +13,7 @@ export const GNAdjustRequest = () => {
   const [requestType, setRequestType] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const [requestUpdate, setRequestUpdate] = useState<UpdateRequest | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<number | null>(null);
@@ -69,12 +70,14 @@ export const GNAdjustRequest = () => {
 
   const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
-    
+    setError("");
+
     if (!selectedFile) {
       setError("Por favor, selecione um arquivo antes de enviar.");
       return;
     }
 
+    setIsLoading(true);
     const formData = new FormData();
     
     const cleanCPF = customerCPF.replace(/\D/g, '');
@@ -139,6 +142,8 @@ export const GNAdjustRequest = () => {
     } catch (error: any) {
       console.error("Erro ao editar solicitação:", error);
       setError("Ocorreu um erro ao tentar editar a solicitação")
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -191,7 +196,7 @@ export const GNAdjustRequest = () => {
             console.log("Nenhum veículo encontrado para esta solicitação.");
         }
 
-        if (newData?.property?.length > 0) {
+        if (newData?.properties?.length > 0) {
             setCurrentProperty(newData.properties[0]);
         } else {
             console.log("Nenhum imóvel encontrado para esta solicitação.");
@@ -533,7 +538,7 @@ export const GNAdjustRequest = () => {
                   name="selectedFile"
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-black file:hover:bg-gray-200 cursor-pointer"
                   onChange={handleFileChange}
-                  accept=".pdf,.jpg,.png,.jpeg"
+                  accept=".pdf"
                   required
                 />
               </div>
@@ -590,9 +595,10 @@ export const GNAdjustRequest = () => {
             <button
               type="submit"
               id="botao"
+              disabled={isLoading}
               className="rounded-md bg-botao-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-botao-1-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-botao-entrar"
             >
-              Salvar Solicitação
+              {isLoading ? "Salvando Solicitação..." : "Salvar Solicitação"}
             </button>
           </div>
         </form>

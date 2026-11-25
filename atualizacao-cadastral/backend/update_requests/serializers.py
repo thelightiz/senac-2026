@@ -157,6 +157,7 @@ class GetRequestNewDataSerializer(serializers.ModelSerializer):
 class GetRequestInfoSerializer(serializers.ModelSerializer):
     created_by = serializers.StringRelatedField()
     customer = serializers.StringRelatedField()
+    cpf = serializers.CharField(source='customer.cpf', read_only=True)
     update_type = serializers.CharField(source='get_update_type_display', read_only=True)
     status = serializers.CharField(source='get_status_display', read_only=True)
     old_data = RequestOldDataSerializer(many=True, read_only=True)

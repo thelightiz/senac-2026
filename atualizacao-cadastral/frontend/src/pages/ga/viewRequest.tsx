@@ -27,6 +27,7 @@ export const GAViewRequestInfo = () => {
   const [modalAction, setModalAction] = useState<ActionType | null>(null);
   const [parecer, setParecer] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState("");
 
   const handleAccept = async (requestData: FormData) => {
     try {
@@ -59,7 +60,7 @@ export const GAViewRequestInfo = () => {
     e.preventDefault();
 
     if (!parecer) {
-      alert("O documento é obrigatório")
+      setError("O documento é obrigatório")
       return;
     }
 
@@ -79,7 +80,7 @@ export const GAViewRequestInfo = () => {
       }
     } catch (error) {
       console.error("Error sending decision:", error);
-      alert("Ocorreu um erro ao processar a ação. Tente novamente.");
+      setError("Ocorreu um erro ao processar a ação. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
@@ -90,6 +91,12 @@ export const GAViewRequestInfo = () => {
 
   return (
     <>
+      {error && (
+        <div className="mt-10 flex items-center gap-3 rounded-r-lg border-l-4 border-red-500 bg-red-50 p-4 text-red-700 shadow-sm" role="alert">
+          <span className="text-sm font-medium">{error}</span>
+        </div>
+      )}
+
       <RequestDetailsLayout
         updateRequestData={requestUpdate}
         oldData={oldData}

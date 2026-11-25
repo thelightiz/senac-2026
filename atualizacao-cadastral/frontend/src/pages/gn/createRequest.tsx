@@ -10,6 +10,7 @@ export const GNCreateRequest = () => {
   const [customerCPF, setCustomerCPF] = useState("");
   const [requestType, setRequestType] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [error, setError] = useState("");
 
   const [newData, setNewData] = useState<NewDataState>({
     salary: "",
@@ -65,7 +66,7 @@ export const GNCreateRequest = () => {
     event.preventDefault();
     
     if (!selectedFile) {
-      alert("Por favor, selecione um arquivo antes de enviar.");
+      setError("Por favor, selecione um arquivo antes de enviar.");
       return;
     }
 
@@ -135,11 +136,7 @@ export const GNCreateRequest = () => {
 
     } catch (error: any) {
       console.error("Error creating update request:", error);
-      if (error.response?.data) {
-        alert(`Erro: ${JSON.stringify(error.response.data)}`);
-      } else {
-        alert("Erro desconhecido.");
-      }
+      setError("Ocorreu um erro ao tentar criar a solicitação")
     }
   };
 
@@ -173,6 +170,12 @@ export const GNCreateRequest = () => {
           Criação de Solicitação para Atualização de Cadastro
         </h1>
       </div>
+
+      {error && (
+        <div className="mt-10 flex items-center gap-3 rounded-r-lg border-l-4 border-red-500 bg-red-50 p-4 text-red-700 shadow-sm" role="alert">
+          <span className="text-sm font-medium">{error}</span>
+        </div>
+      )}
 
       <div>
         <form onSubmit={handleSubmit}>

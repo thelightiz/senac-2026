@@ -12,6 +12,7 @@ export const GNAdjustRequest = () => {
   const [customerCPF, setCustomerCPF] = useState("");
   const [requestType, setRequestType] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [error, setError] = useState("");
 
   const [requestUpdate, setRequestUpdate] = useState<UpdateRequest | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<number | null>(null);
@@ -70,7 +71,7 @@ export const GNAdjustRequest = () => {
     event.preventDefault();
     
     if (!selectedFile) {
-      alert("Por favor, selecione um arquivo antes de enviar.");
+      setError("Por favor, selecione um arquivo antes de enviar.");
       return;
     }
 
@@ -137,11 +138,7 @@ export const GNAdjustRequest = () => {
 
     } catch (error: any) {
       console.error("Erro ao editar solicitação:", error);
-      if (error.response?.data) {
-        alert(`Erro: ${JSON.stringify(error.response.data)}`);
-      } else {
-        alert("Erro desconhecido.");
-      }
+      setError("Ocorreu um erro ao tentar editar a solicitação")
     }
   };
 
@@ -172,6 +169,7 @@ export const GNAdjustRequest = () => {
     const fetchSolicitacao = async () => {
       try {
         const response = await api.get(`ver-solicitacao/${id}`);
+        console.log(response)
         const request = response.data.request;
         const newData = response.data.request.new_data[0];
 
@@ -257,6 +255,12 @@ export const GNAdjustRequest = () => {
         </h1>
       </div>
 
+      {error && (
+        <div className="mt-10 flex items-center gap-3 rounded-r-lg border-l-4 border-red-500 bg-red-50 p-4 text-red-700 shadow-sm" role="alert">
+          <span className="text-sm font-medium">{error}</span>
+        </div>
+      )}
+
       <div>
         <form onSubmit={handleSubmit}>
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
@@ -313,10 +317,10 @@ export const GNAdjustRequest = () => {
                   required
                 >
                   <option value="" disabled>Selecione uma opção</option>
-                  <option value="INCOME">Renda</option>
-                  <option value="ADDRESS">Endereço</option>
-                  <option value="PROPERTY">Patrimônio (Imóvel)</option>
-                  <option value="VEHICLE">Patrimônio (Veículo)</option>
+                  <option value="Atualização de Renda">Renda</option>
+                  <option value="Atualização de Endereço">Endereço</option>
+                  <option value="Atualização de Patrimônio Relacionado a Imóveis">Patrimônio (Imóvel)</option>
+                  <option value="Atualização de Patrimônio Relacionado a Veículos">Patrimônio (Veículo)</option>
                 </select>
               </div>
             </div>
@@ -327,7 +331,7 @@ export const GNAdjustRequest = () => {
               <h2 className="text-xl font-semibold mb-4 text-gray-700">Dados Novos</h2>
 
               <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
-                {requestType === "INCOME" && (
+                {requestType === "Atualização de Renda" && (
                   <div className="sm:col-span-2">
                     <label htmlFor="salario" className="block text-sm font-medium text-gray-900">
                       Salário Atual (R$)
@@ -345,7 +349,7 @@ export const GNAdjustRequest = () => {
                   </div>
                 )}
 
-                {requestType === "PROPERTY" && (
+                {requestType === "Atualização de Patrimônio Relacionado a Imóveis" && (
                   <>
                     <div className="sm:col-span-2">
                       <label htmlFor="property_endereco" className="block text-sm font-medium text-gray-900">
@@ -411,7 +415,7 @@ export const GNAdjustRequest = () => {
                     </>
                 )}
 
-                {requestType === "VEHICLE" && (
+                {requestType === "Atualização de Patrimônio Relacionado a Veículos" && (
                   <>
                     <div>
                       <label htmlFor="vehicle_renavam" className="block text-sm font-medium text-gray-900">
@@ -478,7 +482,7 @@ export const GNAdjustRequest = () => {
                   </>
                 )}
 
-                {requestType === "ADDRESS" && (
+                {requestType === "Atualização de Endereço" && (
                   <>
                     <div className="sm:col-span-2">
                       <label htmlFor="residencia_endereco" className="block text-sm font-medium text-gray-900">
@@ -501,7 +505,7 @@ export const GNAdjustRequest = () => {
                       </label>
                       <input
                         id="residencia_cep"
-                        name="residence_zip"
+                        name="residence_zip_code"
                         type="text"
                         maxLength={8}
                         value={newData.residence_zip_code}

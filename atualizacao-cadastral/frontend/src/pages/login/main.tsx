@@ -1,4 +1,4 @@
-import { useState, SyntheticEvent } from "react";
+import { useState, type SyntheticEvent } from "react";
 import { api } from "../../utils/api";
 import { RoleRedirect } from "../../utils/routeRedirector";
 import { Link } from "react-router-dom";
@@ -6,20 +6,27 @@ import { Link } from "react-router-dom";
 export const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [userRole, setusernameRole] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
 
     try {
       const response = await api.post("login/", {username, password});
-      setusernameRole(response.data.usuario.role)
-      console.log("Sucesso", response.data);
+      setUserRole(response.data.usuario.role);
+      console.log("Success:", response.data);
     } catch (error: any) {
       if (error.response) {
-        console.error("Erro retornado pelo backend:", error.response.data);
+        console.error("Error returned by the backend:", error.response.data);
+
+        if (error.response.status == 400) {
+          setError("Credenciais de login erradas, tente novamente")
+        }
+
       } else {
-        console.error("Sem resposta do servidor:", error.message);
+        console.error("No response from the server:", error.message);
+        setError("Sem resposta do servidor, tente novamente")
       }
     }
   };
@@ -31,6 +38,12 @@ export const Login = () => {
   return (
      <>
       <h1 className="text-3xl text-center">Entrar no Sistema</h1>
+      
+      {error && (
+        <div className="mt-10 flex items-center gap-3 rounded-r-lg border-l-4 border-red-500 bg-red-50 p-4 text-red-700 shadow-sm" role="alert">
+          <span className="text-sm font-medium">{error}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="space-y-12">
@@ -59,7 +72,7 @@ export const Login = () => {
             </div>
 
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
-              <div className="sm:col-span-4">
+              <div className="sm:col-span-2">
                 <label
                   htmlFor="password"
                   className="block text-sm/6 font-medium text-gray-900">

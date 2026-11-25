@@ -27,6 +27,7 @@ export const CADViewRequestInfo = () => {
   const [modalAction, setModalAction] = useState<ActionType | null>(null);
   const [parecer, setParecer] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState("");
 
   const handleAccept = async (requestData: FormData) => {
     try {
@@ -60,7 +61,7 @@ export const CADViewRequestInfo = () => {
     e.preventDefault();
 
     if (!parecer) {
-      alert("O documento é obrigatório")
+      setError("O documento é obrigatório")
       return;
     }
 
@@ -80,7 +81,7 @@ export const CADViewRequestInfo = () => {
       }
     } catch (error) {
       console.error("Erro ao enviar decisão:", error);
-      alert("Ocorreu um erro ao processar a ação. Tente novamente.");
+      setError("Ocorreu um erro ao processar a ação. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
